@@ -571,3 +571,18 @@ pre code.hljs {
   color: #05221c;
   border-color: transparent;
 }
+
+.lecture-hero {
+  margin: 0.35rem 0 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  background: #0f1a2d;
+}
+
+.lecture-hero img {
+  display: block;
+  width: 100%;
+  height: auto;
+}

@@ -1,0 +1,31 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="420" viewBox="0 0 1280 420" role="img" aria-labelledby="t d">
+  <title id="t">Лекция 2 - State Sync и оптимизация</title>
+  <desc id="d">Иллюстрация для второй лекции по синхронизации данных</desc>
+  <defs>
+    <linearGradient id="bg2" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#122640"/>
+      <stop offset="100%" stop-color="#0e1830"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="420" fill="url(#bg2)"/>
+  <g opacity="0.18">
+    <rect x="70" y="82" width="300" height="260" rx="20" fill="#1a335c"/>
+    <rect x="420" y="112" width="220" height="200" rx="16" fill="#193052"/>
+    <rect x="690" y="92" width="220" height="240" rx="16" fill="#1a335c"/>
+    <rect x="960" y="122" width="220" height="180" rx="16" fill="#193052"/>
+  </g>
+  <g font-family="Manrope,Segoe UI,sans-serif" fill="#e7eefc">
+    <text x="80" y="140" font-size="48" font-weight="800">Лекция 2: State Sync и</text>
+    <text x="80" y="192" font-size="48" font-weight="800">сериализация</text>
+    <text x="80" y="242" font-size="28" fill="#a9b9d0">NetworkVariable • Permissions • Dirty/Send • Payload</text>
+    <text x="80" y="292" font-size="22" fill="#7fe2cf">Оптимизация трафика: Frequency, Relevancy, Quantization</text>
+  </g>
+  <g>
+    <rect x="955" y="66" width="230" height="278" rx="22" fill="#17315a" stroke="#2f4f7a"/>
+    <rect x="988" y="258" width="28" height="44" fill="#37c8a7"/>
+    <rect x="1034" y="228" width="28" height="74" fill="#37c8a7"/>
+    <rect x="1080" y="208" width="28" height="94" fill="#37c8a7"/>
+    <rect x="1126" y="150" width="30" height="152" fill="#ff6b6b"/>
+    <text x="980" y="116" font-family="Manrope,Segoe UI,sans-serif" font-size="20" fill="#a9b9d0">Traffic Profile</text>
+  </g>
+</svg>
