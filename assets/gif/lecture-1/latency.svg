@@ -1,0 +1,13 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" role="img" aria-labelledby="t d">
+  <title id="t">Latency animation</title>
+  <desc id="d">Задержка между выстрелом клиента и подтверждением сервера</desc>
+  <rect width="960" height="340" fill="#0f1a2c"/>
+  <text x="50" y="52" fill="#e7eefc" font-size="34" font-family="Manrope,Segoe UI,sans-serif" font-weight="800">Latency: задержка подтверждения</text>
+  <line x1="120" y1="170" x2="840" y2="170" stroke="#3f628e" stroke-width="6"/>
+  <text x="120" y="145" fill="#75e3ce" font-size="20" font-family="Manrope,Segoe UI,sans-serif">Client action</text>
+  <text x="760" y="145" fill="#ffd166" font-size="20" font-family="Manrope,Segoe UI,sans-serif">Server ack</text>
+  <circle cx="120" cy="170" r="12" fill="#37c8a7">
+    <animate attributeName="cx" values="120;840;120" dur="2.2s" repeatCount="indefinite"/>
+  </circle>
+  <text x="50" y="295" fill="#9eb0c9" font-size="22" font-family="Manrope,Segoe UI,sans-serif">Чем больше путь/время, тем позже игрок видит подтверждение.</text>
+</svg>

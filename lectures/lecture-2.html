@@ -1,0 +1,264 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лекция 2 | Course Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../index.html" class="brand">Course Hub</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
+      <nav id="site-nav" class="site-nav">
+        <a href="../index.html">Главная</a>
+        <a href="./lecture-1.html">Лекция 1</a>
+        <a href="./lecture-2.html" aria-current="page">Лекция 2</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section lecture-page">
+    <a class="back-link" href="../index.html">Назад на главную</a>
+    <h1>Лекция 2. Синхронизация данных (State Sync)</h1>
+
+    <div class="content-stack">
+      <article class="content-card">
+        <h2>Что такое State Sync</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-2/state-vs-events.svg" alt="Сравнение State Sync и Events" loading="lazy">
+          <figcaption>State отвечает на вопрос "как сейчас", Events - "что произошло".</figcaption>
+        </figure>
+        <p>State Sync - синхронизация актуального состояния объектов между клиентами.</p>
+        <ul>
+          <li>Позиция игрока.</li>
+          <li>HP / счёт.</li>
+          <li>Состояние двери или объекта.</li>
+        </ul>
+        <p>В NGO для этого используется <code>NetworkVariable</code>.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Почему нельзя слать каждый кадр</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-2/traffic-growth.svg" alt="Рост сетевого трафика при увеличении числа игроков" loading="lazy">
+          <figcaption>Рост числа клиентов быстро выводит трафик в красную зону.</figcaption>
+        </figure>
+        <ul>
+          <li>Сеть работает на другой частоте, чем рендер.</li>
+          <li>Каждый лишний апдейт увеличивает трафик и вероятность потерь.</li>
+          <li>Нужны пороги, ограничение частоты и выбор получателей.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Симуляции оптимизаций</h2>
+        <p>Короткие анимации показывают, где именно экономится трафик.</p>
+        <div class="gif-grid">
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-2/dirty-send.svg" alt="Dirty flag и отправка только при изменении" loading="lazy">
+            <h3>Dirty/Send</h3>
+            <p>Если значение не изменилось, обновление по сети не уходит.</p>
+          </section>
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-2/threshold.svg" alt="Порог epsilon перед отправкой" loading="lazy">
+            <h3>Threshold epsilon</h3>
+            <p>Мелкие изменения игнорируются без визуального ущерба.</p>
+          </section>
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-2/quantization.svg" alt="Квантизация float в short" loading="lazy">
+            <h3>Quantization</h3>
+            <p>Снижаем точность, но резко уменьшаем payload.</p>
+          </section>
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-2/late-join.svg" alt="Late join получает актуальное состояние" loading="lazy">
+            <h3>Late Join</h3>
+            <p>Новый клиент сразу получает текущее значение NV.</p>
+          </section>
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-2/fullstate-spike.svg" alt="Всплеск full-state update" loading="lazy">
+            <h3>Full-state spike</h3>
+            <p>Некоторые изменения дают резкий скачок трафика.</p>
+          </section>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>NetworkVariable: идея и жизненный цикл</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-2/nv-lifecycle.svg" alt="Жизненный цикл подписки OnValueChanged" loading="lazy">
+          <figcaption>Подписка и отписка в правильных методах жизненного цикла.</figcaption>
+        </figure>
+        <ul>
+          <li>Source of Truth обычно на сервере.</li>
+          <li>Late-join клиент автоматически получает текущее значение.</li>
+          <li>Подписка на <code>OnValueChanged</code> должна быть в <code>OnNetworkSpawn</code>.</li>
+          <li>Отписка обязательна в <code>OnNetworkDespawn</code>.</li>
+        </ul>
+        <pre><code class="language-csharp">public override void OnNetworkSpawn() {
+  score.OnValueChanged += OnScore;
+  OnScore(0, score.Value); // initial UI update
+}
+
+public override void OnNetworkDespawn() {
+  score.OnValueChanged -= OnScore;
+}</code></pre>
+      </article>
+
+      <article class="content-card">
+        <h2>Read/Write permissions</h2>
+        <p>Частая проблема "не обновляется" связана с неверными правами записи.</p>
+        <ul>
+          <li><strong>Server-authoritative:</strong> WritePermission = Server.</li>
+          <li><strong>Owner-authoritative (редко):</strong> WritePermission = Owner.</li>
+          <li><strong>Read:</strong> Everyone, если состояние нужно UI и другим клиентам.</li>
+        </ul>
+        <pre><code class="language-csharp">new NetworkVariable&lt;int&gt;(
+  0,
+  NetworkVariableReadPermission.Everyone,
+  NetworkVariableWritePermission.Server
+);</code></pre>
+      </article>
+
+      <article class="content-card">
+        <h2>Когда реально уходит по сети: Dirty/Send</h2>
+        <p>Сеть отправляет данные только если значение изменилось и переменная помечена как dirty на network tick.</p>
+        <ul>
+          <li>Не трогайте <code>.Value</code> без необходимости.</li>
+          <li>Меняйте значение реже (таймер или FixedUpdate).</li>
+          <li>Не присваивайте одно и то же каждый кадр.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Сериализация: объект -> байты -> объект</h2>
+        <p>Сериализация упаковывает данные для сети, десериализация распаковывает на стороне получателя.</p>
+        <ul>
+          <li>Порядок write/read должен совпадать.</li>
+          <li>Ошибки формата дают смещение буфера и повреждённые данные.</li>
+          <li>FastBufferWriter/Reader даёт быстрый низкоуровневый контроль.</li>
+        </ul>
+        <pre><code class="language-csharp">// server
+Write(A); Write(B); Write(C);
+
+// client
+Read(A); Read(B); // C пропущен -> формат сломан</code></pre>
+      </article>
+
+      <article class="content-card">
+        <h2>INetworkSerializable и кастомные типы</h2>
+        <p>Используйте для структур состояния игрока, предметов, инвентаря, которые часто ходят по сети.</p>
+        <pre><code class="language-csharp">public struct PlayerState : INetworkSerializable {
+  public Vector3 Position;
+  public Quaternion Rotation;
+  public byte Stance;
+
+  public void NetworkSerialize&lt;T&gt;(BufferSerializer&lt;T&gt; s)
+    where T : IReaderWriter {
+    s.SerializeValue(ref Position);
+    s.SerializeValue(ref Rotation);
+    s.SerializeValue(ref Stance);
+  }
+}</code></pre>
+        <p>Порядок полей обязателен и должен быть одинаковым у всех участников сети.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>3 рычага оптимизации</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-2/optimization-levers.svg" alt="Frequency Relevancy Payload" loading="lazy">
+          <figcaption>Оптимизация начинается с частоты, затем релевантности и payload.</figcaption>
+        </figure>
+        <ul>
+          <li><strong>Frequency:</strong> как часто отправляем (пороги, таймеры).</li>
+          <li><strong>Relevancy:</strong> кому отправляем (AOI, только видящим клиентам).</li>
+          <li><strong>Payload:</strong> сколько байт (packed, квантизация, custom serialization).</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Payload: квантизация и packed int</h2>
+        <ul>
+          <li>Позиция: float32 (4 байта) -> short (2 байта), экономия до 50%.</li>
+          <li>Yaw: float -> ushort, экономия до 50%.</li>
+          <li>3D позиция: 12 байт -> 6 байт.</li>
+          <li>Packed int (varint): для маленьких значений 1-3 байта вместо 4.</li>
+        </ul>
+        <p>На большом числе объектов маленькая экономия превращается в заметный выигрыш.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>NetworkTransform и трафик</h2>
+        <p>Некоторые настройки (<code>Unreliable Deltas</code>, <code>Quaternion Compression</code>, <code>Half Float</code>) сильно влияют на объём отправки.</p>
+        <p>Важно помнить: часть изменений может триггерить full-state update.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Практика: HP через NetworkVariable (server-authoritative)</h2>
+        <pre><code class="language-csharp">public NetworkVariable&lt;int&gt; HP = new(100, Everyone, Server);
+
+[ServerRpc(RequireOwnership = false)]
+void DealDamageServerRpc(int dmg) {
+  HP.Value = Mathf.Max(0, HP.Value - dmg);
+}
+
+public override void OnNetworkSpawn() {
+  HP.OnValueChanged += OnHP;
+  OnHP(0, HP.Value);
+}</code></pre>
+        <p>Сервер принимает решение, клиенты отображают состояние, UI слушает <code>OnValueChanged</code>.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Событие vs состояние</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-2/rpc-vs-nv.svg" alt="Матрица RPC и NetworkVariable" loading="lazy">
+          <figcaption>Shoot/Pickup/PlaySound - RPC, Ammo/Inventory/IsAlive - NetworkVariable.</figcaption>
+        </figure>
+      </article>
+
+      <article class="content-card">
+        <h2>Чек-лист оптимизации</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-2/checklist.svg" alt="Чек-лист из 7 пунктов" loading="lazy">
+          <figcaption>Сделайте первые 3 пункта - это уже большой прирост стабильности.</figcaption>
+        </figure>
+      </article>
+
+      <article class="content-card">
+        <h2>Что мы узнали</h2>
+        <ul>
+          <li>State Sync и жизненный цикл NetworkVariable.</li>
+          <li>Permissions, OnValueChanged, dirty/send.</li>
+          <li>Сериализация, FastBuffer, INetworkSerializable.</li>
+          <li>Три рычага оптимизации: Frequency, Relevancy, Payload.</li>
+        </ul>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Course Hub - Лекция 2</p>
+    </div>
+  </footer>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+  <script defer src="../assets/js/site.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+

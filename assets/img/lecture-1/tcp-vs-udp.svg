@@ -1,0 +1,22 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="460" viewBox="0 0 1200 460" role="img" aria-labelledby="t d">
+  <title id="t">TCP vs UDP</title>
+  <desc id="d">Сравнение характеристик TCP и UDP</desc>
+  <rect width="1200" height="460" fill="#0f1a2c"/>
+  <g font-family="Manrope,Segoe UI,sans-serif" fill="#e7eefc">
+    <text x="600" y="58" text-anchor="middle" font-size="40" font-weight="800">TCP vs UDP</text>
+    <rect x="80" y="95" width="500" height="320" rx="22" fill="#17243a" stroke="#35527a"/>
+    <rect x="620" y="95" width="500" height="320" rx="22" fill="#17243a" stroke="#35527a"/>
+    <text x="330" y="138" text-anchor="middle" font-size="34" font-weight="800" fill="#75e3ce">TCP</text>
+    <text x="870" y="138" text-anchor="middle" font-size="34" font-weight="800" fill="#ffd166">UDP</text>
+    <text x="110" y="190" font-size="24">Доставка: гарантированная</text>
+    <text x="110" y="230" font-size="24">Порядок: сохраняется</text>
+    <text x="110" y="270" font-size="24">Скорость: ниже</text>
+    <text x="110" y="310" font-size="24">Overhead: выше</text>
+    <text x="110" y="360" font-size="22" fill="#9eb0c9">HTTP, загрузка файлов</text>
+    <text x="650" y="190" font-size="24">Доставка: может теряться</text>
+    <text x="650" y="230" font-size="24">Порядок: может меняться</text>
+    <text x="650" y="270" font-size="24">Скорость: выше</text>
+    <text x="650" y="310" font-size="24">Overhead: ниже</text>
+    <text x="650" y="360" font-size="22" fill="#9eb0c9">Игры, стримы, звонки</text>
+  </g>
+</svg>

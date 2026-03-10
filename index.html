@@ -1,0 +1,62 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/css/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="./index.html" class="brand">Course Hub</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
+      <nav id="site-nav" class="site-nav">
+        <a href="./index.html" aria-current="page">Главная</a>
+        <a href="./lectures/lecture-1.html">Лекция 1</a>
+        <a href="./lectures/lecture-2.html">Лекция 2</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <h1>Учебные материалы по курсу "Мультиплеер в Unity"</h1>
+        <div class="hero-actions">
+          <a class="btn btn-hero-link" href="./lectures/lecture-1.html">Лекция 1</a>
+          <a class="btn btn-hero-link" href="./lectures/lecture-2.html">Лекция 2</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="container section">
+      <h2>Текущий объём</h2>
+      <div class="cards">
+        <article class="card">
+          <h3>Лекция 1</h3>
+          <p>Базовые понятия, терминология, первичные шаги и разбор ошибок.</p>
+          <a class="link-arrow" href="./lectures/lecture-1.html">Открыть страницу</a>
+        </article>
+        <article class="card">
+          <h3>Лекция 2</h3>
+          <p>Синхронизация состояния, сериализация и оптимизация трафика.</p>
+          <a class="link-arrow" href="./lectures/lecture-2.html">Открыть страницу</a>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Course Hub</p>
+    </div>
+  </footer>
+
+  <script src="./assets/js/site.js"></script>
+</body>
+</html>
+

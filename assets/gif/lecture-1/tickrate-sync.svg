@@ -1,0 +1,30 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" role="img" aria-labelledby="t d">
+  <title id="t">Tickrate vs Framerate</title>
+  <desc id="d">Клиент рисует чаще, чем сервер обновляет состояние</desc>
+  <rect width="960" height="340" fill="#0f1a2c"/>
+  <text x="40" y="50" fill="#e7eefc" font-size="33" font-family="Manrope,Segoe UI,sans-serif" font-weight="800">Tickrate vs Framerate</text>
+
+  <text x="40" y="115" fill="#ffd166" font-size="20" font-family="Manrope,Segoe UI,sans-serif">Server ticks (30Hz)</text>
+  <line x1="220" y1="108" x2="860" y2="108" stroke="#3f628e" stroke-width="3"/>
+  <g fill="#ffd166">
+    <circle cx="250" cy="108" r="6"/>
+    <circle cx="350" cy="108" r="6"/>
+    <circle cx="450" cy="108" r="6"/>
+    <circle cx="550" cy="108" r="6"/>
+    <circle cx="650" cy="108" r="6"/>
+    <circle cx="750" cy="108" r="6"/>
+  </g>
+
+  <text x="40" y="185" fill="#75e3ce" font-size="20" font-family="Manrope,Segoe UI,sans-serif">Client frames (60fps)</text>
+  <line x1="220" y1="178" x2="860" y2="178" stroke="#3f628e" stroke-width="3"/>
+  <g fill="#75e3ce">
+    <circle cx="250" cy="178" r="4"/><circle cx="300" cy="178" r="4"/><circle cx="350" cy="178" r="4"/><circle cx="400" cy="178" r="4"/>
+    <circle cx="450" cy="178" r="4"/><circle cx="500" cy="178" r="4"/><circle cx="550" cy="178" r="4"/><circle cx="600" cy="178" r="4"/>
+    <circle cx="650" cy="178" r="4"/><circle cx="700" cy="178" r="4"/><circle cx="750" cy="178" r="4"/><circle cx="800" cy="178" r="4"/>
+  </g>
+
+  <circle cx="250" cy="248" r="10" fill="#37c8a7">
+    <animate attributeName="cx" values="250;350;450;550;650;750;250" dur="2.4s" repeatCount="indefinite"/>
+  </circle>
+  <text x="40" y="300" fill="#9eb0c9" font-size="21" font-family="Manrope,Segoe UI,sans-serif">Клиент дорисовывает движение между тиками сервера (интерполяция).</text>
+</svg>

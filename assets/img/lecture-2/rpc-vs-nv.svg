@@ -1,0 +1,14 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="t d">
+<title id="t">RPC vs NV matrix</title><desc id="d">Какие данные отправлять через RPC, какие через NetworkVariable</desc>
+<rect width="1200" height="430" fill="#0f1a2c"/>
+<g font-family="Manrope,Segoe UI,sans-serif" fill="#e7eefc">
+<text x="600" y="52" text-anchor="middle" font-size="36" font-weight="800">События vs State: RPC или NV</text>
+<rect x="120" y="100" width="960" height="270" rx="16" fill="#17243a" stroke="#35527a"/>
+<line x1="600" y1="100" x2="600" y2="370" stroke="#35527a" stroke-width="2"/>
+<text x="360" y="145" text-anchor="middle" font-size="30" font-weight="800" fill="#ffd166">СОБЫТИЕ (RPC)</text>
+<text x="840" y="145" text-anchor="middle" font-size="30" font-weight="800" fill="#75e3ce">STATE (NetworkVariable)</text>
+<text x="170" y="200" font-size="24">Shoot</text><text x="650" y="200" font-size="24">Ammo</text>
+<text x="170" y="245" font-size="24">Pickup</text><text x="650" y="245" font-size="24">InventoryState</text>
+<text x="170" y="290" font-size="24">PlaySound</text><text x="650" y="290" font-size="24">IsAlive</text>
+<text x="170" y="335" font-size="20" fill="#9eb0c9">Разовое действие</text><text x="650" y="335" font-size="20" fill="#9eb0c9">Актуальное состояние</text>
+</g></svg>

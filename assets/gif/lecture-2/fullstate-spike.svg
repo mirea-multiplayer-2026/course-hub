@@ -1,0 +1,21 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" role="img" aria-labelledby="t d">
+  <title id="t">NetworkTransform full-state spike</title>
+  <desc id="d">Визуализация всплеска трафика при full-state update.</desc>
+  <rect width="960" height="340" fill="#0f1a2c"/>
+
+  <text x="50" y="52" fill="#e7eefc" font-size="34" font-family="Manrope,Segoe UI,sans-serif" font-weight="800">NetworkTransform: full-state spike</text>
+
+  <line x1="120" y1="250" x2="840" y2="250" stroke="#3f628e" stroke-width="6"/>
+
+  <rect x="180" y="180" width="24" height="70" fill="#37c8a7"/>
+  <rect x="230" y="190" width="24" height="60" fill="#37c8a7"/>
+  <rect x="280" y="185" width="24" height="65" fill="#37c8a7"/>
+
+  <rect x="520" y="120" width="32" height="130" fill="#ff6b6b">
+    <animate attributeName="y" values="120;90;120" dur="1.4s" repeatCount="indefinite"/>
+    <animate attributeName="height" values="130;160;130" dur="1.4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.9;1;0.9" dur="1.4s" repeatCount="indefinite"/>
+  </rect>
+
+  <text x="50" y="300" fill="#9eb0c9" font-size="22" font-family="Manrope,Segoe UI,sans-serif">Некоторые изменения вызывают full-state update и резкий всплеск трафика.</text>
+</svg>

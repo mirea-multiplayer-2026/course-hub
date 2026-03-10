@@ -1,0 +1,16 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" role="img" aria-labelledby="t d">
+  <title id="t">Lag compensation animation</title>
+  <desc id="d">Сервер проверяет попадание по прошлой позиции</desc>
+  <rect width="960" height="340" fill="#0f1a2c"/>
+  <text x="50" y="52" fill="#e7eefc" font-size="34" font-family="Manrope,Segoe UI,sans-serif" font-weight="800">Lag Compensation: rewind по времени</text>
+
+  <line x1="140" y1="230" x2="820" y2="230" stroke="#3f628e" stroke-width="6"/>
+  <circle cx="320" cy="230" r="11" fill="#ffd166"/>
+  <circle cx="540" cy="230" r="11" fill="#ffd166" opacity="0.35"/>
+
+  <line x1="140" y1="120" x2="140" y2="260" stroke="#75e3ce" stroke-width="4"/>
+  <circle cx="140" cy="230" r="12" fill="#37c8a7">
+    <animate attributeName="cx" values="140;760;140" dur="2.6s" repeatCount="indefinite"/>
+  </circle>
+  <text x="50" y="295" fill="#9eb0c9" font-size="22" font-family="Manrope,Segoe UI,sans-serif">Сервер сверяет попадание не с текущей, а с исторической позицией цели.</text>
+</svg>

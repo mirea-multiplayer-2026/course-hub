@@ -1,0 +1,26 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" role="img" aria-labelledby="t d">
+  <title id="t">UDP fast flow</title>
+  <desc id="d">UDP шлёт пакеты без ожидания подтверждения</desc>
+  <rect width="960" height="340" fill="#0f1a2c"/>
+  <text x="40" y="50" fill="#e7eefc" font-size="34" font-family="Manrope,Segoe UI,sans-serif" font-weight="800">UDP: быстро, без гарантии</text>
+
+  <text x="90" y="125" fill="#75e3ce" font-size="22" font-family="Manrope,Segoe UI,sans-serif">Client</text>
+  <text x="810" y="125" fill="#ffd166" font-size="22" font-family="Manrope,Segoe UI,sans-serif">Server</text>
+
+  <line x1="130" y1="180" x2="780" y2="180" stroke="#3f628e" stroke-width="3"/>
+
+  <g fill="#37c8a7">
+    <circle cx="160" cy="180" r="8">
+      <animate attributeName="cx" values="160;780" dur="1.2s" begin="0s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="160" cy="180" r="8">
+      <animate attributeName="cx" values="160;780" dur="1.2s" begin="0.25s" repeatCount="indefinite"/>
+      <animate attributeName="opacity" values="1;1;0" keyTimes="0;0.55;1" dur="1.2s" begin="0.25s" repeatCount="indefinite"/>
+    </circle>
+    <circle cx="160" cy="180" r="8">
+      <animate attributeName="cx" values="160;780" dur="1.2s" begin="0.5s" repeatCount="indefinite"/>
+    </circle>
+  </g>
+
+  <text x="40" y="300" fill="#9eb0c9" font-size="21" font-family="Manrope,Segoe UI,sans-serif">Пакеты летят непрерывно, часть может потеряться или прийти не по порядку.</text>
+</svg>

@@ -1,0 +1,14 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="t d">
+<title id="t">Traffic growth</title><desc id="d">Рост трафика при увеличении числа клиентов</desc>
+<rect width="1200" height="420" fill="#0f1a2c"/>
+<g font-family="Manrope,Segoe UI,sans-serif" fill="#e7eefc">
+<text x="600" y="52" text-anchor="middle" font-size="36" font-weight="800">Почему слать каждый кадр плохо</text>
+<line x1="120" y1="330" x2="1080" y2="330" stroke="#3f628e" stroke-width="4"/>
+<line x1="120" y1="80" x2="120" y2="330" stroke="#3f628e" stroke-width="4"/>
+<polyline points="120,320 240,300 360,270 480,230 600,180 720,130 840,90 960,70" fill="none" stroke="#ff6b6b" stroke-width="8"/>
+<rect x="800" y="60" width="250" height="70" rx="12" fill="#5b1f2b"/>
+<text x="925" y="105" text-anchor="middle" font-size="24" font-weight="700">Красная зона</text>
+<text x="110" y="360" font-size="20">1</text><text x="230" y="360" font-size="20">2</text><text x="350" y="360" font-size="20">4</text><text x="470" y="360" font-size="20">8</text><text x="590" y="360" font-size="20">16</text>
+<text x="635" y="392" font-size="20" fill="#9eb0c9">Количество игроков (N)</text>
+<text x="140" y="110" font-size="20" fill="#9eb0c9">Трафик</text>
+</g></svg>

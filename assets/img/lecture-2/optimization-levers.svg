@@ -1,0 +1,9 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="t d">
+<title id="t">Optimization levers</title><desc id="d">Frequency, Relevancy, Payload</desc>
+<rect width="1200" height="420" fill="#0f1a2c"/>
+<g font-family="Manrope,Segoe UI,sans-serif" fill="#e7eefc" text-anchor="middle">
+<text x="600" y="54" font-size="36" font-weight="800">3 рычага оптимизации трафика</text>
+<circle cx="280" cy="230" r="120" fill="#17243a" stroke="#35527a"/><text x="280" y="215" font-size="30" font-weight="800">FREQUENCY</text><text x="280" y="250" font-size="20">Как часто</text>
+<circle cx="600" cy="230" r="120" fill="#17243a" stroke="#35527a"/><text x="600" y="215" font-size="30" font-weight="800">RELEVANCY</text><text x="600" y="250" font-size="20">Кому шлём</text>
+<circle cx="920" cy="230" r="120" fill="#17243a" stroke="#35527a"/><text x="920" y="215" font-size="30" font-weight="800">PAYLOAD</text><text x="920" y="250" font-size="20">Сколько байт</text>
+</g></svg>

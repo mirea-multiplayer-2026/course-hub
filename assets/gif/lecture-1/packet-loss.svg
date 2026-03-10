@@ -1,0 +1,12 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" role="img" aria-labelledby="t d">
+  <title id="t">Packet loss animation</title>
+  <desc id="d">Часть пакетов теряется в пути</desc>
+  <rect width="960" height="340" fill="#0f1a2c"/>
+  <text x="50" y="52" fill="#e7eefc" font-size="34" font-family="Manrope,Segoe UI,sans-serif" font-weight="800">Packet Loss: потеря пакетов</text>
+  <line x1="120" y1="170" x2="840" y2="170" stroke="#3f628e" stroke-width="6"/>
+  <circle cx="120" cy="170" r="10" fill="#37c8a7">
+    <animate attributeName="cx" values="120;840" dur="1.8s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="1;1;0;0;1" keyTimes="0;0.45;0.46;0.72;1" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+  <text x="50" y="295" fill="#9eb0c9" font-size="22" font-family="Manrope,Segoe UI,sans-serif">Когда пакет потерян, состояние обновляется с пропуском.</text>
+</svg>

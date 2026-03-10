@@ -1,0 +1,383 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лекция 1 | Course Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../index.html" class="brand">Course Hub</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
+      <nav id="site-nav" class="site-nav">
+        <a href="../index.html">Главная</a>
+        <a href="./lecture-1.html" aria-current="page">Лекция 1</a>
+        <a href="./lecture-2.html">Лекция 2</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section lecture-page">
+    <a class="back-link" href="../index.html">Назад на главную</a>
+    <h1>Лекция 1. Основы мультиплеера и Unity NGO</h1>
+    
+    <div class="content-stack">
+      <article class="content-card">
+        <h2>Эволюция мультиплеера</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-1/timeline.svg" alt="Таймлайн эволюции мультиплеерных игр от 1993 до 2026 года" loading="lazy">
+          <figcaption>Развитие мультиплеера: от LAN до облачных моделей и Unity NGO.</figcaption>
+        </figure>
+        <ul>
+          <li>1993: DOOM - IPX, LAN.</li>
+          <li>1996: Quake - Client-Server, UDP.</li>
+          <li>2004: WoW - MMO, региональные сервера.</li>
+          <li>2017: Fortnite - Cloud, 100 игроков.</li>
+          <li>2026: ваш проект на Unity NGO.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Проблемы мультиплеера</h2>
+        <p>"Четыре всадника апокалипсиса мультиплеера":</p>
+        <ul>
+          <li><strong>Latency (20-300ms):</strong> задержка пакетов. Пример: Москва ~20ms, Владивосток ~150ms.</li>
+          <li><strong>Jitter:</strong> нестабильность задержки (50ms -> 150ms -> 45ms), из-за чего игрок "телепортируется".</li>
+          <li><strong>Packet loss (1-5%):</strong> UDP не гарантирует доставку.</li>
+          <li><strong>Cheating:</strong> клиент может врать серверу, без валидации игра ломается.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Симуляции сетевых проблем</h2>
+        <p>Ниже короткие анимации, которые показывают ключевые эффекты из лекции в формате "что происходит на экране".</p>
+        <div class="gif-grid">
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-1/latency.svg" alt="Анимация задержки подтверждения действия" loading="lazy">
+            <h3>Latency</h3>
+            <p>Действие клиента подтверждается сервером с задержкой.</p>
+          </section>
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-1/jitter.svg" alt="Анимация нестабильной задержки" loading="lazy">
+            <h3>Jitter</h3>
+            <p>Пакеты приходят неравномерно, движение становится рваным.</p>
+          </section>
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-1/packet-loss.svg" alt="Анимация потери пакетов" loading="lazy">
+            <h3>Packet Loss</h3>
+            <p>Часть обновлений теряется и кадр пропускает состояние.</p>
+          </section>
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-1/rubberband.svg" alt="Анимация эффекта резинки" loading="lazy">
+            <h3>Rubber Banding</h3>
+            <p>Предсказание клиента расходится с сервером и позиция откатывается.</p>
+          </section>
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-1/lag-compensation.svg" alt="Анимация lag compensation с откатом времени" loading="lazy">
+            <h3>Lag Compensation</h3>
+            <p>Проверка попадания идёт по исторической позиции цели (rewind).</p>
+          </section>
+        </div>
+      </article>
+
+            <article class="content-card">
+        <h2>TCP vs UDP</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-1/tcp-vs-udp.svg" alt="Сравнение протоколов TCP и UDP" loading="lazy">
+          <figcaption>Сравнение поведения TCP и UDP в игровых сетях.</figcaption>
+        </figure>
+        <p>CS:GO использует UDP: лучше пропустить 1 пакет, чем ждать повторной отправки.</p>
+        <ul>
+          <li><strong>TCP:</strong> гарантирует доставку, сохраняет порядок, медленнее, больше overhead. Примеры: HTTP, загрузка файлов.</li>
+          <li><strong>UDP:</strong> может терять и перемешивать пакеты, быстрее, меньше overhead. Примеры: игры, стримы, звонки.</li>
+        </ul>
+        <div class="gif-grid">
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-1/tcp-retransmit.svg" alt="Симуляция TCP с подтверждением и повторной отправкой" loading="lazy">
+            <h3>TCP retransmit</h3>
+            <p>Пакет подтверждается. Если потерян, протокол повторно отправляет его.</p>
+          </section>
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-1/udp-fast.svg" alt="Симуляция UDP без подтверждения доставки" loading="lazy">
+            <h3>UDP fast flow</h3>
+            <p>Пакеты отправляются быстро, но без гарантии порядка и доставки.</p>
+          </section>
+        </div>
+        <p>Аналогия: TCP - заказное письмо с уведомлением, UDP - обычная открытка.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Что такое пакет</h2>
+        <p><strong>NETWORK PACKET (UDP):</strong> header + payload.</p>
+        <p><strong>Header:</strong> Source IP, Destination IP, Port.</p>
+        <p><strong>Payload:</strong> Player ID, Position, Rotation, Timestamp.</p>
+        <p>Типичный размер пакета: около 128 байт.</p>
+        <p><strong>Расчёт трафика:</strong></p>
+        <ul>
+          <li>10 игроков x 60 пак/с x 128 B = 76.8 KB/sec.</li>
+          <li>100 игроков x 60 пак/с x 128 B = 768 KB/sec (около 6 Mbps).</li>
+          <li>В шутере каждое движение игрока отправляется пакетами, до 60 пакетов в секунду.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Tickrate, Update Rate, Framerate</h2>
+        <ul>
+          <li><strong>Tickrate:</strong> как часто сервер обрабатывает логику.</li>
+          <li><strong>Update Rate:</strong> как часто клиент получает данные.</li>
+          <li><strong>Framerate:</strong> как часто рисуется картинка.</li>
+        </ul>
+        <div class="gif-grid">
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-1/tickrate-sync.svg" alt="Симуляция разницы Tickrate сервера и Framerate клиента" loading="lazy">
+            <h3>Tickrate vs Framerate</h3>
+            <p>Клиент рисует чаще, чем сервер тикает, поэтому сглаживает движение между апдейтами.</p>
+          </section>
+        </div>
+        <p>Client обновляется чаще, чем Server тикает, поэтому нужна интерполяция.</p>
+        <p>Примеры: CS:GO (64 tick, pro 128), Fortnite (30), Rocket League (60).</p>
+        <p>Низкий tickrate: "пуля не попала, хотя прицел был на голове". Высокий tickrate: больше нагрузка и дороже хостинг.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Интерполяция и экстраполяция</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-1/interpolation-extrapolation.svg" alt="Схема интерполяции и экстраполяции движения игрока" loading="lazy">
+          <figcaption>Сглаживание прошлого и предсказание будущего положения игрока.</figcaption>
+        </figure>
+        <ul>
+          <li><strong>Интерполяция:</strong> сглаживание прошлого между известными позициями A и B.</li>
+          <li><strong>Экстраполяция:</strong> предсказание будущего по последней позиции и скорости.</li>
+        </ul>
+        <p>Когда приходит реальная позиция, клиент корректирует расхождение. Ошибка проявляется как "телепорт".</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Три модели мультиплеера</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-1/topologies.svg" alt="Диаграммы P2P, Listen Server и Dedicated Server" loading="lazy">
+          <figcaption>Сравнение сетевых топологий: P2P, хост-клиент и выделенный сервер.</figcaption>
+        </figure>
+        <ul>
+          <li><strong>P2P (Peer-to-Peer):</strong> все соединены со всеми.</li>
+          <li><strong>Listen Server (Host-Client):</strong> один игрок одновременно сервер и клиент.</li>
+          <li><strong>Dedicated Server:</strong> отдельный сервер для всех игроков.</li>
+        </ul>
+        <p>Выбор топологии - компромисс между стоимостью, защитой и сложностью.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Peer-to-Peer (P2P)</h2>
+        <p><strong>Плюсы:</strong> не нужен сервер, низкая задержка для близких игроков, просто для 2-4 игроков.</p>
+        <p><strong>Минусы:</strong> не масштабируется, легко читерить, 1 лагает - страдают все, NAT traversal.</p>
+        <p><strong>Масштабирование:</strong> количество соединений = n(n-1)/2 (2 игрока: 1, 4 игрока: 6, 10 игроков: 45).</p>
+        <p>Примеры: файтинги (Mortal Kombat, Street Fighter), кооп-игры (It Takes Two).</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Listen Server (Host-Client)</h2>
+        <p>В Unity NGO по умолчанию: <code>NetworkManager.Singleton.StartHost();</code></p>
+        <p><strong>Плюсы:</strong> звездообразная топология, проще P2P, хост контролирует логику, не нужен выделенный сервер.</p>
+        <p><strong>Минусы:</strong> хост имеет 0ms преимущество, хост вышел - игра рухнула, зависимость от ПК хоста.</p>
+        <p>Когда использовать: кооп-игры (Valheim, Don't Starve), матчи 4-8 игроков, ограниченный бюджет на серверы.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Dedicated Server</h2>
+        <pre><code class="language-csharp">#if UNITY_SERVER
+NetworkManager.Singleton.StartServer(); // Логика
+#else
+NetworkManager.Singleton.StartClient(); // Визуал
+#endif</code></pre>
+        <p><strong>Плюсы:</strong> защита от читов, стабильность, масштаб (64-100+ игроков), равные условия.</p>
+        <p><strong>Минусы:</strong> дорого ($1000-5000/месяц), сложнее в разработке, нужна инфраструктура (DevOps).</p>
+        <p>Примеры: CS:GO, Valorant, Overwatch, Fortnite, PUBG, Apex Legends, большинство AAA-мультиплееров.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Relay Server (гибридная модель)</h2>
+        <p>Unity Relay Service встроен в NGO.</p>
+        <p><strong>Как работает:</strong></p>
+        <ol>
+          <li>Один игрок выступает хостом (как Listen Server).</li>
+          <li>Трафик проходит через облачный Relay.</li>
+          <li>Relay только пересылает пакеты.</li>
+        </ol>
+        <p><strong>Зачем нужен:</strong> решает NAT traversal, скрывает IP игроков, не требует публичного IP у хоста.</p>
+        <p><strong>Недостатки:</strong> у хоста остаётся преимущество, появляется доп. задержка через облако, читы возможны на стороне хоста.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Authority</h2>
+        <p><strong>Client Authority:</strong> клиент сообщает серверу готовый результат (может врать).</p>
+        <p><strong>Server Authority:</strong> клиент просит действие, сервер проверяет и разрешает.</p>
+        <p>В 99% игр для критичных действий используется Server Authority: движение, выстрелы, подбор предметов проверяются сервером.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Client-Side Prediction</h2>
+        <ul>
+          <li>T=0ms: клиент нажимает W и сразу двигается локально.</li>
+          <li>T=50ms: сервер получает, проверяет, одобряет.</li>
+          <li>T=100ms: клиент получает подтверждение.</li>
+        </ul>
+        <p>Если сервер отклонил действие, клиент откатывается (эффект "резинки").</p>
+        <pre><code class="language-csharp">if (IsOwner) {
+  transform.position += input * speed; // локальное предсказание
+  SendMovementServerRpc(pos); // отправка на сервер
+}</code></pre>
+      </article>
+
+      <article class="content-card">
+        <h2>Lag Compensation</h2>
+        <p><strong>Проблема:</strong> на экране стрелка попадание есть, а на сервере цель уже сдвинулась.</p>
+        <p><strong>Решение:</strong></p>
+        <ol>
+          <li>Сервер хранит историю позиций (например, 500ms).</li>
+          <li>Откручивает время на ping стрелка.</li>
+          <li>Проверяет коллизию по старым позициям.</li>
+        </ol>
+        <p>Из-за этого в CS:GO иногда убивают "за углом".</p>
+      </article>
+
+      <article class="content-card">
+        <h2>State Sync vs Input Sync</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-1/state-vs-input.svg" alt="Сравнение подходов State Sync и Input Sync" loading="lazy">
+          <figcaption>Передача состояния против передачи пользовательского ввода.</figcaption>
+        </figure>
+        <p><strong>State Sync:</strong> передаётся результат (позиция, поворот). Проще и надёжнее, но больше трафика.</p>
+        <p><strong>Input Sync:</strong> передаётся намерение (нажал W, Fire). Меньше трафика и детерминизм, но синхронизация сложнее.</p>
+        <p>State Sync типичен для FPS/TPS и большинства игр, Input Sync - для Rocket League и файтингов (GGPO).</p>
+        <p>NGO по умолчанию ориентирован на State Sync.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Ownership в NGO</h2>
+        <pre><code class="language-csharp">void Update() {
+  if (!IsOwner) return;
+  HandleInput();
+}</code></pre>
+        <ul>
+          <li>Каждый <code>NetworkObject</code> принадлежит клиенту.</li>
+          <li>Только владелец управляет объектом.</li>
+          <li>Остальные клиенты наблюдают изменения.</li>
+        </ul>
+        <p>Ключевые флаги: <code>IsOwner</code>, <code>IsServer</code>, <code>IsClient</code>, <code>IsHost</code>.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Почему NGO</h2>
+        <ol>
+          <li>Официальное решение Unity с долгосрочной поддержкой.</li>
+          <li>Бесплатно, без ограничений CCU.</li>
+          <li>Интеграция с Relay, Lobby, Matchmaking.</li>
+          <li>Современная архитектура с учётом ошибок UNet.</li>
+          <li>Open-source, можно изучать исходный код.</li>
+        </ol>
+      </article>
+
+      <article class="content-card">
+        <h2>Архитектура NGO</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-1/ngo-architecture.svg" alt="Схема архитектуры Unity NGO" loading="lazy">
+          <figcaption>Базовые компоненты Netcode for GameObjects и их связи.</figcaption>
+        </figure>
+        <ul>
+          <li><strong>NetworkManager:</strong> центральный singleton.</li>
+          <li><strong>NetworkObject:</strong> маркер сетевого объекта.</li>
+          <li><strong>NetworkBehaviour:</strong> сетевой скрипт.</li>
+          <li><strong>RPC:</strong> удалённые вызовы.</li>
+          <li><strong>NetworkVariable:</strong> автосинхронизация.</li>
+          <li><strong>Ownership:</strong> владение объектом.</li>
+          <li><strong>Transport:</strong> UnityTransport (UDP).</li>
+          <li><strong>ConnectionManager:</strong> управление подключениями.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>NetworkObject</h2>
+        <p><strong>Когда нужен:</strong> игрок (Player Prefab), предметы, снаряды.</p>
+        <p><strong>Когда не нужен:</strong> статика (стены, пол), UI, локальные эффекты.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>NetworkBehaviour</h2>
+        <pre><code class="language-csharp">public class PlayerController : NetworkBehaviour {
+  NetworkVariable&lt;int&gt; health = new(100);
+
+  void Update() {
+    if (!IsOwner) return;
+    HandleInput();
+  }
+
+  [ServerRpc]
+  void TakeDamageServerRpc(int dmg) { }
+
+  [ClientRpc]
+  void PlayHitEffectClientRpc() { }
+}</code></pre>
+      </article>
+
+      <article class="content-card">
+        <h2>RPC (Remote Procedure Calls)</h2>
+        <p><strong>[ServerRpc]:</strong> Client -> Server, клиент просит сервер выполнить действие.</p>
+        <p><strong>[ClientRpc]:</strong> Server -> All Clients, сервер рассылает событие всем.</p>
+        <pre><code class="language-csharp">[ServerRpc]
+void PickupItemServerRpc(NetworkObjectReference itemRef) {
+  item.Despawn();
+  NotifyPickupClientRpc();
+}</code></pre>
+      </article>
+
+      <article class="content-card">
+        <h2>NetworkVariable</h2>
+        <pre><code class="language-csharp">NetworkVariable&lt;int&gt; score = new(0);
+score.OnValueChanged += (oldValue, newValue) =&gt; UpdateUI();
+if (IsServer) score.Value += points;</code></pre>
+        <p>Сервер меняет значение, изменение автоматически рассылается клиентам.</p>
+        <p>Типы: <code>NetworkVariable&lt;int&gt;</code>, <code>&lt;float&gt;</code>, <code>&lt;bool&gt;</code>, <code>&lt;Vector3&gt;</code>, <code>NetworkList&lt;T&gt;</code>, <code>NetworkDictionary&lt;K,V&gt;</code>.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Итоги лекции</h2>
+        <ul>
+          <li>Топологии: P2P, Listen Server, Dedicated Server, Relay.</li>
+          <li>Authority: Server/Client, prediction, lag compensation, state/input sync.</li>
+          <li>Unity NGO: NetworkManager, NetworkObject, NetworkBehaviour, RPC, NetworkVariable.</li>
+        </ul>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Course Hub - Лекция 1</p>
+    </div>
+  </footer>
+
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+  <script defer src="../assets/js/site.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

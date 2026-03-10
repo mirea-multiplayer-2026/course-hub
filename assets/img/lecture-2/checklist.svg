@@ -1,0 +1,13 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" role="img" aria-labelledby="t d">
+<title id="t">Optimization checklist</title><desc id="d">Чек-лист из 7 пунктов по оптимизации трафика</desc>
+<rect width="1200" height="500" fill="#0f1a2c"/>
+<g font-family="Manrope,Segoe UI,sans-serif" fill="#e7eefc">
+<text x="600" y="54" text-anchor="middle" font-size="36" font-weight="800">Чек-лист оптимизации (7 пунктов)</text>
+<text x="130" y="125" font-size="24">1. Не менять .Value без необходимости</text>
+<text x="130" y="175" font-size="24">2. Есть порог epsilon перед присвоением</text>
+<text x="130" y="225" font-size="24">3. Частота ограничена (FixedUpdate / таймер)</text>
+<text x="130" y="275" font-size="24">4. Компактные типы: byte/short/packed</text>
+<text x="130" y="325" font-size="24">5. Сложные состояния: INetworkSerializable</text>
+<text x="130" y="375" font-size="24">6. UI слушает только OnValueChanged</text>
+<text x="130" y="425" font-size="24">7. Разовые события через RPC, не NV</text>
+</g></svg>

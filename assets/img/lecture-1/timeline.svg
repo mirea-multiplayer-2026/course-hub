@@ -1,0 +1,13 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="460" viewBox="0 0 1200 460" role="img" aria-labelledby="t d">
+  <title id="t">Эволюция мультиплеера</title>
+  <desc id="d">Таймлайн от Doom до проекта на Unity NGO</desc>
+  <rect width="1200" height="460" fill="#0f1a2c"/>
+  <line x1="90" y1="220" x2="1110" y2="220" stroke="#3f628e" stroke-width="8"/>
+  <g font-family="Manrope,Segoe UI,sans-serif" fill="#e7eefc" text-anchor="middle">
+    <circle cx="130" cy="220" r="22" fill="#37c8a7"/><text x="130" y="165" font-size="26" font-weight="800">1993</text><text x="130" y="275" font-size="24" font-weight="700">DOOM</text><text x="130" y="305" font-size="18" fill="#9eb0c9">IPX, LAN</text>
+    <circle cx="350" cy="220" r="22" fill="#37c8a7"/><text x="350" y="165" font-size="26" font-weight="800">1996</text><text x="350" y="275" font-size="24" font-weight="700">Quake</text><text x="350" y="305" font-size="18" fill="#9eb0c9">Client-Server, UDP</text>
+    <circle cx="570" cy="220" r="22" fill="#37c8a7"/><text x="570" y="165" font-size="26" font-weight="800">2004</text><text x="570" y="275" font-size="24" font-weight="700">WoW</text><text x="570" y="305" font-size="18" fill="#9eb0c9">MMO, регионы</text>
+    <circle cx="790" cy="220" r="22" fill="#37c8a7"/><text x="790" y="165" font-size="26" font-weight="800">2017</text><text x="790" y="275" font-size="24" font-weight="700">Fortnite</text><text x="790" y="305" font-size="18" fill="#9eb0c9">Cloud, 100 игроков</text>
+    <circle cx="1010" cy="220" r="22" fill="#ffd166"/><text x="1010" y="165" font-size="26" font-weight="800">2026</text><text x="1010" y="275" font-size="24" font-weight="700">Ваш проект</text><text x="1010" y="305" font-size="18" fill="#9eb0c9">Unity NGO</text>
+  </g>
+</svg>

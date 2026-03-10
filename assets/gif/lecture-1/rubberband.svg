@@ -1,0 +1,11 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="960" height="340" viewBox="0 0 960 340" role="img" aria-labelledby="t d">
+  <title id="t">Rubber banding animation</title>
+  <desc id="d">Клиент предсказал позицию, сервер откатил</desc>
+  <rect width="960" height="340" fill="#0f1a2c"/>
+  <text x="50" y="52" fill="#e7eefc" font-size="34" font-family="Manrope,Segoe UI,sans-serif" font-weight="800">Rubber Banding: эффект резинки</text>
+  <line x1="120" y1="200" x2="840" y2="200" stroke="#3f628e" stroke-width="6"/>
+  <circle cx="220" cy="200" r="12" fill="#37c8a7">
+    <animate attributeName="cx" values="220;700;360;220" keyTimes="0;0.45;0.65;1" dur="2.3s" repeatCount="indefinite"/>
+  </circle>
+  <text x="50" y="295" fill="#9eb0c9" font-size="22" font-family="Manrope,Segoe UI,sans-serif">Локально объект ушёл вперёд, потом сервер вернул назад.</text>
+</svg>
