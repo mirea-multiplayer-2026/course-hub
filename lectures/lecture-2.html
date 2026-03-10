@@ -44,6 +44,11 @@
           <li>Состояние двери или объекта.</li>
         </ul>
         <p>В NGO для этого используется <code>NetworkVariable</code>.</p>
+      
+        <h3>Пояснение</h3>
+        <p>State Sync нужен для данных, которые должны быть одинаковыми у всех игроков в каждый момент времени. Это "снимок текущего состояния", а не история событий.</p>
+        <h3>Почему это важно</h3>
+        <p>Если перепутать state и события, игроки будут видеть разные миры: у одного дверь открыта, у другого закрыта.</p>
       </article>
 
       <article class="content-card">
@@ -57,6 +62,11 @@
           <li>Каждый лишний апдейт увеличивает трафик и вероятность потерь.</li>
           <li>Нужны пороги, ограничение частоты и выбор получателей.</li>
         </ul>
+      
+        <h3>Практический смысл</h3>
+        <p>"Больше апдейтов" не равно "лучше". После определённой точки вы только увеличиваете перегрузку сети и вероятность потерь.</p>
+        <h3>Типичная ошибка</h3>
+        <p>Отправлять одинаковые данные в каждом Update без порога изменения и ограничения частоты.</p>
       </article>
 
       <article class="content-card">
@@ -89,6 +99,9 @@
             <p>Некоторые изменения дают резкий скачок трафика.</p>
           </section>
         </div>
+      
+        <h3>Как использовать этот блок</h3>
+        <p>Сначала смотрите визуальный эффект, затем проверяйте свой код: где выставляется dirty, где стоит порог epsilon и как часто реально меняется состояние.</p>
       </article>
 
       <article class="content-card">
@@ -111,6 +124,11 @@
 public override void OnNetworkDespawn() {
   score.OnValueChanged -= OnScore;
 }</code></pre>
+      
+        <h3>Пояснение</h3>
+        <p>Главный принцип: подписка/отписка должна следовать жизненному циклу сетевого объекта. Тогда UI не течёт по памяти и не получает "мертвые" события.</p>
+        <h3>Что проверить в практике</h3>
+        <p>После despawn не должно оставаться подписок, а late-join клиент должен сразу увидеть актуальные значения.</p>
       </article>
 
       <article class="content-card">
@@ -126,6 +144,11 @@ public override void OnNetworkDespawn() {
   NetworkVariableReadPermission.Everyone,
   NetworkVariableWritePermission.Server
 );</code></pre>
+      
+        <h3>Пояснение</h3>
+        <p>Права записи определяют, кто формирует истину. Для соревновательной логики почти всегда нужен server-authoritative режим.</p>
+        <h3>Типичная ошибка</h3>
+        <p>Дать Write всем клиентам и потом пытаться "чинить" читерство постфактум.</p>
       </article>
 
       <article class="content-card">
@@ -136,6 +159,9 @@ public override void OnNetworkDespawn() {
           <li>Меняйте значение реже (таймер или FixedUpdate).</li>
           <li>Не присваивайте одно и то же каждый кадр.</li>
         </ul>
+      
+        <h3>Пояснение</h3>
+        <p>Передача происходит не при каждом чтении/присваивании, а в сетевой тик и только для dirty-значений. Это ключ к пониманию оптимизации трафика.</p>
       </article>
 
       <article class="content-card">
@@ -151,6 +177,9 @@ Write(A); Write(B); Write(C);
 
 // client
 Read(A); Read(B); // C пропущен -> формат сломан</code></pre>
+      
+        <h3>Практический вывод</h3>
+        <p>Формат сообщений нужно проектировать как контракт: любое несовпадение порядка или типа ломает декодирование у клиента.</p>
       </article>
 
       <article class="content-card">
@@ -169,6 +198,9 @@ Read(A); Read(B); // C пропущен -> формат сломан</code></pre
   }
 }</code></pre>
         <p>Порядок полей обязателен и должен быть одинаковым у всех участников сети.</p>
+      
+        <h3>Пояснение</h3>
+        <p>Кастомная сериализация даёт контроль над размером и структурой пакета. Это особенно важно для часто обновляемых структур состояния.</p>
       </article>
 
       <article class="content-card">
@@ -182,6 +214,9 @@ Read(A); Read(B); // C пропущен -> формат сломан</code></pre
           <li><strong>Relevancy:</strong> кому отправляем (AOI, только видящим клиентам).</li>
           <li><strong>Payload:</strong> сколько байт (packed, квантизация, custom serialization).</li>
         </ul>
+      
+        <h3>Как применять по шагам</h3>
+        <p>Сначала настраивайте частоту (самый быстрый эффект), затем режьте получателей (relevancy), и только после этого полируйте payload.</p>
       </article>
 
       <article class="content-card">
@@ -193,12 +228,18 @@ Read(A); Read(B); // C пропущен -> формат сломан</code></pre
           <li>Packed int (varint): для маленьких значений 1-3 байта вместо 4.</li>
         </ul>
         <p>На большом числе объектов маленькая экономия превращается в заметный выигрыш.</p>
+      
+        <h3>Типичная ошибка</h3>
+        <p>Квантизировать без измерений. Сначала проверьте baseline-трафик, затем сравните до/после и зафиксируйте допустимую погрешность.</p>
       </article>
 
       <article class="content-card">
         <h2>NetworkTransform и трафик</h2>
         <p>Некоторые настройки (<code>Unreliable Deltas</code>, <code>Quaternion Compression</code>, <code>Half Float</code>) сильно влияют на объём отправки.</p>
         <p>Важно помнить: часть изменений может триггерить full-state update.</p>
+      
+        <h3>Пояснение</h3>
+        <p>NetworkTransform удобен на старте, но при масштабе может стать узким местом. Важно осознанно выбирать, что синхронизировать автоматически, а что вручную.</p>
       </article>
 
       <article class="content-card">
@@ -215,6 +256,9 @@ public override void OnNetworkSpawn() {
   OnHP(0, HP.Value);
 }</code></pre>
         <p>Сервер принимает решение, клиенты отображают состояние, UI слушает <code>OnValueChanged</code>.</p>
+      
+        <h3>Что отработать в лабораторной</h3>
+        <p>Проверьте сценарии урона при высоком ping, повторных RPC и переподключении клиента. Значение HP должно оставаться консистентным у всех участников.</p>
       </article>
 
       <article class="content-card">
@@ -223,6 +267,9 @@ public override void OnNetworkSpawn() {
           <img src="../assets/img/lecture-2/rpc-vs-nv.svg" alt="Матрица RPC и NetworkVariable" loading="lazy">
           <figcaption>Shoot/Pickup/PlaySound - RPC, Ammo/Inventory/IsAlive - NetworkVariable.</figcaption>
         </figure>
+      
+        <h3>Запомнить правило</h3>
+        <p>Если объект должен "помнить" значение для новых клиентов — это state. Если важно только одноразовое действие здесь и сейчас — это событие.</p>
       </article>
 
       <article class="content-card">
@@ -231,6 +278,9 @@ public override void OnNetworkSpawn() {
           <img src="../assets/img/lecture-2/checklist.svg" alt="Чек-лист из 7 пунктов" loading="lazy">
           <figcaption>Сделайте первые 3 пункта - это уже большой прирост стабильности.</figcaption>
         </figure>
+      
+        <h3>Как применять чек-лист</h3>
+        <p>Прогоняйте список после каждой крупной фичи. Это предотвращает незаметное накопление трафика по мере роста проекта.</p>
       </article>
 
       <article class="content-card">
@@ -241,6 +291,9 @@ public override void OnNetworkSpawn() {
           <li>Сериализация, FastBuffer, INetworkSerializable.</li>
           <li>Три рычага оптимизации: Frequency, Relevancy, Payload.</li>
         </ul>
+      
+        <h3>Итог по лекции</h3>
+        <p>Цель лекции 2 — научиться управлять сетевым трафиком как инженерной системой: измерять, ограничивать, упаковывать и проверять консистентность.</p>
       </article>
     </div>
   </main>
@@ -256,14 +309,4 @@ public override void OnNetworkSpawn() {
   <script defer src="../assets/js/site.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
 
