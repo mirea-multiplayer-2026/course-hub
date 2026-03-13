@@ -369,13 +369,114 @@ code {
   margin-top: 0.8rem;
 }
 
+.practice-banner {
+  border-color: #3c5f8b;
+  background:
+    radial-gradient(circle at top right, rgba(55, 200, 167, 0.12), transparent 38%),
+    linear-gradient(180deg, var(--surface) 0%, var(--surface-2) 100%);
+}
+
+.student-note {
+  border-color: #6c5a22;
+  background:
+    radial-gradient(circle at top right, rgba(224, 189, 81, 0.12), transparent 36%),
+    linear-gradient(180deg, #2a2414 0%, #231e12 100%);
+}
+
+.student-note p {
+  margin: 0;
+}
+
+.accent {
+  color: #82e4d0;
+  font-weight: 700;
+}
+
+.accent-warm {
+  color: #ffd479;
+  font-weight: 700;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin: 1rem 0;
+}
+
+.chip-list li {
+  margin-bottom: 0.45rem;
+}
+
+.checkpoint {
+  margin-top: 1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid #3a557d;
+  border-radius: 14px;
+  background: rgba(9, 15, 27, 0.4);
+}
+
+.checkpoint h3 {
+  margin-top: 0;
+  margin-bottom: 0.35rem;
+}
+
+.hint-card {
+  margin-top: 1rem;
+  border: 1px solid #38557b;
+  border-radius: 14px;
+  background: rgba(12, 21, 37, 0.55);
+  overflow: hidden;
+}
+
+.hint-card summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.9rem 1rem;
+  font-weight: 700;
+  background: rgba(18, 32, 58, 0.82);
+}
+
+.hint-card summary::-webkit-details-marker {
+  display: none;
+}
+
+.hint-card summary::after {
+  content: "+";
+  float: right;
+  color: #82e4d0;
+}
+
+.hint-card[open] summary::after {
+  content: "-";
+}
+
+.hint-card > p,
+.hint-card > pre {
+  margin-left: 1rem;
+  margin-right: 1rem;
+}
+
+.hint-card > p {
+  margin-top: 0.9rem;
+  margin-bottom: 0.75rem;
+  color: var(--muted);
+}
+
+.hint-card > pre {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
 @media (max-width: 1000px) {
+  .info-grid,
   .media-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 700px) {
+  .info-grid,
   .media-grid {
     grid-template-columns: 1fr;
   }

@@ -1,0 +1,341 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Практика 1 | Course Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../index.html" class="brand">Course Hub</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
+      <nav id="site-nav" class="site-nav">
+        <a href="../index.html">Главная</a>
+        <a href="./lecture-1.html">Лекция 1</a>
+        <a href="./lecture-2.html">Лекция 2</a>
+        <a href="./practice-1.html" aria-current="page">Практика 1</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section lecture-page">
+    <a class="back-link" href="../index.html">Назад на главную</a>
+    <h1>Практика 1. Подключение двух игроков и синхронизация состояния</h1>
+    <figure class="lecture-hero">
+      <img src="../assets/img/practice-1/header.png" alt="Обложка практики 1 по подключению двух игроков и синхронизации состояния" loading="lazy">
+    </figure>
+
+    <div class="content-stack">
+      <article class="content-card student-note">
+        <p><strong>Уважаемый студент!</strong> Если что-то не работает или вы что-то не знаете, сначала проверьте документацию Unity NGO, настройки <code><span class="accent">NetworkManager</span></code> и консоль Unity. Не пытайтесь обходить серверную логику прямым изменением состояния на клиенте.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Цель</h2>
+        <p>Собрать первую multiplayer-сцену на Unity NGO, которая умеет:</p>
+        <ul>
+          <li>запускаться как <code><span class="accent-warm">Host</span></code> и как <code><span class="accent-warm">Client</span></code>;</li>
+          <li>подключать два окна игры друг к другу;</li>
+          <li>синхронизировать никнейм игрока через <code><span class="accent">NetworkVariable</span></code>;</li>
+          <li>синхронизировать здоровье игрока через <code><span class="accent">NetworkVariable</span></code>;</li>
+          <li>наносить урон другому игроку только через сервер.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Ожидаемый результат</h2>
+        <p>После выполнения практики:</p>
+        <ul>
+          <li>в проекте есть стартовое меню с кнопками <code><span class="accent-warm">Host</span></code> и <code><span class="accent-warm">Client</span></code>;</li>
+          <li>два экземпляра игры успешно соединяются;</li>
+          <li>у каждого игрока отображаются <code><span class="accent">Nickname</span></code> и <code><span class="accent">HP</span></code>;</li>
+          <li>один игрок может нанести урон другому;</li>
+          <li>после атаки здоровье цели одинаково меняется у всех участников сессии.</li>
+        </ul>
+      </article>
+
+
+      <article class="content-card">
+        <h2>Подготовка сцены</h2>
+        <ol>
+          <li>Создайте отдельную сцену для практики, например <code>MainScene</code>.</li>
+          <li>Установите пакеты <code>Netcode for GameObjects</code> и <code>Unity Transport</code>.</li>
+          <li>Добавьте на сцену объект <code><span class="accent">NetworkManager</span></code>.</li>
+          <li>Настройте транспорт внутри <code><span class="accent">NetworkManager</span></code>.</li>
+          <li>Создайте Canvas для стартового меню.</li>
+          <li>Подготовьте сетевой префаб игрока и добавьте на него <code><span class="accent">NetworkObject</span></code>.</li>
+          <li>Назначьте этот префаб в поле <code>Player Prefab</code> у <code><span class="accent">NetworkManager</span></code>.</li>
+        </ol>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>До начала основной логики в сцене уже должны существовать: <code><span class="accent">NetworkManager</span></code>, UI-меню и сетевой префаб игрока.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 1. Подключение Host/Client</h2>
+        <p>На этом этапе нужно получить первый стабильный коннект между двумя окнами игры.</p>
+        <ul>
+          <li>Сделайте кнопки <code><span class="accent-warm">Host</span></code> и <code><span class="accent-warm">Client</span></code>.</li>
+          <li>Создайте отдельный скрипт запуска сетевой сессии, например <code>ConnectionUI</code>.</li>
+          <li>Подключите кнопки к соответствующему запуску режима хоста и клиента.</li>
+          <li>Запустите два окна игры и проверьте, что клиент подключается к хосту без ошибок.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: каркас скрипта подключения</summary>
+          <p>Этот скрипт можно повесить на объект Canvas. Он показывает минимальную структуру для запуска сессии и хранения ника, который потом понадобится сетевому игроку.</p>
+          <pre><code class="language-csharp">using TMPro;
+using Unity.Netcode;
+using UnityEngine;
+
+public class ConnectionUI : MonoBehaviour
+{
+    [SerializeField] private TMP_InputField _nicknameInput;
+
+    // Сохраняем ник локально до появления сетевого объекта игрока.
+    public static string PlayerNickname { get; private set; } = "Player";
+
+    public void StartAsHost()
+    {
+        SaveNickname();
+        // Хост одновременно является сервером и клиентом.
+        NetworkManager.Singleton.StartHost();
+    }
+
+    public void StartAsClient()
+    {
+        SaveNickname();
+        // Клиент только подключается к уже запущенному хосту/серверу.
+        NetworkManager.Singleton.StartClient();
+    }
+
+    private void SaveNickname()
+    {
+        // Нормализуем ввод, чтобы сервер не получил пустую строку.
+        string rawValue = _nicknameInput != null ? _nicknameInput.text : string.Empty;
+        PlayerNickname = string.IsNullOrWhiteSpace(rawValue) ? "Player" : rawValue.Trim();
+    }
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>После запуска одного окна как <code><span class="accent-warm">Host</span></code> и второго как <code><span class="accent-warm">Client</span></code> на сцене должны появляться оба игрока.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 2. Сетевые статы игрока</h2>
+        <p>Теперь игрок должен получить сетевой профиль, который синхронизируется у всех клиентов.</p>
+        <ul>
+          <li>Добавьте в сетевой скрипт игрока переменную для <code><span class="accent">Nickname</span></code>.</li>
+          <li>Добавьте переменную для <code><span class="accent">HP</span></code> со стартовым значением, например <code>100</code>.</li>
+          <li>Настройте права так, чтобы изменять здоровье мог только сервер.</li>
+          <li>После подключения игрок должен передать серверу имя из UI.</li>
+          <li>Если имя не введено, сервер должен назначить корректное имя по умолчанию.</li>
+        </ul>
+
+        <h3>Важно</h3>
+        <p>Ник и здоровье должны храниться именно как сетевое состояние. Клиент не должен поддерживать свою отдельную “истину” для этих данных.</p>
+
+        <details class="hint-card">
+          <summary>Подсказка: каркас сетевых переменных игрока</summary>
+          <p>Ниже дан безопасный стартовый шаблон. Здесь уже заданы правильные права на чтение и запись, но инициализацию и дальнейшую логику студент должен встроить сам.</p>
+          <pre><code class="language-csharp">using Unity.Collections;
+using Unity.Netcode;
+using UnityEngine;
+
+public class PlayerNetwork : NetworkBehaviour
+{
+    // Ник должен быть виден всем клиентам, но менять его может только сервер.
+    public NetworkVariable&lt;FixedString32Bytes&gt; Nickname = new(
+        default,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    // HP тоже читает каждый клиент, но изменяется только на сервере.
+    public NetworkVariable&lt;int&gt; HP = new(
+        100,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsOwner)
+        {
+            // Только владелец отправляет на сервер свой локально введенный ник.
+            SubmitNicknameServerRpc(ConnectionUI.PlayerNickname);
+        }
+    }
+
+    [ServerRpc(RequireOwnership = false)]
+    private void SubmitNicknameServerRpc(string nickname)
+    {
+        // Сервер нормализует ник и записывает итоговое значение в NetworkVariable.
+        string safeValue = string.IsNullOrWhiteSpace(nickname) ? $"Player_{OwnerClientId}" : nickname.Trim();
+        Nickname.Value = safeValue;
+    }
+}</code></pre>
+        </details>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 3. Отображение ника и здоровья</h2>
+        <p>Сделайте привязку UI к сетевому состоянию игрока.</p>
+        <ul>
+          <li>Выведите <code><span class="accent">Nickname</span></code> над головой игрока или рядом с ним.</li>
+          <li>Выведите текущее значение <code><span class="accent">HP</span></code>.</li>
+          <li>Обновляйте UI по изменению сетевых значений, а не через постоянный опрос в <code>Update()</code>.</li>
+          <li>Подписку и отписку на изменение данных размещайте в корректных сетевых методах жизненного цикла.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: обновление UI через OnValueChanged</summary>
+          <p>Здесь главное не сам текст, а принцип: подписка в <code>OnNetworkSpawn</code>, отписка в <code>OnNetworkDespawn</code>, первичное обновление UI вручную сразу после подписки.</p>
+          <pre><code class="language-csharp">using TMPro;
+using Unity.Netcode;
+using UnityEngine;
+
+public class PlayerView : NetworkBehaviour
+{
+    [SerializeField] private PlayerNetwork _playerNetwork;
+    [SerializeField] private TMP_Text _nicknameText;
+    [SerializeField] private TMP_Text _hpText;
+
+    public override void OnNetworkSpawn()
+    {
+        // Подписываемся на изменения только после сетевого спавна объекта.
+        _playerNetwork.Nickname.OnValueChanged += OnNicknameChanged;
+        _playerNetwork.HP.OnValueChanged += OnHpChanged;
+
+        // Сразу рисуем текущее состояние, чтобы UI не ждал первого сетевого события.
+        OnNicknameChanged(default, _playerNetwork.Nickname.Value);
+        OnHpChanged(0, _playerNetwork.HP.Value);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        // Отписка обязательна, чтобы не оставлять "висячие" обработчики.
+        _playerNetwork.Nickname.OnValueChanged -= OnNicknameChanged;
+        _playerNetwork.HP.OnValueChanged -= OnHpChanged;
+    }
+
+    private void OnNicknameChanged(FixedString32Bytes oldValue, FixedString32Bytes newValue)
+    {
+        _nicknameText.text = newValue.ToString();
+    }
+
+    private void OnHpChanged(int oldValue, int newValue)
+    {
+        _hpText.text = $"HP: {newValue}";
+    }
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Если сервер меняет <code><span class="accent">HP</span></code> или ник игрока, оба окна должны увидеть новое значение без ручной синхронизации каждый кадр.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 4. Нанесение урона другому игроку</h2>
+        <p>Реализуйте простую боевую механику, где один игрок может уменьшить здоровье другого.</p>
+        <ul>
+          <li>Добавьте кнопку или клавишу атаки.</li>
+          <li>При атаке локальный игрок должен отправлять запрос на сервер.</li>
+          <li>Сервер должен определить цель и применить к ней урон.</li>
+          <li>После изменения <code><span class="accent">HP</span></code> новое значение должно автоматически прийти всем клиентам через <code><span class="accent">NetworkVariable</span></code>.</li>
+          <li>Здоровье не должно уходить ниже <code>0</code>.</li>
+          <li>Игрок не должен иметь возможность атаковать самого себя.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: серверный урон через ServerRpc</summary>
+          <p>Этот шаблон показывает только правильное направление потока данных: клиент вызывает RPC, сервер валидирует цель и меняет <code>HP</code>. Логику поиска цели студент может реализовать отдельно.</p>
+          <pre><code class="language-csharp">using Unity.Netcode;
+using UnityEngine;
+
+public class PlayerCombat : NetworkBehaviour
+{
+    [SerializeField] private PlayerNetwork _playerNetwork;
+    [SerializeField] private int _damage = 10;
+
+    public void TryAttack(PlayerNetwork target)
+    {
+        // Атаку инициирует только локальный владелец объекта.
+        if (!IsOwner || target == null)
+            return;
+
+        DealDamageServerRpc(target.NetworkObjectId, _damage);
+    }
+
+    [ServerRpc]
+    private void DealDamageServerRpc(ulong targetObjectId, int damage)
+    {
+        // Сервер проверяет, существует ли цель среди заспавненных сетевых объектов.
+        if (!NetworkManager.SpawnManager.SpawnedObjects.TryGetValue(targetObjectId, out NetworkObject targetObject))
+            return;
+
+        PlayerNetwork targetPlayer = targetObject.GetComponent&lt;PlayerNetwork&gt;();
+        // Запрещаем урон самому себе и удары по некорректной цели.
+        if (targetPlayer == null || targetPlayer == _playerNetwork)
+            return;
+
+        // Итоговое значение HP ограничиваем снизу нулем.
+        int nextHp = Mathf.Max(0, targetPlayer.HP.Value - damage);
+        targetPlayer.HP.Value = nextHp;
+    }
+}</code></pre>
+        </details>
+      </article>
+
+      <article class="content-card">
+        <h2>Что нужно реализовать самостоятельно</h2>
+        <ul>
+          <li>связь поля ввода ника с сетевым объектом игрока после подключения;</li>
+          <li>передачу ника на сервер и запись этого значения в сетевую переменную;</li>
+          <li>подписку на обновление <code>NetworkVariable</code> и обновление UI;</li>
+          <li>серверный метод применения урона;</li>
+          <li>защиту от удара по самому себе;</li>
+          <li>ограничение здоровья снизу до <code>0</code>.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Требования к сдаче</h2>
+        <ul>
+          <li>Продемонстрировать запуск одного окна как <code><span class="accent-warm">Host</span></code> и второго как <code><span class="accent-warm">Client</span></code>.</li>
+          <li>Показать, что оба игрока появляются на сцене.</li>
+          <li>Показать отображение <code><span class="accent">Nickname</span></code> и <code><span class="accent">HP</span></code> у обоих игроков.</li>
+          <li>Показать нанесение урона другому игроку.</li>
+          <li>Показать, что значение здоровья одинаково на обоих клиентах после атаки.</li>
+          <li>Предоставить видео работы приложения, где видно запуск сцены, подключение и нанесение урона.</li>
+          <li>Предоставить ссылку на Git-репозиторий проекта.</li>
+        </ul>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Course Hub - Практика 1</p>
+    </div>
+  </footer>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+  <script defer src="../assets/js/site.js"></script>
+</body>
+</html>
+

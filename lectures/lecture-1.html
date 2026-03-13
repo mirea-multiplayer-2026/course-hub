@@ -19,6 +19,7 @@
         <a href="../index.html">Главная</a>
         <a href="./lecture-1.html" aria-current="page">Лекция 1</a>
         <a href="./lecture-2.html">Лекция 2</a>
+        <a href="./practice-1.html">Практика 1</a>
       </nav>
     </div>
   </header>
@@ -385,6 +386,15 @@ if (IsServer) score.Value += points;</code></pre>
         <h3>Пояснение</h3>
         <p><code>NetworkVariable</code> удобен для state-данных, но его тоже нужно использовать экономно: без лишних присваиваний и с понятной частотой обновления.</p>
         <p>Типы: <code>NetworkVariable&lt;int&gt;</code>, <code>&lt;float&gt;</code>, <code>&lt;bool&gt;</code>, <code>&lt;Vector3&gt;</code>, <code>NetworkList&lt;T&gt;</code>, <code>NetworkDictionary&lt;K,V&gt;</code>.</p>
+      </article>
+
+      <article class="content-card practice-banner">
+        <h2>Практическая связка с лекцией 2</h2>
+        <p>После лекции 1 студент уже понимает, как работают <strong>Host</strong>, <strong>Client</strong>, <strong>Server</strong>, почему нужен <code>NetworkManager</code> и зачем критичные действия переводить в <strong>server-authoritative</strong> модель.</p>
+        <p>Следующий шаг на практике: поднять первое подключение двух игроков, синхронизировать <code>Nickname</code> и <code>HP</code>, а затем добавить нанесение урона другому игроку через серверную логику.</p>
+        <div class="demo-links">
+          <a class="btn btn-secondary" href="./practice-1.html">Открыть методичку практики</a>
+        </div>
       </article>
 
       <article class="content-card">
