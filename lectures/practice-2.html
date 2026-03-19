@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Практика 2 | Course Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../index.html" class="brand">Course Hub</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
+      <nav id="site-nav" class="site-nav">
+        <a href="../index.html">Главная</a>
+        <a href="./lecture-1.html">Лекция 1</a>
+        <a href="./lecture-2.html">Лекция 2</a>
+        <a href="./practice-1.html">Практика 1</a>
+        <a href="./practice-2.html" aria-current="page">Практика 2</a>
+        <a href="./practice-3.html">Практика 3</a>
+        <a href="./practice-4.html">Практика 4</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section lecture-page">
+    <a class="back-link" href="../index.html">Назад на главную</a>
+    <h1>Практика 2. Движение, валидация и жизненный цикл объектов</h1>
+
+    <div class="content-stack">
+      <article class="content-card student-note">
+        <p><strong>Уважаемый студент!</strong> Эта практика опирается на результат Практики 1. Убедитесь, что у вас уже работает подключение Host/Client и синхронизация HP через <code><span class="accent">NetworkVariable</span></code>. Если базовая логика сломана — сначала восстановите её, иначе этапы 3–5 работать не будут.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Цель</h2>
+        <p>Выйти за рамки простой синхронизации данных и построить полноценную игровую логику на сервере:</p>
+        <ul>
+          <li>синхронизировать движение персонажа через <code><span class="accent">NetworkTransform</span></code>;</li>
+          <li>привязать камеру только к владельцу объекта;</li>
+          <li>реализовать стрельбу снарядами с <strong>серверной валидацией</strong>;</li>
+          <li>добавить цикл смерти и респавна, которым управляет только сервер;</li>
+          <li>разместить на карте подбираемые предметы — самостоятельные сетевые объекты со своим жизненным циклом.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Ожидаемый результат</h2>
+        <p>После выполнения практики:</p>
+        <ul>
+          <li>персонаж перемещается по сцене через WASD, удалённые игроки видят плавное движение;</li>
+          <li>камера следит только за своим игроком и не прыгает на чужих при спавне;</li>
+          <li>стрельба работает только при выполнении серверных условий: игрок жив, патроны есть, кулдаун прошёл;</li>
+          <li>при смерти игрок «замирает», через 3 секунды автоматически возрождается с полным HP;</li>
+          <li>на карте есть аптечки — сетевые объекты, которые появляются, подбираются и появляются снова.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Подготовка сцены</h2>
+        <ol>
+          <li>Откройте проект из Практики 1 с работающим подключением и <code><span class="accent">NetworkVariable</span></code> для HP.</li>
+          <li>Добавьте на префаб игрока компонент <code><span class="accent">NetworkTransform</span></code> и <code>CharacterController</code>.</li>
+          <li>Создайте префаб снаряда: <code><span class="accent">NetworkObject</span></code>, <code>Rigidbody</code> (Is Kinematic — выключено), <code>SphereCollider</code> (Is Trigger — включено).</li>
+          <li>Создайте префаб аптечки: <code><span class="accent">NetworkObject</span></code>, простая геометрия, <code>SphereCollider</code> (Is Trigger — включено).</li>
+          <li>Зарегистрируйте оба префаба в <code>Network Prefabs</code> у <code><span class="accent">NetworkManager</span></code>.</li>
+          <li>Добавьте на сцену пол (Plane) и несколько объектов для ориентации. Отметьте 2–3 точки респавна пустыми GameObject'ами.</li>
+        </ol>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Префаб игрока содержит <code><span class="accent">NetworkObject</span></code> и <code><span class="accent">NetworkTransform</span></code>. Оба дополнительных префаба (снаряд и аптечка) зарегистрированы в <code><span class="accent">NetworkManager</span></code>.</p>
+        </div>
+      </article>
+
+      <!-- ЭТАП 1 -->
+      <article class="content-card">
+        <h2>Этап 1. NetworkTransform и движение</h2>
+        <p>Игрок управляет только своим персонажем. Позиция синхронизируется для всех клиентов автоматически.</p>
+        <ul>
+          <li>Создайте скрипт движения: ввод WASD читается только при <code><span class="accent">IsOwner</span></code>.</li>
+          <li>Перемещайте персонажа через <code>CharacterController.Move()</code>.</li>
+          <li><code><span class="accent">NetworkTransform</span></code> синхронизирует позицию на остальных клиентах с интерполяцией.</li>
+          <li>Проверьте, что только ваш персонаж реагирует на ввод, а удалённый двигается плавно.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: каркас скрипта движения</summary>
+          <p>Движение обрабатывается только у владельца. <code>CharacterController</code> сам рассчитывает коллизии, а <code>NetworkTransform</code> транслирует итоговую позицию в сеть.</p>
+          <pre><code class="language-csharp">using Unity.Netcode;
+using UnityEngine;
+
+[RequireComponent(typeof(CharacterController))]
+public class PlayerMovement : NetworkBehaviour
+{
+    [SerializeField] private float _speed = 5f;
+    [SerializeField] private float _gravity = -9.81f;
+
+    private CharacterController _cc;
+    private float _verticalVelocity;
+
+    private void Awake() => _cc = GetComponent&lt;CharacterController&gt;();
+
+    private void Update()
+    {
+        if (!IsOwner) return;
+
+        float h = Input.GetAxis("Horizontal");
+        float v = Input.GetAxis("Vertical");
+
+        Vector3 move = new Vector3(h, 0f, v).normalized * _speed;
+
+        _verticalVelocity += _gravity * Time.deltaTime;
+        move.y = _verticalVelocity;
+
+        _cc.Move(move * Time.deltaTime);
+
+        if (_cc.isGrounded) _verticalVelocity = 0f;
+    }
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>В двух окнах каждый управляет только своим персонажем. Удалённый игрок движется плавно, без рывков и телепортаций.</p>
+        </div>
+      </article>
+
+      <!-- ЭТАП 2 -->
+      <article class="content-card">
+        <h2>Этап 2. Камера владельца</h2>
+        <p>Каждый клиент видит сцену от своего персонажа. Чужие игроки не должны перехватывать камеру.</p>
+        <ul>
+          <li>В <code><span class="accent">OnNetworkSpawn</span></code> проверьте <code><span class="accent">IsOwner</span></code> — только владелец настраивает камеру.</li>
+          <li>Используйте <code>LateUpdate</code> для следования камеры: она обновляется после физики и не дёргается.</li>
+          <li>У чужих игроков полностью отключите скрипт камеры через <code>enabled = false</code>.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: камера только для IsOwner</summary>
+          <p>Устанавливать <code>enabled = false</code> в <code>OnNetworkSpawn</code> безопаснее, чем проверять <code>IsOwner</code> каждый кадр в <code>LateUpdate</code>: скрипт вообще не вызывается у чужих.</p>
+          <pre><code class="language-csharp">using Unity.Netcode;
+using UnityEngine;
+
+public class PlayerCamera : NetworkBehaviour
+{
+    [SerializeField] private Vector3 _offset = new(0f, 8f, -6f);
+
+    private Camera _cam;
+
+    public override void OnNetworkSpawn()
+    {
+        if (!IsOwner)
+        {
+            enabled = false;
+            return;
+        }
+        _cam = Camera.main;
+    }
+
+    private void LateUpdate()
+    {
+        if (_cam == null) return;
+        _cam.transform.position = transform.position + _offset;
+        _cam.transform.LookAt(transform.position);
+    }
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Камера в каждом окне следит за своим персонажем. При подключении второго игрока камера первого не перескакивает.</p>
+        </div>
+      </article>
+
+      <!-- ЭТАП 3 -->
+      <article class="content-card">
+        <h2>Этап 3. Стрельба с серверной валидацией</h2>
+        <p>Клиент не решает, выстрел произошёл или нет — это решает только сервер. Без валидации любой клиент может стрелять бесконечно, мгновенно и даже после смерти.</p>
+        <ul>
+          <li>При нажатии клавиши владелец вызывает <code><span class="accent">ServerRpc</span></code> с направлением выстрела.</li>
+          <li>Сервер проверяет <strong>три условия</strong> прежде чем спавнить снаряд: игрок жив, патроны не кончились, кулдаун прошёл.</li>
+          <li>Если хоть одно условие не выполнено — <code>return</code>, снаряд не создаётся.</li>
+          <li>На снаряде реализуйте <code>OnTriggerEnter</code>: только сервер обрабатывает попадание и наносит урон.</li>
+          <li>Стрелок не должен получать урон от собственного снаряда.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: PlayerShooting с валидацией</summary>
+          <p>Обратите внимание на <code>ServerRpcParams</code> — через него получаем <code>SenderClientId</code> для <code>SpawnWithOwnership</code>. Это позволяет снаряду знать своего владельца при попадании.</p>
+          <pre><code class="language-csharp">using Unity.Netcode;
+using UnityEngine;
+
+public class PlayerShooting : NetworkBehaviour
+{
+    [SerializeField] private GameObject _projectilePrefab;
+    [SerializeField] private Transform _firePoint;
+    [SerializeField] private float _cooldown = 0.4f;
+    [SerializeField] private int _maxAmmo = 10;
+
+    private float _lastShotTime;
+    private int _currentAmmo;
+
+    // IsAlive и связь с PlayerNetwork настраивается студентом
+    private PlayerNetwork _playerNetwork;
+
+    public override void OnNetworkSpawn()
+    {
+        _currentAmmo = _maxAmmo;
+        _playerNetwork = GetComponent&lt;PlayerNetwork&gt;();
+    }
+
+    private void Update()
+    {
+        if (!IsOwner) return;
+        if (Input.GetKeyDown(KeyCode.Space))
+            ShootServerRpc(_firePoint.position, _firePoint.forward);
+    }
+
+    [ServerRpc]
+    private void ShootServerRpc(Vector3 pos, Vector3 dir,
+                                 ServerRpcParams rpc = default)
+    {
+        // 1. Жив ли игрок?
+        if (_playerNetwork.HP.Value &lt;= 0) return;
+
+        // 2. Есть ли патроны?
+        if (_currentAmmo &lt;= 0) return;
+
+        // 3. Прошёл ли кулдаун?
+        if (Time.time &lt; _lastShotTime + _cooldown) return;
+
+        _lastShotTime = Time.time;
+        _currentAmmo--;
+
+        var go = Instantiate(_projectilePrefab, pos + dir * 1.2f,
+                             Quaternion.LookRotation(dir));
+        var no = go.GetComponent&lt;NetworkObject&gt;();
+        no.SpawnWithOwnership(rpc.Receive.SenderClientId);
+    }
+}
+
+// --- Скрипт на снаряде ---
+public class Projectile : NetworkBehaviour
+{
+    [SerializeField] private float _speed = 18f;
+    [SerializeField] private int _damage = 20;
+
+    private void Update()
+    {
+        transform.Translate(Vector3.forward * _speed * Time.deltaTime);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!IsServer) return;
+
+        var target = other.GetComponent&lt;PlayerNetwork&gt;();
+        if (target == null) return;
+
+        // Не наносим урон самому себе
+        if (target.OwnerClientId == OwnerClientId) return;
+
+        int newHp = Mathf.Max(0, target.HP.Value - _damage);
+        target.HP.Value = newHp;
+
+        NetworkObject.Despawn(destroy: true);
+    }
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Попробуйте вызвать выстрел после «смерти» (HP = 0) или быстро зажать клавишу — снаряды не должны спавниться, если условия не выполнены. Снаряд попадает в другого игрока и уменьшает его HP у обоих клиентов.</p>
+        </div>
+      </article>
+
+      <!-- ЭТАП 4 -->
+      <article class="content-card">
+        <h2>Этап 4. Смерть и респавн</h2>
+        <p>Когда HP доходит до нуля, сервер должен перевести игрока в состояние «мёртв», заблокировать управление, а через 3 секунды — возродить его. Это первый пример того, как сервер управляет <strong>состоянием</strong> всех клиентов через одну сетевую переменную.</p>
+        <ul>
+          <li>Добавьте в <code>PlayerNetwork</code> новую переменную <code>NetworkVariable&lt;bool&gt; IsAlive</code>.</li>
+          <li>Подпишитесь на <code>HP.OnValueChanged</code>: когда HP падает до 0 — сервер устанавливает <code>IsAlive.Value = false</code>.</li>
+          <li>В скриптах движения и стрельбы добавьте проверку <code>IsAlive</code> — мёртвый не двигается и не стреляет.</li>
+          <li>На сервере запустите корутину: через 3 секунды переместите игрока в точку респавна, восстановите HP, установите <code>IsAlive.Value = true</code>.</li>
+          <li>Все клиенты реагируют на изменение <code>IsAlive</code> автоматически — например, показывают/скрывают модель.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: серверная логика смерти и возрождения</summary>
+          <p>Всё состояние хранится в <code>NetworkVariable</code> — клиентам не нужно знать о корутине. Они просто реагируют на изменение значения.</p>
+          <pre><code class="language-csharp">using Unity.Netcode;
+using UnityEngine;
+using System.Collections;
+
+public class PlayerNetwork : NetworkBehaviour
+{
+    public NetworkVariable&lt;int&gt; HP = new(
+        100,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    public NetworkVariable&lt;bool&gt; IsAlive = new(
+        true,
+        NetworkVariableReadPermission.Everyone,
+        NetworkVariableWritePermission.Server
+    );
+
+    [SerializeField] private Transform[] _spawnPoints;
+
+    public override void OnNetworkSpawn()
+    {
+        HP.OnValueChanged += OnHpChanged;
+        IsAlive.OnValueChanged += OnIsAliveChanged;
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        HP.OnValueChanged -= OnHpChanged;
+        IsAlive.OnValueChanged -= OnIsAliveChanged;
+    }
+
+    private void OnHpChanged(int prev, int next)
+    {
+        // Только сервер запускает цикл смерти
+        if (!IsServer) return;
+        if (next &lt;= 0 && IsAlive.Value)
+        {
+            IsAlive.Value = false;
+            StartCoroutine(RespawnRoutine());
+        }
+    }
+
+    private IEnumerator RespawnRoutine()
+    {
+        yield return new WaitForSeconds(3f);
+
+        // Выбрать случайную точку респавна
+        int idx = Random.Range(0, _spawnPoints.Length);
+        transform.position = _spawnPoints[idx].position;
+
+        HP.Value = 100;
+        IsAlive.Value = true;
+    }
+
+    private void OnIsAliveChanged(bool prev, bool next)
+    {
+        // Показываем/скрываем модель на всех клиентах
+        // Студент реализует самостоятельно
+    }
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Нанесите урон игроку до нуля HP. Он должен «замереть» (не реагировать на ввод), через 3 секунды появиться в точке респавна с полным HP. Оба клиента видят это одновременно.</p>
+        </div>
+      </article>
+
+      <!-- ЭТАП 5 -->
+      <article class="content-card">
+        <h2>Этап 5. Аптечки на карте</h2>
+        <p>Это самый важный этап с точки зрения новых концептов: аптечки — это самостоятельные сетевые объекты, не привязанные ни к одному игроку. У них собственный жизненный цикл: сервер их спавнит, они существуют на карте, игрок подбирает — сервер делает Despawn, через 10 секунд спавнит снова.</p>
+        <ul>
+          <li>Создайте серверный менеджер <code>PickupManager</code> — он запускается только на сервере и спавнит аптечки в заданных позициях.</li>
+          <li>На скрипте аптечки реализуйте <code>OnTriggerEnter</code>: только сервер обрабатывает подбор.</li>
+          <li>При подборе: восстановите HP игрока, сделайте <code>Despawn</code> аптечки, сообщите менеджеру — тот через 10 секунд заспавнит её снова.</li>
+          <li>Аптечка не должна помогать, если у игрока уже полное HP.</li>
+          <li>Мёртвый игрок не должен подбирать аптечки.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: PickupManager и скрипт аптечки</summary>
+          <p>Менеджер существует вне сетевой иерархии — это обычный MonoBehaviour только на сервере. Аптечка при подборе вызывает событие, менеджер его слушает и планирует повторный спавн.</p>
+          <pre><code class="language-csharp">using Unity.Netcode;
+using UnityEngine;
+using System.Collections;
+
+// PickupManager — обычный MonoBehaviour, работает только на сервере
+public class PickupManager : MonoBehaviour
+{
+    [SerializeField] private GameObject _healthPickupPrefab;
+    [SerializeField] private Transform[] _spawnPoints;
+    [SerializeField] private float _respawnDelay = 10f;
+
+    private void Start()
+    {
+        // Менеджер активен только на сервере/хосте
+        if (!NetworkManager.Singleton.IsServer) return;
+        SpawnAll();
+    }
+
+    private void SpawnAll()
+    {
+        foreach (var point in _spawnPoints)
+            SpawnPickup(point.position);
+    }
+
+    public void OnPickedUp(Vector3 position)
+    {
+        StartCoroutine(RespawnAfterDelay(position));
+    }
+
+    private IEnumerator RespawnAfterDelay(Vector3 position)
+    {
+        yield return new WaitForSeconds(_respawnDelay);
+        SpawnPickup(position);
+    }
+
+    private void SpawnPickup(Vector3 position)
+    {
+        var go = Instantiate(_healthPickupPrefab, position, Quaternion.identity);
+        go.GetComponent&lt;HealthPickup&gt;().Init(this);
+        go.GetComponent&lt;NetworkObject&gt;().Spawn();
+    }
+}
+
+// HealthPickup — сетевой скрипт на префабе аптечки
+public class HealthPickup : NetworkBehaviour
+{
+    [SerializeField] private int _healAmount = 40;
+
+    private PickupManager _manager;
+    private Vector3 _spawnPosition;
+
+    public void Init(PickupManager manager)
+    {
+        _manager = manager;
+        _spawnPosition = transform.position;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!IsServer) return;
+
+        var player = other.GetComponent&lt;PlayerNetwork&gt;();
+        if (player == null) return;
+
+        // Мёртвый не подбирает
+        if (!player.IsAlive.Value) return;
+
+        // Не лечить при полном HP
+        if (player.HP.Value >= 100) return;
+
+        player.HP.Value = Mathf.Min(100, player.HP.Value + _healAmount);
+
+        _manager.OnPickedUp(_spawnPosition);
+        NetworkObject.Despawn(destroy: true);
+    }
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Аптечки появляются на карте при старте сессии. При подходе игрока HP восстанавливается, аптечка исчезает у обоих клиентов. Через 10 секунд она появляется снова. Подбор не работает при полном HP и в состоянии смерти.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Что нужно реализовать самостоятельно</h2>
+        <ul>
+          <li>скрипт движения WASD с проверкой <code><span class="accent">IsAlive</span></code> — мёртвый игрок не двигается;</li>
+          <li>логику показа/скрытия модели игрока при смерти и возрождении;</li>
+          <li>отображение оставшихся патронов в UI (синхронизация через <code><span class="accent">NetworkVariable&lt;int&gt;</span></code> или только локально у владельца);</li>
+          <li>визуальный счётчик или таймер до респавна — только у умершего игрока;</li>
+          <li>защиту от подбора аптечки при полном HP и в состоянии смерти (если не добавили в шаблон);</li>
+          <li>расстановку точек спавна аптечек и игроков на сцене.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Требования к сдаче</h2>
+        <ul>
+          <li>Продемонстрировать движение WASD в двух окнах: каждый управляет только своим персонажем.</li>
+          <li>Показать, что камера не перескакивает на чужого при подключении второго игрока.</li>
+          <li>Показать, что при быстром зажатии кнопки выстрела кулдаун ограничивает частоту — снаряды не спамятся.</li>
+          <li>Показать полный цикл смерти: HP → 0, игрок замирает, через 3 сек появляется в точке респавна с полным HP.</li>
+          <li>Показать работу аптечек: появление на карте, подбор с восстановлением HP, исчезновение, повторный спавн.</li>
+          <li>Предоставить видео работы приложения.</li>
+          <li>Предоставить ссылку на Git-репозиторий проекта.</li>
+        </ul>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Course Hub - Практика 2</p>
+    </div>
+  </footer>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+  <script defer src="../assets/js/site.js"></script>
+</body>
+</html>

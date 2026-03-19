@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Практика 4 | Course Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../index.html" class="brand">Course Hub</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
+      <nav id="site-nav" class="site-nav">
+        <a href="../index.html">Главная</a>
+        <a href="./lecture-1.html">Лекция 1</a>
+        <a href="./lecture-2.html">Лекция 2</a>
+        <a href="./practice-1.html">Практика 1</a>
+        <a href="./practice-2.html">Практика 2</a>
+        <a href="./practice-3.html">Практика 3</a>
+        <a href="./practice-4.html" aria-current="page">Практика 4</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section lecture-page">
+    <a class="back-link" href="../index.html">Назад на главную</a>
+    <h1>Практика 4. Dedicated Server и игровой цикл</h1>
+
+    <div class="content-stack">
+      <article class="content-card student-note">
+        <p><strong>Уважаемый студент!</strong> В этой практике вы выйдете за пределы редактора Unity. Вам понадобится <strong>WSL 2</strong> с установленным Ubuntu. Если WSL ещё не настроен, установите его заранее командой <code>wsl --install</code> в PowerShell от имени администратора.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Цель</h2>
+        <p>Собрать серверный билд под Linux, запустить его в WSL и реализовать полный игровой цикл:</p>
+        <ul>
+          <li>настроить Unity для сборки <code><span class="accent">Dedicated Server</span></code> (Linux);</li>
+          <li>запустить headless-сервер в <code><span class="accent">WSL 2</span></code> (Ubuntu);</li>
+          <li>подключить Windows-клиент к Linux-серверу по локальному IP;</li>
+          <li>реализовать лобби с ожиданием игроков и автоматическим стартом матча;</li>
+          <li>реализовать экран результатов и перезапуск цикла.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Ожидаемый результат</h2>
+        <p>После выполнения практики:</p>
+        <ul>
+          <li>headless-сервер запущен в консоли Linux (чёрное окно WSL);</li>
+          <li>Windows-клиенты подключаются к серверу по IP;</li>
+          <li>клиенты ожидают в лобби, пока не наберётся нужное количество игроков;</li>
+          <li>после старта матча идёт игровой процесс с подсчётом очков;</li>
+          <li>по окончании матча — экран результатов, затем возврат в лобби.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Подготовка</h2>
+        <ol>
+          <li>Установите <strong>WSL 2</strong> и дистрибутив Ubuntu, если ещё не установлены.</li>
+          <li>В Unity Hub добавьте модуль <code>Linux Dedicated Server Build Support</code> для вашей версии Unity.</li>
+          <li>Убедитесь, что в проекте есть рабочий FishNet-проект из Практики 3.</li>
+          <li>Проверьте, что Windows Firewall не блокирует UDP-порт, используемый транспортом (по умолчанию <code>7770</code>).</li>
+        </ol>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Команда <code>wsl --list --verbose</code> показывает Ubuntu со статусом Running. В Unity установлен модуль Linux Server Build Support.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 1. Headless-билд под Linux</h2>
+        <p>Соберите серверную версию игры, которая работает без графики.</p>
+        <ul>
+          <li>В Unity выберите <code>File → Build Settings</code>.</li>
+          <li>Переключите платформу на <code><span class="accent">Dedicated Server</span></code>, целевая ОС — <code>Linux</code>.</li>
+          <li>Добавьте в билд нужные сцены (минимум: меню и игровая сцена).</li>
+          <li>Добавьте логику автоматического запуска сервера при headless-режиме (без UI).</li>
+          <li>Нажмите <code>Build</code> и сохраните билд в удобную папку.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: автозапуск сервера в headless-режиме</summary>
+          <p>При запуске Dedicated Server нет экрана и UI. Сервер должен стартовать автоматически.</p>
+          <pre><code class="language-csharp">using FishNet;
+using UnityEngine;
+
+public class ServerAutoStart : MonoBehaviour
+{
+    private void Start()
+    {
+        // Application.isBatchMode == true, когда Unity запущен без графики.
+        if (Application.isBatchMode)
+        {
+            Debug.Log("[Server] Headless mode detected. Starting server...");
+            InstanceFinder.ServerManager.StartConnection();
+        }
+    }
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>В папке билда есть исполняемый файл для Linux. Файл имеет расширение <code>.x86_64</code> или без расширения.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 2. Запуск в WSL и подключение клиента</h2>
+        <p>Запустите собранный сервер в WSL и подключите к нему клиент из Windows.</p>
+        <ul>
+          <li>Скопируйте папку билда в файловую систему WSL или запустите прямо из Windows-пути.</li>
+          <li>В терминале WSL дайте файлу права на выполнение: <code>chmod +x ./GameServer.x86_64</code>.</li>
+          <li>Запустите сервер: <code>./GameServer.x86_64 -batchmode -nographics</code>.</li>
+          <li>Узнайте IP-адрес WSL: <code>hostname -I</code>.</li>
+          <li>В клиенте (Windows Editor или билд) укажите этот IP и подключитесь.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: команды для запуска в WSL</summary>
+          <pre><code class="language-bash"># Перейти в папку с билдом
+cd /mnt/e/Builds/GameServer
+
+# Дать права на запуск
+chmod +x ./GameServer.x86_64
+
+# Запустить сервер
+./GameServer.x86_64 -batchmode -nographics
+
+# В другом терминале WSL — узнать IP
+hostname -I
+# Пример вывода: 172.25.160.1</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>В консоли WSL видны логи сервера. Windows-клиент подключается по IP, игрок спавнится на сцене.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 3. Лобби и старт матча</h2>
+        <p>Сервер должен ждать нужное количество игроков перед началом матча.</p>
+        <ul>
+          <li>Создайте серверный скрипт <code>GameManager</code>, который отслеживает количество подключённых игроков.</li>
+          <li>Задайте лимит (например, <code>2</code> игрока) для старта матча.</li>
+          <li>Пока лимит не достигнут — клиенты видят экран ожидания с количеством подключённых.</li>
+          <li>При достижении лимита сервер оповещает клиентов о начале матча.</li>
+          <li>На клиентах скрывается экран ожидания и начинается игровой процесс.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: каркас GameManager</summary>
+          <p>Сервер управляет состоянием матча. Клиенты получают обновления через <code>[SyncVar]</code> или <code>[ObserversRpc]</code>.</p>
+          <pre><code class="language-csharp">using FishNet;
+using FishNet.Connection;
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
+using UnityEngine;
+
+public class GameManager : NetworkBehaviour
+{
+    [SerializeField] private int _requiredPlayers = 2;
+
+    [SyncVar(OnChange = nameof(OnGameStateChanged))]
+    public GameState CurrentState = GameState.WaitingForPlayers;
+
+    [SyncVar]
+    public int ConnectedPlayers = 0;
+
+    public enum GameState
+    {
+        WaitingForPlayers,
+        InProgress,
+        ShowingResults
+    }
+
+    public override void OnStartServer()
+    {
+        base.ServerManager.OnRemoteConnectionState += OnPlayerConnectionChanged;
+    }
+
+    private void OnPlayerConnectionChanged(
+        NetworkConnection conn,
+        FishNet.Transporting.RemoteConnectionStateArgs args)
+    {
+        if (!base.IsServerInitialized) return;
+
+        // Пересчитываем игроков.
+        ConnectedPlayers = base.ServerManager.Clients.Count;
+
+        if (CurrentState == GameState.WaitingForPlayers
+            && ConnectedPlayers >= _requiredPlayers)
+        {
+            StartMatch();
+        }
+    }
+
+    private void StartMatch()
+    {
+        CurrentState = GameState.InProgress;
+        Debug.Log("[Server] Match started!");
+    }
+
+    private void OnGameStateChanged(
+        GameState oldValue, GameState newValue, bool asServer)
+    {
+        // Клиенты реагируют на смену состояния — переключают UI.
+        Debug.Log($"Game state changed: {oldValue} -> {newValue}");
+    }
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>При подключении первого клиента он видит «Ожидание игроков: 1/2». При подключении второго — матч стартует автоматически.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 4. Игровой цикл и результаты</h2>
+        <p>Добавьте завершение матча, подсчёт результатов и перезапуск цикла.</p>
+        <ul>
+          <li>Добавьте условие завершения матча: таймер (например, 60 секунд) или достижение счёта (первый до 3 фрагов).</li>
+          <li>По завершении сервер переводит состояние в <code><span class="accent">ShowingResults</span></code>.</li>
+          <li>Клиенты показывают экран результатов с итоговым счётом каждого игрока.</li>
+          <li>Через несколько секунд (или по нажатию кнопки) сервер сбрасывает счёт, возвращает состояние в <code><span class="accent">WaitingForPlayers</span></code> и перезапускает цикл.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: завершение матча и перезапуск</summary>
+          <pre><code class="language-csharp">// Добавить в GameManager:
+
+[SyncVar]
+public float MatchTimer = 60f;
+
+private void Update()
+{
+    if (!base.IsServerInitialized) return;
+    if (CurrentState != GameState.InProgress) return;
+
+    MatchTimer -= Time.deltaTime;
+
+    if (MatchTimer <= 0f)
+    {
+        EndMatch();
+    }
+}
+
+private void EndMatch()
+{
+    CurrentState = GameState.ShowingResults;
+    Debug.Log("[Server] Match ended! Showing results...");
+
+    // Через 5 секунд возвращаемся в лобби.
+    Invoke(nameof(ResetToLobby), 5f);
+}
+
+private void ResetToLobby()
+{
+    // Сбросить очки всех игроков.
+    foreach (var conn in base.ServerManager.Clients.Values)
+    {
+        foreach (var nob in conn.Objects)
+        {
+            PlayerNetwork pn = nob.GetComponent&lt;PlayerNetwork&gt;();
+            if (pn != null)
+            {
+                pn.HP = 100;
+                pn.Score = 0;
+            }
+        }
+    }
+
+    MatchTimer = 60f;
+    CurrentState = GameState.WaitingForPlayers;
+    Debug.Log("[Server] Lobby reset. Waiting for players...");
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Полный цикл: ожидание → матч (60 сек) → экран результатов → возврат в лобби. Всё повторяется без перезапуска сервера.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Что нужно реализовать самостоятельно</h2>
+        <ul>
+          <li>скрипт автоматического запуска сервера в headless-режиме;</li>
+          <li>сборку Dedicated Server билда под Linux;</li>
+          <li>запуск сервера в WSL и подключение Windows-клиента;</li>
+          <li>серверную логику ожидания игроков и автостарта матча;</li>
+          <li>UI лобби с отображением количества подключённых игроков;</li>
+          <li>условие завершения матча (таймер или счёт);</li>
+          <li>экран результатов с итоговым счётом;</li>
+          <li>перезапуск цикла без перезапуска серверного процесса.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Требования к сдаче</h2>
+        <ul>
+          <li>Продемонстрировать запуск headless-сервера в консоли WSL (Ubuntu).</li>
+          <li>Показать подключение Windows-клиента к Linux-серверу по IP.</li>
+          <li>Показать экран ожидания в лобби с количеством подключённых игроков.</li>
+          <li>Показать автоматический старт матча при достижении лимита игроков.</li>
+          <li>Показать игровой процесс с подсчётом очков/таймером.</li>
+          <li>Показать экран результатов по окончании матча.</li>
+          <li>Показать автоматический возврат в лобби для нового раунда.</li>
+          <li>Предоставить видео полного цикла: запуск сервера → лобби → матч → результаты → лобби.</li>
+          <li>Предоставить ссылку на Git-репозиторий проекта.</li>
+        </ul>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Course Hub - Практика 4</p>
+    </div>
+  </footer>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+  <script defer src="../assets/js/site.js"></script>
+</body>
+</html>

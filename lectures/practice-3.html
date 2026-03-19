@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Практика 3 | Course Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../index.html" class="brand">Course Hub</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
+      <nav id="site-nav" class="site-nav">
+        <a href="../index.html">Главная</a>
+        <a href="./lecture-1.html">Лекция 1</a>
+        <a href="./lecture-2.html">Лекция 2</a>
+        <a href="./practice-1.html">Практика 1</a>
+        <a href="./practice-2.html">Практика 2</a>
+        <a href="./practice-3.html" aria-current="page">Практика 3</a>
+        <a href="./practice-4.html">Практика 4</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section lecture-page">
+    <a class="back-link" href="../index.html">Назад на главную</a>
+    <h1>Практика 3. Миграция на FishNet и предсказание движения</h1>
+
+    <div class="content-stack">
+      <article class="content-card student-note">
+        <p><strong>Уважаемый студент!</strong> В этой практике вы перенесёте проект с Unity NGO на FishNet. Код придётся переписать — это нормально. Сравнивайте API двух фреймворков и обращайтесь к <a href="https://fish-networking.gitbook.io/docs" target="_blank" rel="noopener">документации FishNet</a>.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>Цель</h2>
+        <p>Перенести проект с NGO на FishNet и настроить клиентское предсказание:</p>
+        <ul>
+          <li>импортировать FishNet и настроить <code><span class="accent">NetworkManager</span></code>;</li>
+          <li>переписать скрипты синхронизации с NGO API на FishNet API;</li>
+          <li>настроить клиентское предсказание (CSP) для плавного движения;</li>
+          <li>протестировать игру с искусственной задержкой 200–500 мс.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Ожидаемый результат</h2>
+        <p>После выполнения практики:</p>
+        <ul>
+          <li>проект полностью работает на FishNet (NGO удалён);</li>
+          <li>движение, стрельба и синхронизация HP функционируют как раньше;</li>
+          <li>при пинге 200 мс движение остаётся плавным благодаря предсказанию;</li>
+          <li>студент понимает ключевые различия API между NGO и FishNet.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Подготовка проекта</h2>
+        <ol>
+          <li>Сделайте резервную копию проекта (новая ветка в Git или копия папки).</li>
+          <li>Удалите пакеты <code>Netcode for GameObjects</code> и <code>Unity Transport</code> через Package Manager.</li>
+          <li>Импортируйте <a href="https://assetstore.unity.com/packages/tools/network/fish-net-networking-evolved-207815" target="_blank" rel="noopener">FishNet</a> из Asset Store или через Git URL.</li>
+          <li>Добавьте на сцену объект с компонентом <code><span class="accent">NetworkManager</span></code> от FishNet и настройте транспорт (<code>Tugboat</code>).</li>
+          <li>Зарегистрируйте префабы игрока и снаряда в <code>Default Prefab Objects</code> FishNet.</li>
+        </ol>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Проект компилируется без ошибок после удаления NGO и импорта FishNet. На сцене есть <code><span class="accent">NetworkManager</span></code> с настроенным транспортом.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 1. Замена базовых скриптов на FishNet API</h2>
+        <p>Перепишите сетевые скрипты, заменяя атрибуты и базовые классы NGO на аналоги FishNet.</p>
+        <ul>
+          <li>Замените <code>NetworkBehaviour</code> из NGO на <code><span class="accent">NetworkBehaviour</span></code> из FishNet.</li>
+          <li>Замените <code>NetworkVariable&lt;T&gt;</code> на <code><span class="accent">[SyncVar]</span></code> с хуком <code>OnChange</code>.</li>
+          <li>Замените <code>[ServerRpc]</code> на <code><span class="accent">[ServerRpc]</span></code> FishNet (атрибут тот же, но пространство имён другое).</li>
+          <li>Замените <code>[ClientRpc]</code> на <code><span class="accent">[ObserversRpc]</span></code>.</li>
+          <li>Замените проверку <code>IsOwner</code> на <code><span class="accent">base.IsOwner</span></code>.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: таблица соответствий NGO → FishNet</summary>
+          <pre><code class="language-csharp">// ===== NGO =====                        // ===== FishNet =====
+using Unity.Netcode;                       using FishNet.Object;
+                                           using FishNet.Object.Synchronizing;
+
+NetworkBehaviour                           NetworkBehaviour
+
+NetworkVariable&lt;int&gt; HP = new(100);        [SyncVar] public int HP = 100;
+
+[ServerRpc]                                [ServerRpc]
+void DoSomethingServerRpc() {}             void DoSomething(/* ... */) {}
+
+[ClientRpc]                                [ObserversRpc]
+void NotifyClientRpc() {}                  void NotifyObservers(/* ... */) {}
+
+IsOwner                                    base.IsOwner
+IsServer                                   base.IsServerInitialized
+
+OnNetworkSpawn()                           public override void OnStartNetwork()
+OnNetworkDespawn()                         public override void OnStopNetwork()
+
+NetworkObject.Spawn()                      ServerManager.Spawn(obj)
+NetworkObject.Despawn()                    ServerManager.Despawn(obj)</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Проект компилируется. Все скрипты используют пространство имён FishNet вместо Unity.Netcode.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 2. Перенос движения и синхронизации</h2>
+        <p>Убедитесь, что базовый геймплей работает на FishNet так же, как работал на NGO.</p>
+        <ul>
+          <li>Переведите скрипт движения на FishNet: проверка <code><span class="accent">base.IsOwner</span></code>, использование <code><span class="accent">NetworkTransform</span></code> от FishNet.</li>
+          <li>Переведите синхронизацию HP и ника на <code><span class="accent">[SyncVar]</span></code> с хуками для обновления UI.</li>
+          <li>Переведите стрельбу: спавн снаряда через <code><span class="accent">ServerManager.Spawn()</span></code>.</li>
+          <li>Проверьте подключение Host/Client и базовый геймплей.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: SyncVar с хуком для HP</summary>
+          <p>В FishNet <code>[SyncVar]</code> заменяет <code>NetworkVariable</code>. Хук вызывается автоматически при изменении значения.</p>
+          <pre><code class="language-csharp">using FishNet.Object;
+using FishNet.Object.Synchronizing;
+using TMPro;
+using UnityEngine;
+
+public class PlayerNetwork : NetworkBehaviour
+{
+    [SyncVar(OnChange = nameof(OnHpChanged))]
+    public int HP = 100;
+
+    [SyncVar(OnChange = nameof(OnNicknameChanged))]
+    public string Nickname = "Player";
+
+    [SerializeField] private TMP_Text _hpText;
+    [SerializeField] private TMP_Text _nicknameText;
+
+    private void OnHpChanged(int oldValue, int newValue, bool asServer)
+    {
+        _hpText.text = $"HP: {newValue}";
+    }
+
+    private void OnNicknameChanged(string oldValue, string newValue, bool asServer)
+    {
+        _nicknameText.text = newValue;
+    }
+
+    [ServerRpc]
+    public void SetNicknameServerRpc(string nickname)
+    {
+        Nickname = string.IsNullOrWhiteSpace(nickname)
+            ? $"Player_{OwnerId}"
+            : nickname.Trim();
+    }
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Два окна подключаются, персонажи двигаются, HP и ник синхронизируются, стрельба работает — всё на FishNet.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 3. Настройка клиентского предсказания (CSP)</h2>
+        <p>Клиентское предсказание позволяет игроку видеть мгновенный отклик на свой ввод, даже если сервер ещё не подтвердил действие.</p>
+        <ul>
+          <li>Используйте механизм <code><span class="accent">Replicate</span></code> и <code><span class="accent">Reconcile</span></code> от FishNet для движения.</li>
+          <li>Создайте структуру входных данных (<code>MoveData</code>) с горизонтальным и вертикальным вводом.</li>
+          <li>В методе <code>Replicate</code> применяйте движение на основе входных данных.</li>
+          <li>В методе <code>Reconcile</code> корректируйте позицию при расхождении с сервером.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Подсказка: каркас CSP-движения</summary>
+          <p>FishNet предоставляет атрибуты <code>[Replicate]</code> и <code>[Reconcile]</code> для автоматического предсказания и отката.</p>
+          <pre><code class="language-csharp">using FishNet.Object;
+using FishNet.Object.Prediction;
+using UnityEngine;
+
+public struct MoveData : IReplicateData
+{
+    public float Horizontal;
+    public float Vertical;
+
+    private uint _tick;
+    public void Dispose() { }
+    public uint GetTick() => _tick;
+    public void SetTick(uint value) => _tick = value;
+}
+
+public struct ReconcileData : IReconcileData
+{
+    public Vector3 Position;
+
+    private uint _tick;
+    public void Dispose() { }
+    public uint GetTick() => _tick;
+    public void SetTick(uint value) => _tick = value;
+}
+
+public class PlayerMovementPredicted : NetworkBehaviour
+{
+    [SerializeField] private float _speed = 5f;
+
+    public override void OnStartNetwork()
+    {
+        base.TimeManager.OnTick += OnTick;
+    }
+
+    public override void OnStopNetwork()
+    {
+        base.TimeManager.OnTick -= OnTick;
+    }
+
+    private void OnTick()
+    {
+        // Владелец собирает ввод и отправляет на сервер.
+        if (base.IsOwner)
+        {
+            MoveData md = new MoveData
+            {
+                Horizontal = Input.GetAxisRaw("Horizontal"),
+                Vertical = Input.GetAxisRaw("Vertical")
+            };
+            Replicate(md);
+        }
+        else
+        {
+            Replicate(default);
+        }
+
+        // Сервер периодически шлёт «истинное» состояние для коррекции.
+        if (base.IsServerInitialized)
+        {
+            ReconcileData rd = new ReconcileData
+            {
+                Position = transform.position
+            };
+            Reconcile(rd);
+        }
+    }
+
+    [Replicate]
+    private void Replicate(
+        MoveData md,
+        ReplicateState state = ReplicateState.Invalid,
+        Channel channel = Channel.Unreliable)
+    {
+        Vector3 move = new Vector3(md.Horizontal, 0f, md.Vertical).normalized;
+        transform.position += move * _speed * (float)base.TimeManager.TickDelta;
+    }
+
+    [Reconcile]
+    private void Reconcile(
+        ReconcileData rd,
+        Channel channel = Channel.Unreliable)
+    {
+        transform.position = rd.Position;
+    }
+}</code></pre>
+        </details>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>Движение персонажа мгновенно реагирует на ввод даже при наличии сетевой задержки. Позиция корректируется сервером без видимых рывков.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Этап 4. Тестирование с искусственным лагом</h2>
+        <p>Проверьте, что предсказание действительно помогает при высоком пинге.</p>
+        <ul>
+          <li>В настройках транспорта FishNet (<code>Tugboat</code>) включите <code><span class="accent">Latency Simulator</span></code>.</li>
+          <li>Установите задержку 200 мс, затем 500 мс.</li>
+          <li>Сравните движение <strong>с предсказанием</strong> и <strong>без</strong> (временно отключите CSP).</li>
+          <li>Убедитесь, что при 200 мс с включённым предсказанием движение остаётся плавным.</li>
+          <li>Обратите внимание на reconcile-коррекции: при правильной настройке они почти незаметны.</li>
+        </ul>
+
+        <div class="checkpoint">
+          <h3>Проверь</h3>
+          <p>С лагом 200 мс и включённым CSP персонаж двигается плавно. Без CSP заметна задержка между нажатием клавиши и началом движения.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Что нужно реализовать самостоятельно</h2>
+        <ul>
+          <li>полный перенос скриптов с NGO на FishNet API;</li>
+          <li>замену <code>NetworkVariable</code> на <code>[SyncVar]</code> с хуками обновления UI;</li>
+          <li>замену <code>[ClientRpc]</code> на <code>[ObserversRpc]</code>;</li>
+          <li>структуры <code>MoveData</code> и <code>ReconcileData</code> для предсказания;</li>
+          <li>подключение к <code>TimeManager.OnTick</code> для tick-based движения;</li>
+          <li>тестирование и сравнение поведения с лагом и без.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Требования к сдаче</h2>
+        <ul>
+          <li>Продемонстрировать, что проект полностью работает на FishNet (нет зависимостей от NGO).</li>
+          <li>Показать подключение Host/Client, синхронизацию HP и ника.</li>
+          <li>Показать движение с клиентским предсказанием.</li>
+          <li>Продемонстрировать работу с искусственным лагом 200 мс: плавное движение с CSP.</li>
+          <li>Показать разницу между движением с CSP и без CSP при лаге.</li>
+          <li>Предоставить видео работы приложения с демонстрацией лага.</li>
+          <li>Предоставить ссылку на Git-репозиторий проекта.</li>
+        </ul>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Course Hub - Практика 3</p>
+    </div>
+  </footer>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+  <script defer src="../assets/js/site.js"></script>
+</body>
+</html>
