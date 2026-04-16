@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="t d">
+  <title id="t">Lecture 4 header</title>
+  <desc id="d">Advanced NGO topics: targeted rpc, pooling, inventory, lobby, scene flow.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d1b2a"/>
+      <stop offset="100%" stop-color="#1b263b"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="420" fill="url(#bg)" rx="28"/>
+  <g font-family="Manrope, Segoe UI, Arial, sans-serif" fill="#e0e6f0">
+    <text x="64" y="120" font-size="52" font-weight="800">Lecture 4</text>
+    <text x="64" y="174" font-size="30" font-weight="600">Advanced NGO</text>
+    <text x="64" y="222" font-size="26">Targeted RPC  •  Object Pooling  •  Inventory  •  Lobby</text>
+  </g>
+  <g transform="translate(820 90)">
+    <rect x="0" y="0" width="280" height="240" rx="20" fill="#14213d" stroke="#4cc9f0" stroke-width="3"/>
+    <circle cx="56" cy="62" r="20" fill="#4cc9f0"/>
+    <rect x="96" y="44" width="150" height="36" rx="8" fill="#223b63"/>
+    <rect x="26" y="118" width="228" height="22" rx="6" fill="#2f4c78"/>
+    <rect x="26" y="156" width="178" height="22" rx="6" fill="#2f4c78"/>
+    <path d="M26 202h162" stroke="#4cc9f0" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>

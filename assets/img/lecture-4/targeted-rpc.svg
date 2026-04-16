@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="t d">
+  <title id="t">Targeted RPC</title>
+  <desc id="d">Server sends a message to one selected client.</desc>
+  <defs>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#38bdf8"/>
+    </marker>
+    <marker id="arrowGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="680" fill="#0f172a"/>
+  <text x="80" y="70" fill="#e2e8f0" font-size="42" font-family="Manrope, Segoe UI, Arial" font-weight="800">Targeted ClientRpc</text>
+
+  <g font-family="Manrope, Segoe UI, Arial" font-size="26" fill="#e2e8f0" text-anchor="middle">
+    <circle cx="250" cy="340" r="84" fill="#1d4ed8"/>
+    <text x="250" y="350">Server</text>
+
+    <circle cx="770" cy="180" r="72" fill="#334155"/>
+    <text x="770" y="188">Client A</text>
+
+    <circle cx="960" cy="340" r="72" fill="#0284c7"/>
+    <text x="960" y="348">Client B</text>
+
+    <circle cx="770" cy="500" r="72" fill="#334155"/>
+    <text x="770" y="508">Client C</text>
+  </g>
+
+  <path d="M340 302 L690 210" stroke="#64748b" stroke-width="8" fill="none" marker-end="url(#arrowGray)"/>
+  <path d="M340 340 L878 340" stroke="#38bdf8" stroke-width="10" fill="none" marker-end="url(#arrowBlue)"/>
+  <path d="M340 378 L690 470" stroke="#64748b" stroke-width="8" fill="none" marker-end="url(#arrowGray)"/>
+
+  <g stroke="#ef4444" stroke-width="10" stroke-linecap="round">
+    <line x1="720" y1="130" x2="820" y2="230"/>
+    <line x1="820" y1="130" x2="720" y2="230"/>
+    <line x1="720" y1="450" x2="820" y2="550"/>
+    <line x1="820" y1="450" x2="720" y2="550"/>
+  </g>
+</svg>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" role="img" aria-labelledby="t d">
+  <title id="t">Inventory architecture</title>
+  <desc id="d">NetworkList storage, ServerRpc request, server validation.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#7dd3fc"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="640" fill="#0b132b"/>
+  <text x="70" y="70" fill="#e2e8f0" font-size="40" font-family="Manrope, Segoe UI, Arial" font-weight="800">Network Inventory Architecture</text>
+
+  <g font-family="Manrope, Segoe UI, Arial" fill="#e2e8f0">
+    <rect x="120" y="210" width="280" height="220" rx="20" fill="#1d4ed8"/>
+    <text x="260" y="290" text-anchor="middle" font-size="34" font-weight="700">NetworkList</text>
+    <text x="260" y="332" text-anchor="middle" font-size="22">Persistent state</text>
+
+    <rect x="460" y="210" width="280" height="220" rx="20" fill="#0f766e"/>
+    <text x="600" y="290" text-anchor="middle" font-size="34" font-weight="700">ServerRpc</text>
+    <text x="600" y="332" text-anchor="middle" font-size="22">Pickup/Drop request</text>
+
+    <rect x="800" y="210" width="280" height="220" rx="20" fill="#7c2d12"/>
+    <text x="940" y="280" text-anchor="middle" font-size="34" font-weight="700">Validation</text>
+    <text x="940" y="322" text-anchor="middle" font-size="22">Distance</text>
+    <text x="940" y="352" text-anchor="middle" font-size="22">Capacity</text>
+  </g>
+
+  <path d="M410 320 H448" stroke="#7dd3fc" stroke-width="8" marker-end="url(#arr)"/>
+  <path d="M750 320 H788" stroke="#7dd3fc" stroke-width="8" marker-end="url(#arr)"/>
+</svg>

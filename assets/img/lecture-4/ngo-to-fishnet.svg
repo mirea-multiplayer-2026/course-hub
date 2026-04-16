@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-labelledby="t d">
+  <title id="t">NGO to FishNet bridge</title>
+  <desc id="d">Comparison of NGO baseline and FishNet gains.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#93c5fd"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="700" fill="#0f172a"/>
+  <text x="70" y="70" fill="#e2e8f0" font-size="42" font-family="Manrope, Segoe UI, Arial" font-weight="800">NGO Foundation  to  FishNet Upgrade</text>
+
+  <rect x="90" y="130" width="430" height="500" rx="20" fill="#1e293b" stroke="#64748b" stroke-width="3"/>
+  <rect x="680" y="130" width="430" height="500" rx="20" fill="#0b3a63" stroke="#38bdf8" stroke-width="3"/>
+
+  <g font-family="Manrope, Segoe UI, Arial" fill="#e2e8f0">
+    <text x="130" y="185" font-size="34" font-weight="700">NGO</text>
+    <text x="130" y="238" font-size="24">- RPC + NetworkVariable</text>
+    <text x="130" y="282" font-size="24">- Good for prototype</text>
+    <text x="130" y="326" font-size="24">- Limited observers</text>
+    <text x="130" y="370" font-size="24">- No built-in prediction</text>
+
+    <text x="720" y="185" font-size="34" font-weight="700">FishNet</text>
+    <text x="720" y="238" font-size="24">- Better scalability</text>
+    <text x="720" y="282" font-size="24">- Observer conditions (AOI)</text>
+    <text x="720" y="326" font-size="24">- Prediction-ready stack</text>
+    <text x="720" y="370" font-size="24">- Lower alloc pressure</text>
+  </g>
+
+  <path d="M545 382 H655" stroke="#93c5fd" stroke-width="10" marker-end="url(#arr)"/>
+</svg>

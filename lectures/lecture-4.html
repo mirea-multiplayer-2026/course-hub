@@ -1,13 +1,15 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Лекция 4 | Course Hub</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
 </head>
 <body>
   <header class="site-header">
@@ -15,35 +17,612 @@
       <a href="../index.html" class="brand">Course Hub</a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
       <nav id="site-nav" class="site-nav">
-      <div class="nav-row nav-row-lectures">
-        <a href="../index.html">Главная</a>
-        <a href="./lecture-1.html">Лекция 1</a>
-        <a href="./lecture-2.html">Лекция 2</a>
-        <a href="./lecture-3.html">Лекция 3</a>
-        <a href="./lecture-4.html" aria-current="page">Лекция 4</a>
-        <a href="./lecture-5.html">Лекция 5</a>
-      </div>
-      <div class="nav-row nav-row-practices">
-        <a href="./practice-1.html">Практика 1</a>
-        <a href="./practice-2.html">Практика 2</a>
-        <a href="./practice-3.html">Практика 3</a>
-        <a href="./practice-4.html">Практика 4</a>
-      </div>
-      </nav>
+  <div class="nav-row nav-row-lectures">
+    <a href="../index.html">Главная</a>
+    <a href="./lecture-1.html">Лекция 1</a>
+    <a href="./lecture-2.html">Лекция 2</a>
+    <a href="./lecture-3.html">Лекция 3</a>
+    <a href="./lecture-4.html" aria-current="page">Лекция 4</a>
+    <a href="./lecture-5.html">Лекция 5</a>
+  </div>
+  <div class="nav-row nav-row-practices">
+    <a href="./practice-1.html">Практика 1</a>
+    <a href="./practice-2.html">Практика 2</a>
+    <a href="./practice-3.html">Практика 3</a>
+    <a href="./practice-4.html">Практика 4</a>
+  </div>
+</nav>
     </div>
   </header>
-
   <main class="container section lecture-page">
-    <h1>Лекция 4</h1>
-  </main>
+  <a class="back-link" href="../index.html">Назад на главную</a>
+  <h1>Лекция 4. Продвинутый NGO: события, пул объектов и сетевое лобби</h1>
 
+  <!-- Hero-секция в стиле lecture-3 -->
+  <section class="lecture-hero lecture-hero-text">
+    <p class="eyebrow">Завершение Блока 1 — полный арсенал NGO перед миграцией на FishNet</p>
+    <p>Эта лекция закрывает все оставшиеся продвинутые паттерны Unity Netcode for GameObjects. Студент уже написал стрельбу с серверной валидацией. Теперь — Targeted RPC, Object Pooling, сетевой инвентарь, лобби с готовностью игроков и сетевая загрузка сцен.</p>
+    <div class="pill-row">
+      <span class="pill">Targeted RPC</span>
+      <span class="pill">Unreliable RPC</span>
+      <span class="pill">Object Pooling</span>
+      <span class="pill">NetworkList</span>
+      <span class="pill">Инвентарь</span>
+      <span class="pill">Лобби</span>
+      <span class="pill">Scene Management</span>
+    </div>
+  </section>
+
+  <div class="content-stack">
+    <article class="content-card">
+  <h2>1. Карта занятия и повторение</h2>
+  <p>За три лекции мы прошли путь от «что такое пакет» до полного цикла стрельбы с серверной валидацией. Лекция 4 — финал Блока 1: закрываем все оставшиеся продвинутые паттерны NGO, после чего будем готовы к миграции на FishNet.</p>
+
+  <div class="info-grid">
+    <section class="media-card">
+      <h3>Что уже знаем</h3>
+      <p><code>NetworkVariable</code>, <code>ServerRpc</code> / <code>ClientRpc</code>, <code>IsOwner</code>, <code>NetworkTransform</code>, <code>ChangeOwnership</code>, <code>SpawnWithOwnership</code>, guard-клозы валидации.</p>
+    </section>
+    <section class="media-card">
+      <h3>Что пока не умеем</h3>
+      <p>Отправлять RPC одному клиенту, переиспользовать объекты через пул, строить инвентарь на <code>NetworkList</code>, управлять лобби и загрузкой сцен по сети.</p>
+    </section>
+    <section class="media-card">
+      <h3>К чему идём</h3>
+      <p>К полному набору инструментов NGO: все типы RPC, Object Pooling, сетевой инвентарь, готовность игроков, Scene Management — перед переходом на FishNet.</p>
+    </section>
+  </div>
+
+  <h3>Карта занятия</h3>
+  <ul>
+    <li><strong>Блок 1:</strong> Продвинутые RPC-паттерны — Targeted RPC, матрица NV vs RPC, Unreliable RPC.</li>
+    <li><strong>Блок 2:</strong> Object Pooling — <code>INetworkPrefabInstanceHandler</code>, серверный и клиентский пул.</li>
+    <li><strong>Блок 3:</strong> Сетевой инвентарь — <code>NetworkList</code>, подбор/выброс предметов с серверной валидацией.</li>
+    <li><strong>Блок 4:</strong> Лобби — подключения, готовность, сетевая загрузка сцен.</li>
+    <li><strong>Блок 5:</strong> Wrap-up Блока 1 и мост к FishNet.</li>
+  </ul>
+
+  <div class="checkpoint">
+    <h3>Проверка понимания</h3>
+    <p>Если вы можете объяснить, зачем нужны 4 guard-клоза в <code>ShootServerRpc</code> и чем <code>Spawn()</code> отличается от <code>SpawnWithOwnership()</code> — вы готовы к этой лекции.</p>
+  </div>
+</article>
+
+<article class="content-card">
+  <h2>2. Targeted RPC — сообщение одному клиенту</h2>
+  <p>В Лекциях 1 и 3 мы разобрали <code>ServerRpc</code> (клиент → сервер) и <code>ClientRpc</code> (сервер → все). Но что если нужно отправить событие только одному конкретному клиенту?</p>
+
+  <figure class="lecture-figure">
+    <img src="../assets/img/lecture-4/targeted-rpc.svg" alt="Схема Targeted RPC: сервер отправляет сообщение одному клиенту" loading="lazy">
+    <figcaption>Targeted ClientRpc доставляет сообщение только указанному клиенту, остальные ничего не получают.</figcaption>
+  </figure>
+
+  <h3>Когда нужен Targeted RPC</h3>
+  <ul>
+    <li>Персональное уведомление: «Вы получили предмет!»</li>
+    <li>Приватный канал: торговля между двумя игроками.</li>
+    <li>Индивидуальные данные: показать число патронов только владельцу.</li>
+  </ul>
+
+  <pre><code class="language-csharp">// Targeted ClientRpc — только указанным клиентам
+[ClientRpc]
+void ShowNotificationClientRpc(string message,
+    ClientRpcParams rpcParams = default)
+{
+    ShowUI(message);
+}
+
+// Вызов на сервере — передаём конкретного получателя
+void NotifyPlayer(ulong clientId, string msg)
+{
+    ClientRpcParams targetParams = new ClientRpcParams {
+        Send = new ClientRpcSendParams {
+            TargetClientIds = new ulong[] { clientId }
+        }
+    };
+    ShowNotificationClientRpc(msg, targetParams);
+}</code></pre>
+
+  <h3>Пояснение</h3>
+  <p><code>ClientRpcParams.Send.TargetClientIds</code> — массив ID клиентов-получателей. Если массив пуст или параметр не задан — RPC идёт всем (обычное поведение <code>ClientRpc</code>).</p>
+
+  <div class="checkpoint">
+    <h3>Экономия трафика</h3>
+    <p>Targeted RPC экономит трафик: если в игре 16 человек, а уведомление нужно одному — зачем слать его пятнадцати другим?</p>
+  </div>
+</article>
+
+<article class="content-card">
+  <h2>3. NetworkVariable vs RPC — матрица принятия решений</h2>
+  <p>В Лекции 2 мы кратко сравнили «события vs state». В Лекции 3 показали конкретный пример со стрельбой. Теперь систематизируем в формальную матрицу.</p>
+
+  <figure class="lecture-figure">
+    <img src="../assets/img/lecture-4/nv-vs-rpc-matrix.svg" alt="Матрица решений: когда использовать NetworkVariable, а когда RPC" loading="lazy">
+    <figcaption>Два вопроса: нужно ли значение при позднем подключении? Это разовое событие или постоянное состояние?</figcaption>
+  </figure>
+
+  <h3>Правила</h3>
+  <ul>
+    <li><strong>NetworkVariable</strong> — если данные нужны при late-join (позднем подключении): HP, счёт, состояние двери, текущее оружие.</li>
+    <li><strong>RPC</strong> — если данные одноразовые: звук выстрела, анимация подбора, уведомление.</li>
+    <li><strong>Обе технологии</strong> — для сложных механик: смерть = <code>NetworkVariable&lt;bool&gt; IsAlive</code> + <code>ClientRpc PlayDeathEffectClientRpc()</code>.</li>
+  </ul>
+
+  <h3>Пограничные случаи</h3>
+  <ul>
+    <li><strong>Чат:</strong> RPC — сообщения не нужны при late-join (обычно).</li>
+    <li><strong>Смена оружия:</strong> <code>NetworkVariable</code> для текущего оружия + RPC для анимации переключения.</li>
+    <li><strong>Открытие двери:</strong> <code>NetworkVariable&lt;bool&gt; IsOpen</code>, чтобы новый клиент увидел открытую дверь.</li>
+  </ul>
+
+  <details class="hint-card">
+    <summary>Если перепутать</summary>
+    <p><strong>Событие через NV:</strong> лишний трафик — NV синхронизирует значение постоянно, даже когда событие произошло один раз.</p>
+    <p><strong>State через RPC:</strong> пропуск данных — клиент, подключившийся позже, не получит RPC и не увидит текущее состояние.</p>
+  </details>
+</article>
+
+<article class="content-card">
+  <h2>4. Unreliable RPC — экономия на не критичных событиях</h2>
+  <p>По умолчанию RPC в NGO — reliable (гарантированная доставка с подтверждением). Но для частых некритичных событий потеря одного пакета несущественна.</p>
+
+  <pre><code class="language-csharp">// Reliable (по умолчанию) — гарантия доставки
+[ServerRpc]
+void ImportantActionServerRpc() { }
+
+// Unreliable — без подтверждения, быстрее
+[ServerRpc(Delivery = RpcDelivery.Unreliable)]
+void FootstepSoundServerRpc(Vector3 position) { }
+
+[ClientRpc(Delivery = RpcDelivery.Unreliable)]
+void SpawnBulletTrailClientRpc(Vector3 from, Vector3 to) { }</code></pre>
+
+  <h3>Когда использовать Unreliable</h3>
+  <ul>
+    <li>Следы от пуль, мелкие частицы — потеря одного незаметна.</li>
+    <li>Звуки шагов — если пропустили один, следующий через 0.3 секунды.</li>
+    <li>Частые обновления HUD, которые перезаписываются каждый кадр.</li>
+  </ul>
+
+  <h3>Когда НЕ использовать Unreliable</h3>
+  <ul>
+    <li>Выстрел, подбор предмета, смерть — потеря критична.</li>
+    <li>Любое действие, которое меняет состояние игры необратимо.</li>
+  </ul>
+
+  <p>Экономия: Reliable требует ACK-пакет на каждый RPC. При 60 событиях/сек — это 60 лишних ACK. Unreliable убирает эти подтверждения.</p>
+</article>
+
+<article class="content-card">
+  <h2>5. Object Pooling — зачем переиспользовать объекты</h2>
+
+  <figure class="lecture-figure">
+    <img src="../assets/img/lecture-4/pool-problem.svg" alt="Проблема Spawn/Despawn: GC spikes при массовом создании объектов" loading="lazy">
+    <figcaption>Каждый Spawn = аллокация + регистрация + рассылка. При 10–30 снарядах/сек = сотни аллокаций → GC-фризы.</figcaption>
+  </figure>
+
+  <p>В Лекции 3 мы спавнили снаряды через <code>Instantiate</code> + <code>Spawn</code>. В реальном шутере это 10–30 снарядов в секунду. Каждый:</p>
+  <ul>
+    <li>Аллокация памяти (new GameObject).</li>
+    <li>Регистрация <code>NetworkObject</code> в сети.</li>
+    <li>Рассылка Create-сообщения всем клиентам.</li>
+  </ul>
+  <p>При 16 игроках — сотни аллокаций в секунду → GC spikes → фризы.</p>
+
+  <h3>Решение: пул объектов</h3>
+  <p>Вместо создания и удаления — активируем и деактивируем. Объекты создаются один раз при старте (pre-warming) и переиспользуются.</p>
+
+  <div class="gif-grid">
+    <section class="gif-card">
+      <img src="../assets/gif/lecture-4/pool-without.svg" alt="Без пула: Instantiate/Destroy каждый раз" loading="lazy">
+      <h3>Без пула</h3>
+      <p>Instantiate → Spawn → Despawn → Destroy. Каждый раз аллокация и GC.</p>
+    </section>
+    <section class="gif-card">
+      <img src="../assets/gif/lecture-4/pool-with.svg" alt="С пулом: объекты переиспользуются" loading="lazy">
+      <h3>С пулом</h3>
+      <p>Активировать → использовать → деактивировать → вернуть. Ноль аллокаций в рантайме.</p>
+    </section>
+  </div>
+</article>
+
+<article class="content-card">
+  <h2>6. INetworkPrefabInstanceHandler — серверный пул</h2>
+  <p>NGO позволяет подменить стандартное создание/удаление объектов через интерфейс <code>INetworkPrefabInstanceHandler</code>.</p>
+
+  <pre><code class="language-csharp">public class ProjectilePoolHandler : INetworkPrefabInstanceHandler
+{
+    private Queue&lt;NetworkObject&gt; pool = new();
+    private NetworkObject prefab;
+
+    public ProjectilePoolHandler(NetworkObject prefab, int preWarmCount)
+    {
+        this.prefab = prefab;
+        // Pre-warming: создаём объекты заранее
+        for (int i = 0; i &lt; preWarmCount; i++)
+        {
+            var obj = Object.Instantiate(prefab);
+            obj.gameObject.SetActive(false);
+            pool.Enqueue(obj);
+        }
+    }
+
+    // Вызывается вместо Instantiate
+    public NetworkObject Instantiate(ulong ownerClientId,
+        Vector3 position, Quaternion rotation)
+    {
+        NetworkObject obj = pool.Count > 0
+            ? pool.Dequeue()
+            : Object.Instantiate(prefab);
+
+        obj.transform.SetPositionAndRotation(position, rotation);
+        obj.gameObject.SetActive(true);
+        return obj;
+    }
+
+    // Вызывается вместо Destroy
+    public void Destroy(NetworkObject networkObject)
+    {
+        networkObject.gameObject.SetActive(false);
+        pool.Enqueue(networkObject);
+    }
+}</code></pre>
+
+  <h3>Регистрация пула</h3>
+  <pre><code class="language-csharp">// При старте сервера
+var handler = new ProjectilePoolHandler(projectilePrefab, poolSize: 50);
+NetworkManager.Singleton.PrefabHandler.AddHandler(
+    projectilePrefab, handler);</code></pre>
+
+  <h3>Размер пула</h3>
+  <p>Формула: <code>maxPlayers × fireRate × maxLifetime</code>. Для 16 игроков, 2 выстрела/сек, время жизни 3 сек: <code>16 × 2 × 3 = 96</code> объектов.</p>
+
+  <div class="checkpoint">
+    <h3>Ключевой момент</h3>
+    <p>Pre-warming (создание пула при старте) обязательно. Ленивое создание в рантайме — снова аллокации и GC. Создавайте всё заранее.</p>
+  </div>
+</article>
+
+<article class="content-card">
+  <h2>7. Клиентский пул для визуальных эффектов</h2>
+  <p>Отдельно от сетевого пула нужен локальный пул для VFX: вспышки, следы попаданий, частицы. Эти объекты не требуют <code>NetworkObject</code> — они порождаются локально через <code>ClientRpc</code>.</p>
+
+  <pre><code class="language-csharp">// Стандартный Unity ObjectPool для VFX
+private ObjectPool&lt;ParticleSystem&gt; hitEffectPool;
+
+void Awake()
+{
+    hitEffectPool = new ObjectPool&lt;ParticleSystem&gt;(
+        createFunc: () =&gt; Instantiate(hitEffectPrefab),
+        actionOnGet: fx =&gt; fx.gameObject.SetActive(true),
+        actionOnRelease: fx =&gt; fx.gameObject.SetActive(false),
+        defaultCapacity: 20,
+        maxSize: 50
+    );
+}
+
+// Вызывается из ClientRpc (Лекция 3)
+[ClientRpc]
+void PlayHitEffectClientRpc(Vector3 position)
+{
+    var fx = hitEffectPool.Get();
+    fx.transform.position = position;
+    fx.Play();
+    StartCoroutine(ReturnToPool(fx, 2f));
+}
+
+IEnumerator ReturnToPool(ParticleSystem fx, float delay)
+{
+    yield return new WaitForSeconds(delay);
+    hitEffectPool.Release(fx);
+}</code></pre>
+
+  <p>Два пула в проекте: серверный (<code>INetworkPrefabInstanceHandler</code>) для снарядов, клиентский (<code>ObjectPool</code>) для VFX. Они не пересекаются.</p>
+</article>
+
+<article class="content-card">
+  <h2>8. Архитектура сетевого инвентаря</h2>
+
+  <figure class="lecture-figure">
+    <img src="../assets/img/lecture-4/inventory-architecture.svg" alt="Архитектура сетевого инвентаря: NetworkList + ServerRpc + ChangeOwnership" loading="lazy">
+    <figcaption>Инвентарь объединяет NetworkList для хранения, ServerRpc для запросов и серверную валидацию для защиты.</figcaption>
+  </figure>
+
+  <p>Инвентарь объединяет знания из Лекций 2, 3 и текущей: <code>NetworkVariable</code> / <code>NetworkList</code> для хранения состояния, <code>ChangeOwnership</code> для подбора, <code>ServerRpc</code> для запросов действий.</p>
+
+  <h3>Почему NetworkList, а не массив в NetworkVariable?</h3>
+  <ul>
+    <li><code>NetworkList</code> отправляет дельту: «добавлен элемент в индекс 3».</li>
+    <li><code>NetworkVariable&lt;массив&gt;</code> отправляет весь массив при любом изменении.</li>
+    <li>При 50 слотах — разница в десятки раз по трафику.</li>
+  </ul>
+
+  <pre><code class="language-csharp">// Структура слота инвентаря
+public struct InventorySlot : INetworkSerializable, IEquatable&lt;InventorySlot&gt;
+{
+    public ushort ItemId;   // ID предмета (0 = пусто)
+    public byte Quantity;   // Количество
+
+    public void NetworkSerialize&lt;T&gt;(BufferSerializer&lt;T&gt; s) where T : IReaderWriter
+    {
+        s.SerializeValue(ref ItemId);
+        s.SerializeValue(ref Quantity);
+    }
+
+    public bool Equals(InventorySlot other)
+        =&gt; ItemId == other.ItemId &amp;&amp; Quantity == other.Quantity;
+}
+
+// Инвентарь как NetworkList
+public NetworkList&lt;InventorySlot&gt; Inventory;</code></pre>
+
+  <div class="checkpoint">
+    <h3>Связь с Лекцией 2</h3>
+    <p><code>InventorySlot</code> реализует <code>INetworkSerializable</code> — тот самый паттерн кастомной сериализации, который мы разбирали на Лекции 2. Порядок полей обязателен!</p>
+  </div>
+</article>
+
+<article class="content-card">
+  <h2>9. Полный цикл подбора предмета</h2>
+
+  <figure class="lecture-figure">
+    <img src="../assets/img/lecture-4/pickup-flow.svg" alt="Полный цикл подбора предмета: клиент запрашивает → сервер валидирует → обновляет инвентарь → Despawn предмет" loading="lazy">
+    <figcaption>Подбор предмета — те же принципы валидации, что и в стрельбе из Лекции 3, но применённые к другой механике.</figcaption>
+  </figure>
+
+  <pre><code class="language-csharp">[ServerRpc(RequireOwnership = false)]
+void PickupItemServerRpc(NetworkObjectReference itemRef,
+    ServerRpcParams rpcParams = default)
+{
+    // 1. Предмет существует?
+    if (!itemRef.TryGet(out NetworkObject itemObj)) return;
+
+    // 2. Расстояние допустимо?
+    float dist = Vector3.Distance(
+        transform.position, itemObj.transform.position);
+    if (dist > 2.5f) return;
+
+    // 3. Инвентарь не полон?
+    if (Inventory.Count >= MaxSlots) return;
+
+    // 4. Предмет ещё не подобран? (не despawned)
+    if (!itemObj.IsSpawned) return;
+
+    // Всё ок — добавляем в инвентарь, удаляем с земли
+    var itemData = itemObj.GetComponent&lt;PickupItem&gt;();
+    Inventory.Add(new InventorySlot {
+        ItemId = itemData.ItemId,
+        Quantity = itemData.Quantity
+    });
+
+    itemObj.Despawn(true);
+}</code></pre>
+
+  <h3>4 проверки — те же guard-клозы</h3>
+  <p>Сравните с 4 guard-клозами из <code>ShootServerRpc</code> (Лекция 3): там — Owner, Alive, Cooldown, Direction. Здесь — Exists, Distance, Capacity, NotTaken. Принцип тот же: клиент просит, сервер валидирует.</p>
+
+  <details class="hint-card">
+    <summary>Выброс и передача предметов</summary>
+    <p><strong>Выброс:</strong> клиент запрашивает → сервер спавнит предмет в позиции игрока, удаляет из <code>NetworkList</code>.</p>
+    <p><strong>Передача:</strong> Targeted <code>ClientRpc</code> для подтверждения обоим участникам.</p>
+    <pre><code class="language-csharp">[ServerRpc]
+void DropItemServerRpc(int slotIndex)
+{
+    if (slotIndex &lt; 0 || slotIndex >= Inventory.Count) return;
+    InventorySlot slot = Inventory[slotIndex];
+    if (slot.ItemId == 0) return;
+
+    // Спавн предмета на земле
+    var obj = Instantiate(GetPrefab(slot.ItemId),
+        transform.position + transform.forward, Quaternion.identity);
+    obj.GetComponent&lt;NetworkObject&gt;().Spawn();
+
+    // Удаление из инвентаря
+    Inventory.RemoveAt(slotIndex);
+}</code></pre>
+  </details>
+</article>
+
+<article class="content-card">
+  <h2>10. Обработка подключений и отключений</h2>
+  <p>В Лекции 1 мы подключались кнопками Host/Client, но не обрабатывали события. Теперь — полноценный жизненный цикл соединения.</p>
+
+  <pre><code class="language-csharp">public class ConnectionManager : NetworkBehaviour
+{
+    private Dictionary&lt;ulong, PlayerData&gt; players = new();
+
+    public override void OnNetworkSpawn()
+    {
+        if (!IsServer) return;
+
+        NetworkManager.OnClientConnectedCallback += OnClientConnected;
+        NetworkManager.OnClientDisconnectCallback += OnClientDisconnected;
+    }
+
+    void OnClientConnected(ulong clientId)
+    {
+        Debug.Log($"Клиент {clientId} подключился");
+        players[clientId] = new PlayerData { ClientId = clientId };
+        UpdatePlayerCountClientRpc(players.Count);
+    }
+
+    void OnClientDisconnected(ulong clientId)
+    {
+        Debug.Log($"Клиент {clientId} отключился");
+        players.Remove(clientId);
+        // Чистка: удаление данных, уведомление остальных
+        UpdatePlayerCountClientRpc(players.Count);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        if (!IsServer) return;
+        NetworkManager.OnClientConnectedCallback -= OnClientConnected;
+        NetworkManager.OnClientDisconnectCallback -= OnClientDisconnected;
+    }
+}</code></pre>
+
+  <h3>Грациозное отключение vs потеря связи</h3>
+  <ul>
+    <li><strong>Грациозное:</strong> клиент вызвал <code>NetworkManager.Shutdown()</code>. Сервер получает <code>OnClientDisconnect</code> мгновенно.</li>
+    <li><strong>Потеря связи:</strong> клиент вырубил Wi-Fi. Сервер обнаруживает через timeout (обычно 10–30 сек).</li>
+  </ul>
+</article>
+
+<article class="content-card">
+  <h2>11. Готовность игроков и старт матча</h2>
+
+  <figure class="lecture-figure">
+    <img src="../assets/img/lecture-4/lobby-flow.svg" alt="Поток лобби: подключение → готовность → проверка → старт" loading="lazy">
+    <figcaption>Паттерн Lobby → Ready → Game: сервер запускает матч, когда все нажали Ready.</figcaption>
+  </figure>
+
+  <pre><code class="language-csharp">public class LobbyManager : NetworkBehaviour
+{
+    public NetworkVariable&lt;int&gt; PlayerCount = new(0);
+
+    // Каждый игрок имеет свой флаг готовности
+    private Dictionary&lt;ulong, bool&gt; readyStates = new();
+
+    [ServerRpc(RequireOwnership = false)]
+    public void SetReadyServerRpc(bool isReady,
+        ServerRpcParams rpcParams = default)
+    {
+        ulong clientId = rpcParams.Receive.SenderClientId;
+        readyStates[clientId] = isReady;
+
+        // Проверяем: все ли готовы?
+        if (readyStates.Count >= 2 &amp;&amp;
+            readyStates.Values.All(r =&gt; r))
+        {
+            StartGame();
+        }
+    }
+
+    void StartGame()
+    {
+        // Сетевая загрузка сцены — все клиенты переходят синхронно
+        NetworkManager.SceneManager.LoadScene(
+            "GameScene", LoadSceneMode.Single);
+    }
+}</code></pre>
+
+  <h3>Обработка edge-cases</h3>
+  <ul>
+    <li><strong>Один игрок не готов:</strong> ждём, показываем статус каждого через UI.</li>
+    <li><strong>Хост отключился:</strong> в NGO — игра ломается (нет Host Migration).</li>
+    <li><strong>Клиент отвалился при загрузке:</strong> сервер получит <code>OnClientDisconnect</code>, чистим данные.</li>
+  </ul>
+</article>
+
+<article class="content-card">
+  <h2>12. Scene Management — сетевая загрузка сцен</h2>
+
+  <h3>Локальный vs сетевой LoadScene</h3>
+  <ul>
+    <li><code>SceneManager.LoadScene()</code> — только на текущей машине. Другие клиенты не затронуты.</li>
+    <li><code>NetworkManager.SceneManager.LoadScene()</code> — сервер загружает сцену для ВСЕХ клиентов синхронно.</li>
+  </ul>
+
+  <pre><code class="language-csharp">// Только сервер вызывает сетевую загрузку!
+if (IsServer)
+{
+    NetworkManager.SceneManager.LoadScene(
+        "GameScene", LoadSceneMode.Single);
+}
+
+// Additive: постоянная сцена (UI, NetworkManager) + загружаемая (карта)
+if (IsServer)
+{
+    NetworkManager.SceneManager.LoadScene(
+        "Arena_01", LoadSceneMode.Additive);
+}</code></pre>
+
+  <h3>Паттерн: постоянная + загружаемая сцена</h3>
+  <ul>
+    <li><strong>Постоянная сцена:</strong> NetworkManager, UI Canvas, AudioManager — никогда не выгружается.</li>
+    <li><strong>Загружаемая сцена:</strong> карта, игровые объекты — меняется при переходе из лобби в матч и обратно.</li>
+  </ul>
+
+  <div class="checkpoint">
+    <h3>Связь с Занятием 8</h3>
+    <p>Scene Management — основа для полного игрового цикла (Лобби → Игра → Результаты), который мы построим в финальном занятии курса.</p>
+  </div>
+</article>
+
+<article class="content-card">
+  <h2>13. Итог Блока 1 и мост к FishNet</h2>
+
+  <h3>Полный арсенал NGO</h3>
+  <p>За четыре лекции мы освоили все ключевые инструменты Unity Netcode for GameObjects:</p>
+  <ul>
+    <li><strong>Лекция 1:</strong> Архитектура, топологии, Authority, NetworkManager, NetworkObject, NetworkBehaviour, RPC, NetworkVariable.</li>
+    <li><strong>Лекция 2:</strong> Сериализация, FastBuffer, INetworkSerializable, оптимизация трафика (пороги, квантизация, packed int).</li>
+    <li><strong>Лекция 3:</strong> NetworkTransform, Jitter Buffer, Ownership, камера, стрельба с серверной валидацией.</li>
+    <li><strong>Лекция 4:</strong> Targeted/Unreliable RPC, Object Pooling, инвентарь, лобби, Scene Management.</li>
+  </ul>
+
+  <h3>Ограничения NGO, которые мотивируют переход</h3>
+  <figure class="lecture-figure">
+    <img src="../assets/img/lecture-4/ngo-to-fishnet.svg" alt="Мост от NGO к FishNet: что мы получаем при переходе" loading="lazy">
+    <figcaption>NGO — отличный фундамент. FishNet добавляет Prediction, мощные Observers и лучшую производительность.</figcaption>
+  </figure>
+  <ul>
+    <li><strong>Нет Prediction:</strong> при пинге 150 мс — заметная задержка управления.</li>
+    <li><strong>Примитивные Observers:</strong> все объекты всем — не масштабируется.</li>
+    <li><strong>Нет Host Migration:</strong> хост вышел = игра упала.</li>
+    <li><strong>Производительность:</strong> 32+ клиентов × 500+ объектов = проблемы.</li>
+  </ul>
+
+  <p><strong>Лекция 5</strong> — миграция проекта на FishNet. Вы перенесёте то, что уже написали, на новый фреймворк и получите доступ к Observers и Prediction.</p>
+</article>
+
+<article class="content-card practice-banner">
+  <h2>Практическая связка с лекцией 4</h2>
+  <p>На практике 4 вы реализуете полный игровой цикл: Dedicated Server на Linux (WSL), лобби с ожиданием игроков, автостарт матча, экран результатов и возврат в лобби для нового раунда.</p>
+  <p>Это итоговая практика Блока 1 — она объединяет всё, что было в Лекциях 1–4: подключение, синхронизацию, стрельбу, валидацию и управление сессией.</p>
+  <div class="demo-links">
+    <a class="btn btn-secondary" href="./practice-4.html">Открыть практику 4</a>
+  </div>
+</article>
+
+<article class="content-card">
+  <h2>Что мы узнали</h2>
+  <ul>
+    <li>Targeted <code>ClientRpc</code> для отправки событий конкретному клиенту.</li>
+    <li>Матрица решений: когда <code>NetworkVariable</code>, когда RPC, когда оба.</li>
+    <li>Unreliable RPC для некритичных частых событий.</li>
+    <li>Object Pooling через <code>INetworkPrefabInstanceHandler</code> и клиентский <code>ObjectPool</code>.</li>
+    <li>Сетевой инвентарь на <code>NetworkList&lt;InventorySlot&gt;</code> с серверной валидацией подбора.</li>
+    <li>Обработка подключений/отключений, готовность игроков.</li>
+    <li>Сетевая загрузка сцен через <code>NetworkManager.SceneManager.LoadScene()</code>.</li>
+  </ul>
+
+  <h3>Чек-лист самопроверки</h3>
+  <ol>
+    <li>Я могу отправить <code>ClientRpc</code> конкретному клиенту через <code>ClientRpcParams</code>.</li>
+    <li>Я знаю, когда использовать <code>NetworkVariable</code>, а когда RPC.</li>
+    <li>Я понимаю, зачем нужен Object Pooling и как работает <code>INetworkPrefabInstanceHandler</code>.</li>
+    <li>Я могу реализовать инвентарь на <code>NetworkList</code> с серверной валидацией подбора.</li>
+    <li>Я обрабатываю <code>OnClientConnectedCallback</code> и <code>OnClientDisconnectCallback</code>.</li>
+    <li>Я понимаю разницу между локальной и сетевой загрузкой сцен.</li>
+    <li>Я знаю ограничения NGO и зачем нужен переход на FishNet.</li>
+  </ol>
+
+  <div class="checkpoint">
+    <h3>Если что-то не работает</h3>
+    <p>Проверьте: все ли guard-клозы на месте в <code>PickupItemServerRpc</code>, вызывается ли <code>Despawn(true)</code> вместо <code>Destroy()</code>, подписаны ли вы на <code>OnClientConnectedCallback</code> только на сервере, и только ли сервер вызывает <code>NetworkManager.SceneManager.LoadScene()</code>.</p>
+  </div>
+</article>
+  </div>
+</main>
   <footer class="site-footer">
     <div class="container">
       <p>Course Hub - Лекция 4</p>
     </div>
   </footer>
-
-  <script defer src="../assets/js/site.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+<script defer src="../assets/js/site.js"></script>
 </body>
 </html>
-

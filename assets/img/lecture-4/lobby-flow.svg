@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-labelledby="t d">
+  <title id="t">Lobby flow</title>
+  <desc id="d">Connect, ready, all ready check, load scene, start game.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#60a5fa"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="520" fill="#111827"/>
+  <text x="70" y="68" fill="#e5e7eb" font-family="Manrope, Segoe UI, Arial" font-size="40" font-weight="800">Lobby to Match Flow</text>
+
+  <g font-family="Manrope, Segoe UI, Arial" fill="#f8fafc" text-anchor="middle" font-size="22" font-weight="700">
+    <circle cx="150" cy="270" r="62" fill="#2563eb"/><text x="150" y="278">Connect</text>
+    <circle cx="370" cy="270" r="62" fill="#0f766e"/><text x="370" y="278">Ready</text>
+    <circle cx="590" cy="270" r="62" fill="#7c3aed"/><text x="590" y="266">All</text><text x="590" y="294">Ready?</text>
+    <circle cx="810" cy="270" r="62" fill="#b45309"/><text x="810" y="278">LoadScene</text>
+    <circle cx="1030" cy="270" r="62" fill="#16a34a"/><text x="1030" y="278">Game</text>
+  </g>
+
+  <g stroke="#60a5fa" stroke-width="8" marker-end="url(#arr)">
+    <line x1="216" y1="270" x2="300" y2="270"/>
+    <line x1="436" y1="270" x2="520" y2="270"/>
+    <line x1="656" y1="270" x2="740" y2="270"/>
+    <line x1="876" y1="270" x2="960" y2="270"/>
+  </g>
+</svg>

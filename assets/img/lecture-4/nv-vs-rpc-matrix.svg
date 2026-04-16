@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="760" viewBox="0 0 1200 760" role="img" aria-labelledby="t d">
+  <title id="t">NetworkVariable vs RPC matrix</title>
+  <desc id="d">Decision matrix for event/state and late join requirements.</desc>
+  <rect width="1200" height="760" fill="#0b132b"/>
+  <g font-family="Manrope, Segoe UI, Arial" fill="#e2e8f0">
+    <text x="80" y="70" font-size="40" font-weight="800">NetworkVariable vs RPC</text>
+    <text x="80" y="114" font-size="24">Question 1: needed for late join?  Question 2: event or persistent state?</text>
+  </g>
+
+  <g transform="translate(220 170)">
+    <rect x="0" y="0" width="760" height="500" fill="#111827" stroke="#475569" stroke-width="3"/>
+    <line x1="380" y1="0" x2="380" y2="500" stroke="#475569" stroke-width="3"/>
+    <line x1="0" y1="250" x2="760" y2="250" stroke="#475569" stroke-width="3"/>
+
+    <rect x="0" y="0" width="380" height="250" fill="#0f766e" opacity="0.35"/>
+    <rect x="380" y="0" width="380" height="250" fill="#1d4ed8" opacity="0.35"/>
+    <rect x="0" y="250" width="380" height="250" fill="#7c2d12" opacity="0.35"/>
+    <rect x="380" y="250" width="380" height="250" fill="#166534" opacity="0.35"/>
+
+    <g font-family="Manrope, Segoe UI, Arial" fill="#f8fafc" font-size="30" font-weight="700" text-anchor="middle">
+      <text x="190" y="130">Both</text>
+      <text x="570" y="130">NetworkVariable</text>
+      <text x="190" y="380">RPC</text>
+      <text x="570" y="380">Skip or Local</text>
+    </g>
+  </g>
+
+  <g font-family="Manrope, Segoe UI, Arial" fill="#cbd5e1" font-size="24" font-weight="600">
+    <text x="352" y="154">One-time event</text>
+    <text x="656" y="154">Persistent state</text>
+    <text x="38" y="310" transform="rotate(-90 38 310)">Needed for late join</text>
+    <text x="38" y="575" transform="rotate(-90 38 575)">Not needed for late join</text>
+  </g>
+</svg>

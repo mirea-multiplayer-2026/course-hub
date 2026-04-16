@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="300" viewBox="0 0 900 300" role="img" aria-labelledby="t d">
+  <title id="t">With pool animation</title>
+  <desc id="d">Projectile reused from pool stack and returned.</desc>
+  <rect width="900" height="300" fill="#0f172a"/>
+  <text x="24" y="40" fill="#e2e8f0" font-family="Manrope, Segoe UI, Arial" font-size="28" font-weight="700">Pool: activate to fly to deactivate to return</text>
+
+  <g fill="#334155">
+    <rect x="90" y="140" width="52" height="18" rx="4"/>
+    <rect x="98" y="118" width="52" height="18" rx="4"/>
+    <rect x="106" y="96" width="52" height="18" rx="4"/>
+  </g>
+
+  <circle cx="116" cy="149" r="12" fill="#38bdf8">
+    <animate attributeName="cx" values="116;760;760;116" dur="2.8s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="149;149;149;149" dur="2.8s" repeatCount="indefinite"/>
+  </circle>
+
+  <circle cx="760" cy="149" r="20" fill="#22c55e" opacity="0">
+    <animate attributeName="opacity" values="0;0;0.8;0;0" dur="2.8s" repeatCount="indefinite"/>
+  </circle>
+</svg>

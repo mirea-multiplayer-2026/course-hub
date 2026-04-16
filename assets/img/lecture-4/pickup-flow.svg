@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200" role="img" aria-labelledby="t d">
+  <title id="t">Pickup flow</title>
+  <desc id="d">Client request, server checks, add inventory and despawn item.</desc>
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0 0L10 5L0 10z" fill="#93c5fd"/>
+    </marker>
+  </defs>
+  <rect width="900" height="1200" fill="#0f172a"/>
+  <text x="60" y="70" fill="#e2e8f0" font-size="38" font-family="Manrope, Segoe UI, Arial" font-weight="800">Pickup Item Flow</text>
+
+  <g font-family="Manrope, Segoe UI, Arial" fill="#e2e8f0" text-anchor="middle" font-size="26" font-weight="700">
+    <rect x="210" y="130" width="480" height="90" rx="14" fill="#1d4ed8"/><text x="450" y="188">Client presses E</text>
+    <rect x="210" y="280" width="480" height="90" rx="14" fill="#0f766e"/><text x="450" y="338">PickupItemServerRpc</text>
+    <rect x="210" y="430" width="480" height="90" rx="14" fill="#334155"/><text x="450" y="488">Check Exists + Distance</text>
+    <rect x="210" y="580" width="480" height="90" rx="14" fill="#334155"/><text x="450" y="638">Check Capacity + Spawned</text>
+    <rect x="210" y="730" width="480" height="90" rx="14" fill="#16a34a"/><text x="450" y="788">Add to NetworkList</text>
+    <rect x="210" y="880" width="480" height="90" rx="14" fill="#b45309"/><text x="450" y="938">Despawn ground item</text>
+  </g>
+
+  <g stroke="#93c5fd" stroke-width="8" fill="none" marker-end="url(#arr)">
+    <path d="M450 224 V268"/>
+    <path d="M450 374 V418"/>
+    <path d="M450 524 V568"/>
+    <path d="M450 674 V718"/>
+    <path d="M450 824 V868"/>
+  </g>
+</svg>
