@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="t d">
+  <title id="t">Ограничения NGO</title>
+  <desc id="d">Инфографика с четырьмя ограничениями NGO при масштабировании</desc>
+  <rect width="960" height="560" rx="28" fill="#101b2f"/>
+  <text x="48" y="66" fill="#e7eefc" font-size="34" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Где NGO начинает упираться в потолок</text>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <g transform="translate(48 110)">
+      <rect width="400" height="160" rx="22" fill="#1d2d46" stroke="#35527c"/>
+      <text x="28" y="42" fill="#ffd479" font-size="24" font-weight="800">Нет встроенного Prediction</text>
+      <text x="28" y="80" fill="#c8d7ef" font-size="18">При высоком RTT ввод ощущается ватным.</text>
+      <text x="28" y="112" fill="#9eb0c9" font-size="17">Для шутеров и action-проектов это быстро</text>
+      <text x="28" y="136" fill="#9eb0c9" font-size="17">становится критичным.</text>
+    </g>
+    <g transform="translate(512 110)">
+      <rect width="400" height="160" rx="22" fill="#1d2d46" stroke="#35527c"/>
+      <text x="28" y="42" fill="#ffd479" font-size="24" font-weight="800">Слабая Observer-модель</text>
+      <text x="28" y="80" fill="#c8d7ef" font-size="18">Сложнее ограничивать видимость объектов.</text>
+      <text x="28" y="112" fill="#9eb0c9" font-size="17">Лишняя синхронизация съедает</text>
+      <text x="28" y="136" fill="#9eb0c9" font-size="17">трафик и CPU.</text>
+    </g>
+    <g transform="translate(48 300)">
+      <rect width="400" height="160" rx="22" fill="#1d2d46" stroke="#35527c"/>
+      <text x="28" y="42" fill="#ffd479" font-size="24" font-weight="800">Нет Host Migration</text>
+      <text x="28" y="80" fill="#c8d7ef" font-size="18">Если хост уходит, сессия часто распадается.</text>
+      <text x="28" y="112" fill="#9eb0c9" font-size="17">Для кооп-игр это серьёзное</text>
+      <text x="28" y="136" fill="#9eb0c9" font-size="17">UX-ограничение.</text>
+    </g>
+    <g transform="translate(512 300)">
+      <rect width="400" height="160" rx="22" fill="#1d2d46" stroke="#35527c"/>
+      <text x="28" y="42" fill="#ffd479" font-size="24" font-weight="800">Масштабируемость</text>
+      <text x="28" y="80" fill="#c8d7ef" font-size="18">При росте игроков и объектов быстрее</text>
+      <text x="28" y="112" fill="#9eb0c9" font-size="17">растут накладные расходы по CPU/GC.</text>
+      <text x="28" y="136" fill="#9eb0c9" font-size="17">На учебном проекте это почти незаметно.</text>
+    </g>
+  </g>
+</svg>

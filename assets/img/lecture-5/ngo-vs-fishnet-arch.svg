@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="t d">
+  <title id="t">NGO vs FishNet Architecture</title>
+  <desc id="d">Сравнительная схема архитектур NGO и FishNet</desc>
+  <rect width="960" height="560" rx="28" fill="#101b2f"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="220" y="62" text-anchor="middle" fill="#ffd479" font-size="30" font-weight="800">NGO</text>
+    <text x="740" y="62" text-anchor="middle" fill="#75e3ce" font-size="30" font-weight="800">FishNet</text>
+    <rect x="72" y="104" width="300" height="318" rx="24" fill="#1d2d46" stroke="#35527c"/>
+    <rect x="118" y="150" width="208" height="86" rx="18" fill="#243858" stroke="#ffd479"/>
+    <text x="220" y="204" text-anchor="middle" fill="#e7eefc" font-size="24" font-weight="800">NetworkManager</text>
+    <text x="220" y="282" text-anchor="middle" fill="#c8d7ef" font-size="22">Connection</text>
+    <text x="220" y="318" text-anchor="middle" fill="#c8d7ef" font-size="22">Spawn</text>
+    <text x="220" y="354" text-anchor="middle" fill="#c8d7ef" font-size="22">RPC</text>
+    <text x="220" y="390" text-anchor="middle" fill="#c8d7ef" font-size="22">State sync</text>
+    <rect x="464" y="104" width="424" height="318" rx="24" fill="#1d2d46" stroke="#35527c"/>
+    <g fill="#243858" stroke="#37c8a7">
+      <rect x="500" y="146" width="178" height="64" rx="16"/>
+      <rect x="694" y="146" width="178" height="64" rx="16"/>
+      <rect x="500" y="236" width="178" height="64" rx="16"/>
+      <rect x="694" y="236" width="178" height="64" rx="16"/>
+      <rect x="500" y="326" width="178" height="64" rx="16"/>
+      <rect x="694" y="326" width="178" height="64" rx="16"/>
+    </g>
+    <g fill="#e7eefc" font-size="16" font-weight="700" text-anchor="middle">
+      <text x="589" y="184">ServerManager</text>
+      <text x="783" y="184">ClientManager</text>
+      <text x="589" y="274">TransportManager</text>
+      <text x="783" y="274">TimeManager</text>
+      <text x="589" y="364">ObserverManager</text>
+      <text x="783" y="364">PredictionManager</text>
+    </g>
+  </g>
+</svg>

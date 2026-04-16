@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 260" role="img" aria-labelledby="t d">
+  <title id="t">Observer enter</title>
+  <desc id="d">Клиент пересекает границу и получает пакет состояния</desc>
+  <rect width="420" height="260" rx="22" fill="#0f1a2d"/>
+  <circle cx="150" cy="130" r="72" fill="none" stroke="#37c8a7" stroke-width="4" stroke-dasharray="10 10"/>
+  <circle cx="150" cy="130" r="20" fill="#75e3ce"/>
+  <circle cx="322" cy="130" r="18" fill="#ffd479">
+    <animate attributeName="cx" values="360;322;282;240" dur="2.6s" repeatCount="indefinite"/>
+  </circle>
+  <rect x="216" y="96" width="64" height="40" rx="10" fill="#1d2d46" stroke="#37c8a7" opacity="0">
+    <animate attributeName="opacity" values="0;0;0.95;0.95;0" dur="2.6s" repeatCount="indefinite"/>
+  </rect>
+  <text x="248" y="121" text-anchor="middle" fill="#e7eefc" font-size="14" font-family="Segoe UI, Arial, sans-serif" opacity="0">
+    STATE
+    <animate attributeName="opacity" values="0;0;1;1;0" dur="2.6s" repeatCount="indefinite"/>
+  </text>
+</svg>

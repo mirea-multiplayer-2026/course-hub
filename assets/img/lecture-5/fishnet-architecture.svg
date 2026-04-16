@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 680" role="img" aria-labelledby="t d">
+  <title id="t">Архитектура FishNet</title>
+  <desc id="d">Схема менеджеров FishNet</desc>
+  <rect width="1200" height="680" rx="28" fill="#101b2f"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <rect x="460" y="46" width="280" height="84" rx="22" fill="#17344a" stroke="#37c8a7"/>
+    <text x="600" y="99" text-anchor="middle" fill="#75e3ce" font-size="20" font-weight="800">NetworkManager</text>
+    <path d="M600 132v66" stroke="#37c8a7" stroke-width="8" stroke-linecap="round"/>
+    <path d="M140 220h920" stroke="#35527c" stroke-width="4" stroke-linecap="round"/>
+
+    <g fill="#1d2d46" stroke="#35527c">
+      <rect x="70" y="220" width="190" height="96" rx="20"/>
+      <rect x="280" y="220" width="190" height="96" rx="20"/>
+      <rect x="490" y="220" width="210" height="96" rx="20"/>
+      <rect x="720" y="220" width="190" height="96" rx="20"/>
+      <rect x="930" y="220" width="200" height="96" rx="20"/>
+      <rect x="280" y="392" width="190" height="96" rx="20"/>
+      <rect x="490" y="392" width="210" height="96" rx="20"/>
+    </g>
+
+    <g fill="#e7eefc" font-size="18" font-weight="700" text-anchor="middle">
+      <text x="165" y="275">ServerManager</text>
+      <text x="375" y="275">ClientManager</text>
+      <text x="595" y="275">TransportManager</text>
+      <text x="815" y="275">TimeManager</text>
+      <text x="1030" y="267">Observer</text>
+      <text x="1030" y="294">Manager</text>
+      <text x="375" y="445">Prediction</text>
+      <text x="375" y="472">Manager</text>
+      <text x="595" y="445">Scene /</text>
+      <text x="595" y="472">Prefab layer</text>
+    </g>
+
+    <path d="M375 316v76M595 316v76" stroke="#35527c" stroke-width="6"/>
+  </g>
+</svg>

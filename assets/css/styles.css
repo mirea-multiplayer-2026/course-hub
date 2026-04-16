@@ -59,7 +59,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 68px;
+  min-height: 86px;
   gap: 1rem;
 }
 
@@ -71,7 +71,21 @@ a {
 
 .site-nav {
   display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+  align-items: flex-end;
+}
+
+.site-nav .nav-row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 0.25rem;
+}
+
+.site-nav .nav-row-practices {
+  padding-top: 0.2rem;
+  border-top: 1px solid rgba(42, 61, 94, 0.7);
 }
 
 .site-nav a {
@@ -279,7 +293,7 @@ code {
 
   .site-nav {
     position: absolute;
-    top: 68px;
+    top: 86px;
     right: 4vw;
     left: 4vw;
     background: var(--bg-soft);
@@ -288,6 +302,16 @@ code {
     padding: 0.35rem;
     display: none;
     flex-direction: column;
+    gap: 0.45rem;
+    align-items: stretch;
+  }
+
+  .site-nav .nav-row {
+    justify-content: flex-start;
+  }
+
+  .site-nav .nav-row-practices {
+    padding-top: 0.35rem;
   }
 
   .site-nav.is-open {

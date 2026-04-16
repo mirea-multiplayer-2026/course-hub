@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 520" role="img" aria-labelledby="t d">
+  <title id="t">AOI Problem</title>
+  <desc id="d">Сравнение трафика без AOI и с AOI</desc>
+  <rect width="960" height="520" rx="28" fill="#101b2f"/>
+  <g font-family="Segoe UI, Arial, sans-serif" text-anchor="middle">
+    <text x="240" y="68" fill="#ffd479" font-size="30" font-weight="800">Без AOI</text>
+    <text x="720" y="68" fill="#75e3ce" font-size="30" font-weight="800">С AOI</text>
+    <circle cx="240" cy="260" r="136" fill="#47252c" stroke="#b74545" stroke-width="4"/>
+    <circle cx="720" cy="260" r="136" fill="#17344a" stroke="#37c8a7" stroke-width="4"/>
+    <circle cx="720" cy="260" r="74" fill="none" stroke="#75e3ce" stroke-width="4" stroke-dasharray="10 10"/>
+    <g fill="#e7eefc" font-size="24" font-weight="700">
+      <text x="240" y="238">32 × 1000</text>
+      <text x="240" y="272">32 000 sync/tick</text>
+      <text x="720" y="238">32 × 50</text>
+      <text x="720" y="272">1 600 sync/tick</text>
+    </g>
+    <text x="480" y="474" fill="#9eb0c9" font-size="20">AOI сокращает синхронизацию до релевантного радиуса вместо глобальной рассылки.</text>
+  </g>
+</svg>

@@ -1,0 +1,609 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лекция 5 | Course Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../index.html" class="brand">Course Hub</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
+      <nav id="site-nav" class="site-nav">
+      <div class="nav-row nav-row-lectures">
+        <a href="../index.html">Главная</a>
+        <a href="./lecture-1.html">Лекция 1</a>
+        <a href="./lecture-2.html">Лекция 2</a>
+        <a href="./lecture-3.html">Лекция 3</a>
+        <a href="./lecture-4.html">Лекция 4</a>
+        <a href="./lecture-5.html" aria-current="page">Лекция 5</a>
+      </div>
+      <div class="nav-row nav-row-practices">
+        <a href="./practice-1.html">Практика 1</a>
+        <a href="./practice-2.html">Практика 2</a>
+        <a href="./practice-3.html">Практика 3</a>
+        <a href="./practice-4.html">Практика 4</a>
+      </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section lecture-page">
+    <a class="back-link" href="../index.html">Назад на главную</a>
+    <h1>Лекция 5. FishNet: архитектура, Observers и миграция</h1>
+
+    <section class="lecture-hero lecture-hero-text">
+      <p class="eyebrow">Переход от NGO к продакшен-фреймворку</p>
+      <p>Эта лекция открывает второй блок курса. Базовый прототип на Unity NGO уже собран, и теперь мы переходим к FishNet — более гибкому фреймворку с декомпозированной архитектурой, встроенным Prediction-ready стеком и системой видимости объектов (Observers), которой в NGO нет.</p>
+      <div class="pill-row">
+        <span class="pill">FishNet</span>
+        <span class="pill">SyncVar</span>
+        <span class="pill">ObserversRpc</span>
+        <span class="pill">TargetRpc</span>
+        <span class="pill">DistanceCondition</span>
+        <span class="pill">Area of Interest</span>
+        <span class="pill">NGO → FishNet</span>
+      </div>
+    </section>
+
+    <div class="content-stack">
+      <article class="content-card">
+        <h2>1. Карта занятия и повторение</h2>
+        <p>После первых трёх лекций студент уже умеет собирать мультиплеерный прототип на NGO: подключение, синхронизацию переменных, движение, ownership, камеру и серверную стрельбу. Лекция 5 открывает следующий уровень — миграцию на FishNet и работу с возможностями, которых в NGO нет.</p>
+
+        <div class="info-grid">
+          <section class="media-card">
+            <h3>Что уже знаем</h3>
+            <p><code>NetworkVariable</code>, <code>ServerRpc</code>, <code>ClientRpc</code>, <code>IsOwner</code>, <code>NetworkTransform</code>, серверный спавн и guard-клозы валидации.</p>
+          </section>
+          <section class="media-card">
+            <h3>Что пока не умеем</h3>
+            <p>Работать с FishNet, ограничивать видимость объектов по расстоянию, применять <code>SyncVar</code>, <code>ObserversRpc</code> и Observer Conditions.</p>
+          </section>
+          <section class="media-card">
+            <h3>К чему идём</h3>
+            <p>К проекту, переведённому на FishNet, с системой Observer-видимости и понятной базой под Prediction из следующей лекции.</p>
+          </section>
+        </div>
+
+        <h3>Карта занятия</h3>
+        <ul>
+          <li><strong>Блок 1:</strong> зачем вообще выходить за пределы NGO и что FishNet даёт в продакшене.</li>
+          <li><strong>Блок 2:</strong> архитектура FishNet и transport-слой.</li>
+          <li><strong>Блок 3:</strong> <code>SyncVar</code>, <code>SyncList</code>, <code>SyncDictionary</code>, <code>SyncHashSet</code>.</li>
+          <li><strong>Блок 4:</strong> <code>ObserversRpc</code>, <code>TargetRpc</code> и Observer Conditions.</li>
+          <li><strong>Блок 5:</strong> инженерный чек-лист миграции NGO → FishNet.</li>
+        </ul>
+
+        <div class="checkpoint">
+          <h3>Проверка понимания</h3>
+          <p>Если вы уверенно пишете <code>ServerRpc</code> с валидацией, понимаете, зачем нужен <code>OnNetworkSpawn()</code>, и различаете <code>IsOwner</code> и <code>IsServer</code>, то вход в эту лекцию у вас уже есть.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>2. Почему не только NGO</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-5/ngo-limits.svg" alt="Ограничения NGO при масштабировании" loading="lazy">
+          <figcaption>NGO отлично подходит для обучения и прототипов, но при росте масштаба появляются архитектурные ограничения.</figcaption>
+        </figure>
+
+        <h3>Сильные стороны NGO</h3>
+        <ul>
+          <li>Официальный стек Unity с долгосрочной поддержкой и понятной документацией.</li>
+          <li>Бесплатная интеграция с Relay, Lobby и Matchmaking.</li>
+          <li>Очень хороший вход для обучения мультиплееру и сборки первых прототипов.</li>
+        </ul>
+
+        <h3>Где начинаются ограничения</h3>
+        <ul>
+          <li><strong>Нет встроенного Prediction:</strong> при высоком пинге отзывчивость быстро деградирует.</li>
+          <li><strong>Слабая observer-модель:</strong> без предметной системы relevancy сложнее экономить трафик.</li>
+          <li><strong>Нет Host Migration:</strong> при выходе хоста сессия разваливается.</li>
+          <li><strong>Масштабируемость:</strong> при росте числа клиентов и объектов быстрее накапливаются расходы по CPU и GC.</li>
+        </ul>
+
+        <div class="checkpoint">
+          <h3>Важно</h3>
+          <p>Это не отменяет ценность NGO. Он отлично решает задачу старта и учебной базы. Просто на следующем уровне требований индустрия часто уходит в более специализированные решения.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>3. FishNet: мотивация и бенчмарки</h2>
+
+        <div class="info-grid">
+          <section class="media-card">
+            <h3>Архитектура</h3>
+            <p>Вместо одной перегруженной точки входа FishNet раскладывает сеть по менеджерам: сервер, клиент, транспорт, время, observability и prediction.</p>
+          </section>
+          <section class="media-card">
+            <h3>Производительность</h3>
+            <p>Меньше аллокаций и ниже GC pressure. На больших сценах это быстро превращается из теории в реальную экономию кадра.</p>
+          </section>
+          <section class="media-card">
+            <h3>Возможности</h3>
+            <p>Prediction, мощные Observers, несколько транспортов, гибкий жизненный цикл и более явная работа с AOI.</p>
+          </section>
+        </div>
+
+        <h3>Сравнение производительности</h3>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-5/benchmarks.svg" alt="Бенчмарки NGO и FishNet на 100, 500 и 1000 объектах" loading="lazy">
+          <figcaption>При малом количестве объектов разницы почти не видно. При масштабировании FishNet выигрывает заметно сильнее.</figcaption>
+        </figure>
+
+        <p>FishNet распространяется по MIT-лицензии, активно развивается сообществом и используется в реальных коммерческих проектах. Для нас важно не «кто круче», а то, что этот стек даёт более инженерно зрелый набор инструментов.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>4. Архитектура FishNet</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-5/fishnet-architecture.svg" alt="Древовидная схема архитектуры FishNet" loading="lazy">
+          <figcaption>FishNet разносит сетевую ответственность по специализированным менеджерам.</figcaption>
+        </figure>
+
+        <ul>
+          <li><strong>NetworkManager:</strong> точка входа, но не жесткий singleton.</li>
+          <li><strong>ServerManager:</strong> серверная логика, подключения, spawn и despawn.</li>
+          <li><strong>ClientManager:</strong> локальное клиентское соединение и обработка собственного состояния.</li>
+          <li><strong>TransportManager:</strong> абстракция транспорта, изолирующая игру от конкретного сетевого канала.</li>
+          <li><strong>TimeManager:</strong> сетевой тик, <code>Tick</code>, <code>TickDelta</code> и всё, что критично для prediction.</li>
+          <li><strong>ObserverManager:</strong> правила видимости и Area of Interest.</li>
+          <li><strong>PredictionManager:</strong> база для <code>Replicate</code> / <code>Reconcile</code> и клиентского предсказания.</li>
+        </ul>
+
+        <h3>Сравнение с NGO</h3>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-5/ngo-vs-fishnet-arch.svg" alt="Сравнение архитектур NGO и FishNet" loading="lazy">
+          <figcaption>NGO собирает больше логики вокруг одного центра. FishNet декомпозирует систему и снижает архитектурную связанность.</figcaption>
+        </figure>
+      </article>
+
+      <article class="content-card">
+        <h2>5. Transport: Tugboat, Bayou, Multipass</h2>
+
+        <div class="media-grid">
+          <section class="media-card">
+            <h3>Tugboat (UDP)</h3>
+            <p>Основной транспорт по умолчанию. Даёт минимальную задержку и по смыслу ближе всего к <code>UnityTransport</code> из NGO.</p>
+          </section>
+          <section class="media-card">
+            <h3>Bayou (WebSocket)</h3>
+            <p>Полезен для WebGL и браузерных сборок, где нужен стек поверх ограничений браузера.</p>
+          </section>
+          <section class="media-card">
+            <h3>Multipass</h3>
+            <p>Позволяет держать несколько транспортов одновременно: например, Tugboat для desktop и Bayou для web-клиентов.</p>
+          </section>
+        </div>
+
+        <p>Ключевая мысль: транспорт — это конфигурация. Логика игры не должна переписываться только потому, что вы меняете конкретный способ доставки пакетов.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>6. Жизненный цикл NetworkBehaviour</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-5/lifecycle.svg" alt="Жизненный цикл NetworkBehaviour в FishNet" loading="lazy">
+          <figcaption>В FishNet серверная и клиентская инициализация разделены отдельными методами.</figcaption>
+        </figure>
+
+        <ul>
+          <li><code>OnStartNetwork()</code> — объект зарегистрирован в сети.</li>
+          <li><code>OnStartServer()</code> — только серверная инициализация.</li>
+          <li><code>OnStartClient()</code> — клиентская инициализация для каждого клиента.</li>
+          <li><code>OnOwnershipClient(prev)</code> — реакция на передачу владения.</li>
+          <li><code>OnStopClient()</code>, <code>OnStopServer()</code>, <code>OnStopNetwork()</code> — зеркальное завершение.</li>
+        </ul>
+
+        <h3>Что меняется по сравнению с NGO</h3>
+        <ul>
+          <li>Вместо одного <code>OnNetworkSpawn()</code> появляется более точное разделение ответственности.</li>
+          <li>Серверную и клиентскую инициализацию больше не нужно смешивать в одном методе.</li>
+          <li>На смену ручному отслеживанию ownership приходит встроенный <code>OnOwnershipClient(prev)</code>.</li>
+        </ul>
+
+        <div class="checkpoint">
+          <h3>Критический нюанс</h3>
+          <p>Если вы переопределяете lifecycle-методы FishNet, не забывайте вызывать <code>base.OnStartClient()</code> и другие соответствующие <code>base</code>-методы. Иначе внутренняя инициализация фреймворка будет неполной.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>7. SyncVar — замена NetworkVariable</h2>
+        <p><code>[SyncVar]</code> — это более декларативная форма state sync. Вам не нужен отдельный контейнер <code>NetworkVariable&lt;T&gt;</code>; вы описываете обычное поле и задаёте правила синхронизации атрибутом.</p>
+
+        <h3>NGO (Лекция 2)</h3>
+        <pre><code class="language-csharp">public NetworkVariable&lt;int&gt; health = new(100,
+    NetworkVariableReadPermission.Everyone,
+    NetworkVariableWritePermission.Server);
+
+public override void OnNetworkSpawn() {
+    health.OnValueChanged += OnHealthChanged;
+    OnHealthChanged(0, health.Value);
+}
+
+public override void OnNetworkDespawn() {
+    health.OnValueChanged -= OnHealthChanged;
+}</code></pre>
+
+        <h3>FishNet</h3>
+        <pre><code class="language-csharp">[SyncVar(OnChange = nameof(OnHealthChanged))]
+public int health = 100;
+
+private void OnHealthChanged(int prev, int next, bool asServer) {
+    UpdateHealthUI(next);
+}</code></pre>
+
+        <h3>Права доступа</h3>
+        <ul>
+          <li><code>ReadPermission.Observers</code> по умолчанию: значение видят наблюдатели объекта.</li>
+          <li><code>ReadPermission.OwnerOnly</code>: подходит для приватных данных вроде инвентаря или скрытых статов.</li>
+          <li><code>WritePermission.ServerOnly</code> по умолчанию: сервер остаётся источником истины.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Аналогия с NGO permissions</summary>
+          <p>Те же read/write-ограничения задаются прямо на атрибуте. По смыслу модель знакомая, просто синтаксис короче.</p>
+          <pre><code class="language-csharp">[SyncVar(WritePermission = WritePermission.ServerOnly,
+         ReadPermission = ReadPermission.Observers)]
+public int score = 0;</code></pre>
+        </details>
+      </article>
+
+      <article class="content-card">
+        <h2>8. SyncList, SyncDictionary, SyncHashSet</h2>
+
+        <h3>SyncList — замена NetworkList с гранулярными колбэками</h3>
+        <pre><code class="language-csharp">public readonly SyncList&lt;InventorySlot&gt; inventory = new();
+
+inventory.OnChange += (SyncListOperation op, int index,
+    InventorySlot oldItem, InventorySlot newItem, bool asServer) =&gt; {
+    switch (op) {
+        case SyncListOperation.Add: UpdateSlotUI(index, newItem); break;
+        case SyncListOperation.RemoveAt: RemoveSlotUI(index); break;
+        case SyncListOperation.Set: UpdateSlotUI(index, newItem); break;
+        case SyncListOperation.Clear: ClearAllSlotsUI(); break;
+    }
+};</code></pre>
+
+        <h3>SyncDictionary — сетевой словарь</h3>
+        <pre><code class="language-csharp">public readonly SyncDictionary&lt;string, int&gt; playerScores = new();
+
+playerScores["Alice"] = 150;
+playerScores.OnChange += (op, key, value, asServer) =&gt; UpdateScoreboard();</code></pre>
+
+        <h3>SyncHashSet — множество уникальных элементов</h3>
+        <pre><code class="language-csharp">public readonly SyncHashSet&lt;ulong&gt; readyPlayers = new();
+
+readyPlayers.Add(clientId);
+readyPlayers.Remove(clientId);
+
+bool allReady = readyPlayers.Count == totalPlayers;</code></pre>
+
+        <p>Ключевая выгода у всех сетевых коллекций одна: по сети передаётся дельта, а не весь контейнер целиком.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>9. RPC: ObserversRpc, TargetRpc и маппинг с NGO</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-5/rpc-mapping.svg" alt="Маппинг RPC из NGO в FishNet" loading="lazy">
+          <figcaption>ServerRpc почти не меняется, а ClientRpc превращается в ObserversRpc с более точным смыслом доставки.</figcaption>
+        </figure>
+
+        <ul>
+          <li><strong>Клиент → Сервер:</strong> <code>[ServerRpc]</code> остаётся почти тем же.</li>
+          <li><strong>Сервер → Наблюдатели:</strong> <code>[ClientRpc]</code> из NGO переходит в <code>[ObserversRpc]</code>.</li>
+          <li><strong>Сервер → Один клиент:</strong> вместо <code>ClientRpcParams</code> и списка адресатов используется <code>[TargetRpc]</code> с <code>NetworkConnection target</code>.</li>
+        </ul>
+
+        <div class="checkpoint">
+          <h3>Ключевое отличие</h3>
+          <p><code>[ObserversRpc]</code> шлёт не всем клиентам подряд, а только тем, кто является observer для объекта. Это не косметическое переименование, а фундаментальное изменение модели доставки.</p>
+        </div>
+
+        <h3>ServerRpc и ownership</h3>
+        <pre><code class="language-csharp">[ServerRpc(RequireOwnership = true)]
+void ShootServerRpc(Vector3 direction) {
+    if (!IsAlive || ammo &lt;= 0) return;
+    if (Time.time &lt; lastShotTime + cooldown) return;
+    if (direction.magnitude &lt; 0.1f) return;
+
+    SpawnProjectile(direction);
+}</code></pre>
+
+        <h3>ObserversRpc и TargetRpc</h3>
+        <pre><code class="language-csharp">[ObserversRpc]
+void PlayShotSoundObserversRpc(Vector3 position) {
+    AudioSource.PlayClipAtPoint(shotClip, position);
+}
+
+[TargetRpc]
+void ShowLootDropTargetRpc(NetworkConnection target, string itemName) {
+    ShowNotification($"Вы получили {itemName}!");
+}</code></pre>
+      </article>
+
+      <article class="content-card">
+        <h2>10. Миграция стрельбы: NGO → FishNet</h2>
+        <p>Код стрельбы из лекции 3 переносится на FishNet почти без изменения геймплейной логики. Мы меняем API-слой, а не саму архитектуру выстрела.</p>
+
+        <h3>NGO (Лекция 3)</h3>
+        <pre><code class="language-csharp">using Unity.Netcode;
+
+public class PlayerShooting : NetworkBehaviour {
+    public NetworkObject projectilePrefab;
+    public Transform muzzle;
+
+    void Update() {
+        if (!IsOwner) return;
+        if (Input.GetKeyDown(KeyCode.Space))
+            ShootServerRpc(Camera.main.transform.forward);
+    }
+
+    [ServerRpc(RequireOwnership = true)]
+    void ShootServerRpc(Vector3 dir, ServerRpcParams p = default) {
+        var obj = Instantiate(projectilePrefab,
+            muzzle.position, Quaternion.LookRotation(dir));
+        obj.SpawnWithOwnership(OwnerClientId);
+    }
+}</code></pre>
+
+        <h3>FishNet</h3>
+        <pre><code class="language-csharp">using FishNet.Object;
+
+public class PlayerShooting : NetworkBehaviour {
+    public NetworkObject projectilePrefab;
+    public Transform muzzle;
+
+    void Update() {
+        if (!base.IsOwner) return;
+        if (Input.GetKeyDown(KeyCode.Space))
+            ShootServerRpc(Camera.main.transform.forward);
+    }
+
+    [ServerRpc(RequireOwnership = true)]
+    void ShootServerRpc(Vector3 dir) {
+        var obj = Instantiate(projectilePrefab,
+            muzzle.position, Quaternion.LookRotation(dir));
+        ServerManager.Spawn(obj, Owner);
+    }
+}</code></pre>
+
+        <details class="hint-card">
+          <summary>Что реально поменялось</summary>
+          <p><code>IsOwner</code> превращается в <code>base.IsOwner</code>, <code>ServerRpcParams</code> больше не нужен, а <code>SpawnWithOwnership(OwnerClientId)</code> заменяется на <code>ServerManager.Spawn(obj, Owner)</code>. Все guard-клозы и бизнес-логика остаются на месте.</p>
+        </details>
+      </article>
+
+      <article class="content-card">
+        <h2>11. Observers — Area of Interest</h2>
+
+        <h3>Проблема: все видят всё</h3>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-5/aoi-problem.svg" alt="Сравнение трафика без AOI и с AOI" loading="lazy">
+          <figcaption>Без AOI сервер синхронизирует всё всем. С AOI каждый клиент получает только релевантный кусок мира.</figcaption>
+        </figure>
+
+        <p>В NGO любой сетевой объект часто оказывается видим всем клиентам. В открытом мире это сразу бьёт по трафику и CPU. FishNet решает эту задачу через Observers: сервер заранее знает, кому объект действительно нужен.</p>
+
+        <h3>Что такое Observer</h3>
+        <p>Observer — это клиент, для которого выполнены правила видимости конкретного объекта. Только observers получают <code>SyncVar</code>-обновления и <code>ObserversRpc</code>. Остальные клиенты не получают ничего.</p>
+
+        <div class="gif-grid">
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-5/observer-in-range.svg" alt="Клиент внутри радиуса становится observer" loading="lazy">
+            <h3>Клиент в зоне</h3>
+            <p>Когда клиент внутри радиуса видимости, объект для него существует и синхронизируется.</p>
+          </section>
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-5/observer-out-range.svg" alt="Клиент вне радиуса не получает данные" loading="lazy">
+            <h3>Клиент вне зоны</h3>
+            <p>Когда клиент слишком далеко, объект не попадает в его observer-набор и данные не отправляются.</p>
+          </section>
+          <section class="gif-card">
+            <img src="../assets/gif/lecture-5/observer-enter.svg" alt="Клиент входит в зону и получает текущее состояние" loading="lazy">
+            <h3>Вход в зону</h3>
+            <p>При пересечении границы FishNet присылает клиенту актуальное состояние объекта, как при late-join.</p>
+          </section>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>12. Встроенные ObserverConditions</h2>
+
+        <div class="media-grid">
+          <section class="media-card">
+            <h3>DistanceCondition</h3>
+            <p>Максимальная дальность видимости. Особенно полезна для FPS, TPS и проектов с большим числом активных объектов.</p>
+          </section>
+          <section class="media-card">
+            <h3>SceneCondition</h3>
+            <p>Клиент в одной сцене не получает данные из другой сцены или подуровня.</p>
+          </section>
+          <section class="media-card">
+            <h3>OwnerOnlyCondition</h3>
+            <p>Подходит для приватных данных: персонального инвентаря, скрытых статов и owner-only UI.</p>
+          </section>
+        </div>
+
+        <p>Во многих случаях всё настраивается в Inspector через <code>NetworkObserver</code> и набор conditions. Код вообще не нужен, пока сценарий не выходит за рамки базовой видимости.</p>
+
+        <h3>Custom ObserverCondition</h3>
+        <pre><code class="language-csharp">public class TeamCondition : ObserverCondition {
+    public override bool ConditionMet(
+        NetworkConnection conn, bool currentlyAdded, out bool notProcessed) {
+        notProcessed = false;
+        int objectTeam = GetComponent&lt;TeamComponent&gt;().TeamId;
+        int clientTeam = conn.FirstObject
+            .GetComponent&lt;TeamComponent&gt;().TeamId;
+        return objectTeam == clientTeam;
+    }
+
+    public override ObserverConditionType GetConditionType()
+        =&gt; ObserverConditionType.Normal;
+}</code></pre>
+
+        <p>По тому же принципу строятся командная видимость, stealth-механики, Fog of War и более сложные схемы relevancy.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>13. Observers и ObserversRpc</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-5/observers-rpc-flow.svg" alt="ObserversRpc доходит только до наблюдателей объекта" loading="lazy">
+          <figcaption>Если объект ограничен observer-условиями, его RPC тоже ограничиваются этим же набором клиентов.</figcaption>
+        </figure>
+
+        <ul>
+          <li><strong>Объект с DistanceCondition:</strong> <code>ObserversRpc</code> получают только клиенты, попавшие в радиус.</li>
+          <li><strong>Объект без observer-ограничений:</strong> <code>ObserversRpc</code> воспринимается почти как старый глобальный <code>ClientRpc</code>.</li>
+        </ul>
+
+        <div class="checkpoint">
+          <h3>Частая ошибка при миграции</h3>
+          <p>Глобальные события вроде таймера, конца матча или чата внезапно «ломаются» после включения Observers. Причина обычно одна: эти события отправляются с объекта, на который по ошибке повесили <code>DistanceCondition</code>.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>14. Чек-лист миграции NGO → FishNet</h2>
+
+        <ol>
+          <li>Удалить пакеты <code>Netcode for GameObjects</code> и связанный transport-слой NGO.</li>
+          <li>Импортировать FishNet и поднять новый <code>NetworkManager</code>.</li>
+          <li>Подключить транспорт, обычно <code>Tugboat</code>.</li>
+          <li>Заменить пространства имён <code>Unity.Netcode</code> на <code>FishNet.Object</code> и <code>FishNet.Object.Synchronizing</code>.</li>
+          <li><code>NetworkVariable&lt;T&gt;</code> перенести в <code>[SyncVar]</code>.</li>
+          <li><code>[ClientRpc]</code> заменить на <code>[ObserversRpc]</code>.</li>
+          <li><code>OnNetworkSpawn()</code> разложить на <code>OnStartClient()</code> и <code>OnStartServer()</code>.</li>
+          <li><code>Spawn()</code> и <code>Despawn()</code> перевести на вызовы через <code>ServerManager</code>.</li>
+        </ol>
+
+        <h3>Топ-5 типовых ошибок</h3>
+        <ul>
+          <li>Забытый <code>base.IsOwner</code> вместо старого <code>IsOwner</code>.</li>
+          <li>Механический перенос логики из <code>OnNetworkSpawn()</code> только в <code>OnStartClient()</code>, хотя часть инициализации должна жить на сервере.</li>
+          <li>Сохранение старых вызовов <code>SpawnWithOwnership</code> и <code>NetworkObject.Despawn</code>.</li>
+          <li>Отсутствие <code>base.OnStartClient()</code> и других обязательных <code>base</code>-вызовов.</li>
+          <li>Смешанное состояние проекта, когда сцена уже на FishNet, а часть кода всё ещё на NGO.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Короткий пример PlayerController до и после</summary>
+          <p><strong>NGO:</strong></p>
+          <pre><code class="language-csharp">using Unity.Netcode;
+
+public class PlayerController : NetworkBehaviour {
+    NetworkVariable&lt;int&gt; health = new(100);
+
+    public override void OnNetworkSpawn() {
+        if (IsOwner) Camera.main.transform.SetParent(transform);
+        health.OnValueChanged += OnHP;
+        OnHP(0, health.Value);
+    }
+
+    public override void OnNetworkDespawn() {
+        health.OnValueChanged -= OnHP;
+    }
+
+    void Update() {
+        if (!IsOwner) return;
+        HandleMovement();
+    }
+}</code></pre>
+          <p><strong>FishNet:</strong></p>
+          <pre><code class="language-csharp">using FishNet.Object;
+using FishNet.Object.Synchronizing;
+
+public class PlayerController : NetworkBehaviour {
+    [SyncVar(OnChange = nameof(OnHP))]
+    public int health = 100;
+
+    public override void OnStartClient() {
+        base.OnStartClient();
+        if (base.IsOwner) Camera.main.transform.SetParent(transform);
+    }
+
+    void Update() {
+        if (!base.IsOwner) return;
+        HandleMovement();
+    }
+}</code></pre>
+        </details>
+      </article>
+
+      <article class="content-card">
+        <h2>15. Добавляем Observers к проекту</h2>
+        <ol>
+          <li>Добавить <code>NetworkObserver</code> на каждый сетевой префаб, который не обязан быть глобально видимым.</li>
+          <li>Назначить <code>DistanceCondition</code> и подобрать рабочую дистанцию под жанр.</li>
+          <li>Оставить глобальные менеджеры и системные объекты без дистанционных ограничений.</li>
+        </ol>
+
+        <p>Это сильный инженерный выигрыш: вы сокращаете лишнюю синхронизацию без переписывания всей игры.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>16. А что с задержками?</h2>
+        <figure class="lecture-figure">
+          <img src="../assets/img/lecture-5/latency-problem.svg" alt="Проблема задержки без Prediction" loading="lazy">
+          <figcaption>Даже после миграции на FishNet без prediction ввод продолжает ждать RTT.</figcaption>
+        </figure>
+
+        <p>Если в FishNet включить симуляцию задержки 200 мс и нажать <code>W</code>, персонаж всё равно начнёт двигаться с неприятным запаздыванием. Новый стек улучшает архитектуру, но не отменяет физику сети.</p>
+
+        <p><strong>Лекция 6</strong> закрывает именно этот разрыв:</p>
+        <ul>
+          <li><strong>Client-Side Prediction:</strong> локальный отклик без ожидания сервера.</li>
+          <li><strong>Server Reconciliation:</strong> корректировка расхождений между предсказанием и серверной истиной.</li>
+          <li><strong>Lag Compensation:</strong> честная стрельба и справедливые проверки попаданий.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Что мы узнали</h2>
+        <ul>
+          <li>Почему FishNet интересен индустрии: производительность, декомпозиция, Observers и готовность к prediction.</li>
+          <li>Как устроена архитектура FishNet и зачем нужны отдельные менеджеры.</li>
+          <li>Чем <code>[SyncVar]</code> и сетевые коллекции отличаются от модели NGO.</li>
+          <li>Почему <code>[ObserversRpc]</code> — это не просто переименование старого <code>ClientRpc</code>.</li>
+          <li>Как Observers решают задачу Area of Interest и экономии трафика.</li>
+          <li>Как выглядит практический чек-лист миграции NGO → FishNet.</li>
+        </ul>
+
+        <h3>Чек-лист самопроверки</h3>
+        <ol>
+          <li>Я понимаю, чем архитектура FishNet отличается от NGO.</li>
+          <li>Я могу объявить <code>[SyncVar]</code> и объяснить, как работает <code>OnChange</code>.</li>
+          <li>Я знаю разницу между <code>[ObserversRpc]</code> и <code>[TargetRpc]</code>.</li>
+          <li>Я понимаю, что такое observer и зачем нужен <code>DistanceCondition</code>.</li>
+          <li>Я могу перевести спавн и despawn на вызовы через <code>ServerManager</code>.</li>
+          <li>Я понимаю, почему глобальные события нельзя отправлять с объекта, скрытого observer-ограничениями.</li>
+        </ol>
+
+        <div class="checkpoint">
+          <h3>Если что-то ломается после миграции</h3>
+          <p>Сначала проверяйте три места: ownership-проверки через <code>base.IsOwner</code>, корректный lifecycle с вызовом <code>base.OnStartClient()</code> и observer-настройки на глобальных объектах.</p>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Course Hub - Лекция 5</p>
+    </div>
+  </footer>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+  <script defer src="../assets/js/site.js"></script>
+</body>
+</html>
+

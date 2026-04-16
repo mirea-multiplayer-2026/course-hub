@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-labelledby="t d">
+  <title id="t">Benchmarks NGO vs FishNet</title>
+  <desc id="d">Столбчатая диаграмма сравнения NGO и FishNet</desc>
+  <rect width="960" height="560" rx="28" fill="#101b2f"/>
+  <text x="48" y="64" fill="#e7eefc" font-size="34" font-family="Segoe UI, Arial, sans-serif" font-weight="800">Сравнение на 100 / 500 / 1000 объектах</text>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="18">
+    <line x1="90" y1="470" x2="900" y2="470" stroke="#35527c" stroke-width="2"/>
+    <line x1="90" y1="120" x2="90" y2="470" stroke="#35527c" stroke-width="2"/>
+    <text x="170" y="505" fill="#9eb0c9">100</text>
+    <text x="440" y="505" fill="#9eb0c9">500</text>
+    <text x="710" y="505" fill="#9eb0c9">1000</text>
+    <rect x="140" y="350" width="64" height="120" rx="10" fill="#ffd479"/>
+    <rect x="218" y="328" width="64" height="142" rx="10" fill="#37c8a7"/>
+    <rect x="410" y="250" width="64" height="220" rx="10" fill="#ffd479"/>
+    <rect x="488" y="178" width="64" height="292" rx="10" fill="#37c8a7"/>
+    <rect x="680" y="146" width="64" height="324" rx="10" fill="#ffd479"/>
+    <rect x="758" y="72" width="64" height="398" rx="10" fill="#37c8a7"/>
+    <text x="122" y="344" fill="#ffd479">NGO</text>
+    <text x="210" y="322" fill="#75e3ce">FishNet</text>
+    <text x="392" y="244" fill="#ffd479">NGO</text>
+    <text x="480" y="172" fill="#75e3ce">FishNet</text>
+    <text x="662" y="140" fill="#ffd479">NGO</text>
+    <text x="750" y="66" fill="#75e3ce">FishNet</text>
+  </g>
+  <text x="48" y="532" fill="#9eb0c9" font-size="18" font-family="Segoe UI, Arial, sans-serif">Высота столбца = условная эффективность под нагрузкой: больше выше, меньше GC и стабильнее tick rate.</text>
+</svg>

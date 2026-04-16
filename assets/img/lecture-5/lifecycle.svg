@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 920" role="img" aria-labelledby="t d">
+  <title id="t">Lifecycle FishNet</title>
+  <desc id="d">Вертикальная цепочка lifecycle-методов FishNet</desc>
+  <rect width="760" height="920" rx="28" fill="#101b2f"/>
+  <g font-family="Segoe UI, Arial, sans-serif" text-anchor="middle">
+    <text x="380" y="58" fill="#e7eefc" font-size="34" font-weight="800">Жизненный цикл NetworkBehaviour</text>
+    <g fill="#1d2d46" stroke="#35527c">
+      <rect x="220" y="100" width="320" height="68" rx="18"/>
+      <rect x="220" y="208" width="320" height="68" rx="18"/>
+      <rect x="220" y="316" width="320" height="68" rx="18"/>
+      <rect x="220" y="424" width="320" height="68" rx="18"/>
+      <rect x="220" y="532" width="320" height="68" rx="18"/>
+      <rect x="220" y="640" width="320" height="68" rx="18"/>
+      <rect x="150" y="748" width="460" height="92" rx="18"/>
+    </g>
+    <g fill="#e7eefc" font-size="24" font-weight="700">
+      <text x="380" y="143">OnStartNetwork()</text>
+      <text x="380" y="251">OnStartServer()</text>
+      <text x="380" y="359">OnStartClient()</text>
+      <text x="380" y="467">Runtime / Tick loop</text>
+      <text x="380" y="575">OnOwnershipClient(prev)</text>
+      <text x="380" y="683">OnStopClient()</text>
+      <text x="380" y="790">OnStopServer()</text>
+      <text x="380" y="820">OnStopNetwork()</text>
+    </g>
+    <g stroke="#37c8a7" stroke-width="6" stroke-linecap="round">
+      <path d="M380 168v34"/>
+      <path d="M380 276v34"/>
+      <path d="M380 384v34"/>
+      <path d="M380 492v34"/>
+      <path d="M380 600v34"/>
+      <path d="M380 708v34"/>
+    </g>
+  </g>
+</svg>

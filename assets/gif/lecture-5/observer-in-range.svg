@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 260" role="img" aria-labelledby="t d">
+  <title id="t">Observer in range</title>
+  <desc id="d">Клиент входит в зону и получает синхронизацию</desc>
+  <rect width="420" height="260" rx="22" fill="#0f1a2d"/>
+  <circle cx="150" cy="130" r="72" fill="none" stroke="#37c8a7" stroke-width="4" stroke-dasharray="10 10"/>
+  <circle cx="150" cy="130" r="20" fill="#75e3ce"/>
+  <circle cx="300" cy="130" r="18" fill="#ffd479">
+    <animate attributeName="cx" values="336;300;300" dur="2.2s" repeatCount="indefinite"/>
+  </circle>
+  <path d="M172 130H276" stroke="#37c8a7" stroke-width="6" stroke-linecap="round" opacity="0.2">
+    <animate attributeName="opacity" values="0.15;1;0.15" dur="1.1s" repeatCount="indefinite"/>
+  </path>
+</svg>

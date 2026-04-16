@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 420" role="img" aria-labelledby="t d">
+  <title id="t">Latency Problem</title>
+  <desc id="d">Шкала задержки между нажатием клавиши и движением</desc>
+  <rect width="960" height="420" rx="28" fill="#101b2f"/>
+  <g font-family="Segoe UI, Arial, sans-serif">
+    <text x="48" y="66" fill="#e7eefc" font-size="34" font-weight="800">Без Prediction ввод ждёт RTT</text>
+    <line x1="96" y1="244" x2="864" y2="244" stroke="#35527c" stroke-width="8" stroke-linecap="round"/>
+    <circle cx="140" cy="244" r="18" fill="#75e3ce"/>
+    <circle cx="520" cy="244" r="18" fill="#ffd479"/>
+    <circle cx="812" cy="244" r="18" fill="#b74545"/>
+    <text x="140" y="206" text-anchor="middle" fill="#75e3ce" font-size="20" font-weight="700">W key</text>
+    <text x="520" y="206" text-anchor="middle" fill="#ffd479" font-size="20" font-weight="700">200 ms ожидания</text>
+    <text x="812" y="206" text-anchor="middle" fill="#ffb6b6" font-size="20" font-weight="700">Движение</text>
+    <text x="48" y="344" fill="#9eb0c9" font-size="22">Даже после миграции на FishNet управление без prediction всё ещё остаётся "ватным" на высоком пинге.</text>
+  </g>
+</svg>
