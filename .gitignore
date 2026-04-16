@@ -1,0 +1,45 @@
+# Local lecture/source materials in project root
+/*.pdf
+/*.ppt
+/*.pptx
+/*.txt
+/Plan*.md
+/plan*.md
+/task*.md
+/*план*.md
+/*правки*.md
+
+# Temporary workspace artifacts
+/tmp/
+*.tmp
+*.bak
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Frontend build outputs and caches (if tooling is added)
+node_modules/
+dist/
+build/
+coverage/
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.svelte-kit/
