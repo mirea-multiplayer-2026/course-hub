@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Практика 2 | Course Hub</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -37,6 +38,9 @@
   <main class="container section lecture-page">
     <a class="back-link" href="../index.html">Назад на главную</a>
     <h1>Практика 2. Движение, валидация и жизненный цикл объектов</h1>
+    <figure class="lecture-hero">
+      <img src="../assets/img/practice-2/header.png" alt="Обложка практики 2 по движению, серверной валидации и жизненному циклу объектов" loading="lazy">
+    </figure>
 
     <div class="content-stack">
       <article class="content-card student-note">
@@ -72,7 +76,7 @@
         <ol>
           <li>Откройте проект из Практики 1 с работающим подключением и <code><span class="accent">NetworkVariable</span></code> для HP.</li>
           <li>Добавьте на префаб игрока компонент <code><span class="accent">NetworkTransform</span></code> и <code>CharacterController</code>.</li>
-          <li>Создайте префаб снаряда: <code><span class="accent">NetworkObject</span></code>, <code>Rigidbody</code> (Is Kinematic — выключено), <code>SphereCollider</code> (Is Trigger — включено).</li>
+          <li>Создайте префаб снаряда: <code><span class="accent">NetworkObject</span></code>, <code>Rigidbody</code> (Is Kinematic — <strong>включено</strong>), <code>SphereCollider</code> (Is Trigger — включено).</li>
           <li>Создайте префаб аптечки: <code><span class="accent">NetworkObject</span></code>, простая геометрия, <code>SphereCollider</code> (Is Trigger — включено).</li>
           <li>Зарегистрируйте оба префаба в <code>Network Prefabs</code> у <code><span class="accent">NetworkManager</span></code>.</li>
           <li>Добавьте на сцену пол (Plane) и несколько объектов для ориентации. Отметьте 2–3 точки респавна пустыми GameObject'ами.</li>
@@ -190,6 +194,7 @@ public class PlayerCamera : NetworkBehaviour
         <p>Клиент не решает, выстрел произошёл или нет — это решает только сервер. Без валидации любой клиент может стрелять бесконечно, мгновенно и даже после смерти.</p>
         <ul>
           <li>При нажатии клавиши владелец вызывает <code><span class="accent">ServerRpc</span></code> с направлением выстрела.</li>
+          <li>Если используете New Input System с callback-подписками, не вызывайте <code>ServerRpc</code> у чужих инстансов: либо добавьте <code>if (!IsOwner) return;</code> в callback, либо используйте <code>[ServerRpc(RequireOwnership = false)]</code> и валидируйте всё на сервере.</li>
           <li>Сервер проверяет <strong>три условия</strong> прежде чем спавнить снаряд: игрок жив, патроны не кончились, кулдаун прошёл.</li>
           <li>Если хоть одно условие не выполнено — <code>return</code>, снаряд не создаётся.</li>
           <li>На снаряде реализуйте <code>OnTriggerEnter</code>: только сервер обрабатывает попадание и наносит урон.</li>
@@ -228,12 +233,12 @@ public class PlayerShooting : NetworkBehaviour
             ShootServerRpc(_firePoint.position, _firePoint.forward);
     }
 
-    [ServerRpc]
+    [ServerRpc(RequireOwnership = false)]
     private void ShootServerRpc(Vector3 pos, Vector3 dir,
                                  ServerRpcParams rpc = default)
     {
         // 1. Жив ли игрок?
-        if (_playerNetwork.HP.Value &lt;= 0) return;
+        if (!_playerNetwork.IsAlive.Value) return;
 
         // 2. Есть ли патроны?
         if (_currentAmmo &lt;= 0) return;
@@ -350,7 +355,12 @@ public class PlayerNetwork : NetworkBehaviour
 
         // Выбрать случайную точку респавна
         int idx = Random.Range(0, _spawnPoints.Length);
+
+        // CharacterController кэширует позицию — нужно отключить перед телепортом
+        var cc = GetComponent&lt;CharacterController&gt;();
+        cc.enabled = false;
         transform.position = _spawnPoints[idx].position;
+        cc.enabled = true;
 
         HP.Value = 100;
         IsAlive.Value = true;
@@ -398,9 +408,14 @@ public class PickupManager : MonoBehaviour
 
     private void Start()
     {
-        // Менеджер активен только на сервере/хосте
-        if (!NetworkManager.Singleton.IsServer) return;
-        SpawnAll();
+        // Подписываемся на событие — Start() может сработать до старта сессии
+        NetworkManager.Singleton.OnServerStarted += SpawnAll;
+    }
+
+    private void OnDestroy()
+    {
+        if (NetworkManager.Singleton != null)
+            NetworkManager.Singleton.OnServerStarted -= SpawnAll;
     }
 
     private void SpawnAll()
@@ -492,6 +507,80 @@ public class HealthPickup : NetworkBehaviour
           <li>Предоставить видео работы приложения.</li>
           <li>Предоставить ссылку на Git-репозиторий проекта.</li>
         </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>Справочник по NGO (быстрые опоры)</h2>
+        <p>Этот блок поможет быстро вспоминать, какой компонент за что отвечает в практике 2 и где чаще всего допускают ошибки.</p>
+
+        <details class="hint-card">
+          <summary>NetworkManager и UnityTransport</summary>
+          <p><strong>NetworkManager</strong> — центральная точка сетевой сессии. Через него запускается Host/Server/Client, хранится список подключённых клиентов и выполняется сетевой спавн объектов.</p>
+          <ul>
+            <li><code>IsServer</code> — <code>true</code> на сервере и на хосте.</li>
+            <li><code>IsClient</code> — <code>true</code> на клиенте и на хосте.</li>
+            <li><code>IsHost</code> — <code>true</code> только в режиме Host.</li>
+            <li><code>LocalClientId</code> — ID текущего клиента.</li>
+            <li><code>ConnectedClients</code> — словарь всех подключённых клиентов.</li>
+            <li><code>OnServerStarted</code> — событие успешного старта сервера.</li>
+            <li><code>OnClientConnectedCallback</code> — событие подключения клиента.</li>
+          </ul>
+          <p><strong>UnityTransport</strong> отвечает за передачу пакетов. Ключевые настройки: <code>Protocol Type</code>, <code>Address</code>, <code>Port</code>, <code>Max Payload Size</code>. Для локального теста обычно достаточно <code>127.0.0.1:7777</code>.</p>
+        </details>
+
+        <details class="hint-card">
+          <summary>NetworkObject и NetworkBehaviour</summary>
+          <p><code>NetworkObject</code> делает GameObject сетевым. Без него <code>NetworkVariable</code>, RPC и сетевой спавн не работают.</p>
+          <ul>
+            <li><code>Spawn()</code> — спавн без владельца.</li>
+            <li><code>SpawnWithOwnership(clientId)</code> — спавн с назначенным владельцем.</li>
+            <li><code>Despawn(destroy: true)</code> — удалить объект из сети и уничтожить.</li>
+          </ul>
+          <p><code>NetworkBehaviour</code> — база для сетевых скриптов. Сетевую инициализацию делайте в <code>OnNetworkSpawn()</code>, очистку подписок — в <code>OnNetworkDespawn()</code>. В <code>Awake()</code>/<code>Start()</code> проверки <code>IsOwner</code>/<code>IsServer</code> могут быть ещё невалидны.</p>
+        </details>
+
+        <details class="hint-card">
+          <summary>NetworkVariable и подписки</summary>
+          <p><code>NetworkVariable</code> синхронизирует состояние между клиентами. Для игровой логики почти всегда используйте запись только на сервере:</p>
+          <pre><code class="language-csharp">public NetworkVariable&lt;int&gt; HP = new(
+    100,
+    NetworkVariableReadPermission.Everyone,
+    NetworkVariableWritePermission.Server
+);</code></pre>
+          <p>Подписка на изменения в <code>OnNetworkSpawn()</code>, отписка в <code>OnNetworkDespawn()</code>. Клиент не должен менять серверные переменные напрямую.</p>
+        </details>
+
+        <details class="hint-card">
+          <summary>NetworkTransform и авторитет</summary>
+          <p><code>NetworkTransform</code> автоматически синхронизирует позицию/поворот/масштаб. По умолчанию источник истины — сервер. Если перемещение задаёт владелец объекта, переключите <code>Authority Mode</code> в <code>Client</code> в инспекторе.</p>
+        </details>
+
+        <details class="hint-card">
+          <summary>IsOwner, IsServer, IsClient, IsHost</summary>
+          <ul>
+            <li>Ввод и камера: <code>if (!IsOwner) return;</code></li>
+            <li>Урон, спавн, изменение состояния: <code>if (!IsServer) return;</code></li>
+            <li><code>IsClient</code> — общий клиентский код (используется реже).</li>
+            <li><code>IsHost</code> — спец-ветки только для режима сервер+клиент в одном процессе.</li>
+          </ul>
+        </details>
+
+        <details class="hint-card">
+          <summary>ServerRpc и ClientRpc</summary>
+          <p><code>ServerRpc</code> вызывается клиентом, выполняется на сервере. <code>ClientRpc</code> вызывается сервером, выполняется на клиентах.</p>
+          <pre><code class="language-csharp">[ServerRpc(RequireOwnership = false)]
+private void DoSomethingServerRpc(ServerRpcParams rpc = default)
+{
+    ulong sender = rpc.Receive.SenderClientId;
+}
+
+[ClientRpc]
+private void NotifyClientRpc(string message)
+{
+}
+</code></pre>
+          <p>Практическое правило: любые критические действия (урон, смерть, спавн, изменение <code>NetworkVariable</code>) подтверждает и выполняет только сервер.</p>
+        </details>
       </article>
     </div>
   </main>

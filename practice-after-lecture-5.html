@@ -1,0 +1,461 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <title>Практика после лекции 5 — FishNet migration plan</title>
+  <link rel="icon" type="image/svg+xml" href="./assets/img/favicon.svg">
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --bg-soft: #ffffff;
+      --surface: #ffffff;
+      --surface-alt: #eef4fb;
+      --surface-warm: #fff8e9;
+      --text: #172033;
+      --muted: #546079;
+      --line: #d6dfec;
+      --line-strong: #b8c8de;
+      --primary: #0b78c8;
+      --primary-soft: #dff1ff;
+      --success: #138a5d;
+      --success-soft: #e6f8f0;
+      --warning: #b7791f;
+      --warning-soft: #fff3da;
+      --danger: #b74545;
+      --danger-soft: #fdeaea;
+      --shadow: 0 16px 40px rgba(23, 32, 51, 0.08);
+      --radius-lg: 24px;
+      --radius-md: 18px;
+      --radius-sm: 12px;
+      --code-bg: #172033;
+      --code-text: #f7fbff;
+      --max-width: 1380px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", Arial, sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top left, rgba(11, 120, 200, 0.08), transparent 34%), linear-gradient(180deg, #f8fbff 0%, var(--bg) 100%);
+      line-height: 1.6;
+    }
+    a { color: var(--primary); }
+    code, pre { font-family: Consolas, "Cascadia Code", "Courier New", monospace; }
+    .page-shell { width: min(var(--max-width), calc(100vw - 40px)); margin: 0 auto; padding: 28px 0 72px; }
+    .hero {
+      background: linear-gradient(135deg, rgba(11, 120, 200, 0.12), rgba(255, 255, 255, 0.92)), var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 28px;
+      margin-bottom: 24px;
+    }
+    .eyebrow-row { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
+    .eyebrow {
+      display: inline-flex; align-items: center; padding: 7px 12px; border-radius: 999px; border: 1px solid var(--line-strong);
+      background: rgba(255,255,255,.85); color: var(--muted); font-size: .92rem; font-weight: 700; letter-spacing: .01em;
+    }
+    h1,h2,h3,h4 { margin: 0; line-height: 1.16; }
+    h1 { font-size: clamp(2rem, 4.4vw, 3.5rem); max-width: 14ch; }
+    h2 { font-size: clamp(1.45rem, 2.8vw, 2.1rem); margin-bottom: 14px; }
+    h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    p { margin: 0 0 14px; }
+    .hero-grid { display: grid; grid-template-columns: minmax(0,1.4fr) minmax(290px,.9fr); gap: 22px; align-items: start; margin-top: 18px; }
+    .hero-lead { max-width: 74ch; margin-top: 16px; font-size: 1.04rem; color: var(--muted); }
+    .hero-note { padding: 18px; border-radius: var(--radius-md); background: rgba(255,255,255,.82); border: 1px solid var(--line); }
+    .hero-note p:last-child { margin-bottom: 0; }
+    .hero-metrics { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; margin-top: 18px; }
+    .metric { border: 1px solid var(--line); background: rgba(255,255,255,.84); border-radius: var(--radius-sm); padding: 14px; }
+    .metric strong { display: block; font-size: 1.25rem; margin-bottom: 4px; }
+    .layout { display: grid; grid-template-columns: 320px minmax(0,1fr); gap: 24px; align-items: start; }
+    .toc-card { position: sticky; top: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 20px; }
+    .toc-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 12px; }
+    .toc-list { list-style: none; padding: 0; margin: 0 0 18px; display: grid; gap: 8px; }
+    .toc-list a { display: block; text-decoration: none; color: var(--text); padding: 10px 12px; border-radius: 12px; border: 1px solid transparent; }
+    .toc-list a:hover,.toc-list a:focus-visible { outline: none; background: var(--primary-soft); border-color: #c6e4ff; }
+    .toc-footer { padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: .95rem; }
+    .content-column { display: grid; gap: 18px; }
+    .section-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); box-shadow: var(--shadow); padding: 24px; scroll-margin-top: 26px; }
+    .section-card > :last-child { margin-bottom: 0; }
+    .section-kicker { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 14px; padding: 7px 12px; border-radius: 999px; background: var(--primary-soft); color: var(--primary); font-size: .9rem; font-weight: 800; letter-spacing: .02em; text-transform: uppercase; }
+    .lead-paragraph { color: var(--muted); max-width: 80ch; }
+    .info-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; margin-top: 16px; }
+    .info-box { border: 1px solid var(--line); border-radius: var(--radius-md); padding: 16px; background: var(--surface-alt); }
+    .info-box ul,.info-box ol,.step-panel ul,.step-panel ol,.section-card ul,.section-card ol { margin: 0; padding-left: 20px; }
+    .checklist { display: grid; gap: 10px; margin-top: 14px; }
+    .check-row { display: grid; grid-template-columns: 24px minmax(0,1fr); gap: 10px; align-items: start; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: #fbfdff; }
+    .check-row strong { display: block; margin-bottom: 2px; }
+    .checkmark { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border-radius: 8px; border: 2px solid #97acc8; color: var(--success); font-weight: 900; font-size: .95rem; }
+    .step-card { border: 1px solid var(--line); border-radius: 22px; overflow: hidden; background: linear-gradient(180deg,#ffffff 0%,#fbfdff 100%); margin-top: 18px; }
+    .step-head { padding: 18px 20px; border-bottom: 1px solid var(--line); background: linear-gradient(90deg, rgba(11, 120, 200, 0.07), rgba(255,255,255,.98)); }
+    .step-index { display: inline-flex; align-items: center; justify-content: center; min-width: 42px; height: 42px; margin-bottom: 12px; padding: 0 12px; border-radius: 999px; background: var(--primary); color: #fff; font-size: .95rem; font-weight: 800; }
+    .step-subtitle { margin-top: 8px; color: var(--muted); }
+    .step-panels { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; padding: 18px; }
+    .step-panel { border: 1px solid var(--line); border-radius: 16px; padding: 16px; background: var(--surface); }
+    .step-panel.explain { background: #f5fbff; }
+    .step-panel.do { background: #f7fbf8; }
+    .step-panel.see { background: #fffdf7; }
+    .step-panel.check { background: #fff8f8; }
+    .reference-table { width: 100%; border-collapse: collapse; overflow: hidden; border-radius: 18px; margin-top: 16px; }
+    .reference-table th,.reference-table td { padding: 12px 14px; border: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .reference-table th { background: #ecf5ff; font-size: .95rem; }
+    pre { margin: 16px 0 0; padding: 18px; overflow-x: auto; background: var(--code-bg); color: var(--code-text); border-radius: 18px; border: 1px solid #0e1724; box-shadow: inset 0 0 0 1px rgba(255,255,255,.03); line-height: 1.5; font-size: .92rem; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+    .tag { display: inline-flex; align-items: center; padding: 7px 12px; border-radius: 999px; background: var(--surface-alt); border: 1px solid var(--line); font-size: .92rem; font-weight: 700; color: var(--text); }
+    details { margin-top: 14px; border: 1px solid var(--line); border-radius: 16px; background: #fbfdff; overflow: hidden; }
+    summary { cursor: pointer; list-style: none; padding: 15px 18px; font-weight: 800; background: linear-gradient(180deg,#f8fbff 0%,#f1f7ff 100%); }
+    summary::-webkit-details-marker { display: none; }
+    details[open] summary { border-bottom: 1px solid var(--line); }
+    .details-body { padding: 16px 18px 18px; }
+    .alert { border-radius: 18px; padding: 16px 18px; margin-top: 14px; border: 1px solid transparent; }
+    .alert-info { background: var(--primary-soft); border-color: #cbe7ff; }
+    .alert-warn { background: var(--warning-soft); border-color: #f0d39e; }
+    .alert-danger { background: var(--danger-soft); border-color: #edc0c0; }
+    .demo-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; margin-top: 16px; }
+    .demo-card { border: 1px solid var(--line); border-radius: 18px; padding: 16px; background: var(--surface-alt); }
+    .footer-note { margin-top: 24px; text-align: center; color: var(--muted); font-size: .95rem; }
+    .print-button { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; border: 1px solid #a8c3df; border-radius: 999px; background: #ffffff; color: var(--primary); font: inherit; font-weight: 800; cursor: pointer; }
+    .print-button:hover,.print-button:focus-visible { outline: none; background: var(--primary-soft); }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+      .toc-card { position: static; }
+      .hero-grid,.step-panels,.info-grid,.demo-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 760px) {
+      .page-shell { width: min(calc(100vw - 20px), var(--max-width)); padding-top: 14px; }
+      .hero,.section-card { padding: 18px; }
+      .hero-metrics { grid-template-columns: 1fr; }
+      .reference-table { display: block; overflow-x: auto; white-space: nowrap; }
+      pre { padding: 14px; font-size: .88rem; }
+    }
+    @media print {
+      body { background: #ffffff; }
+      .page-shell { width: 100%; padding: 0; }
+      .layout { grid-template-columns: 1fr; }
+      .toc-card { position: static; box-shadow: none; }
+      .hero,.section-card,.step-card,.step-panel,.info-box,.demo-card,details { box-shadow: none; break-inside: avoid; }
+      .print-button { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <header class="hero" id="top">
+      <div class="eyebrow-row">
+        <span class="eyebrow">Практика после лекции 5</span>
+        <span class="eyebrow">Оффлайн-страница для преподавателя</span>
+        <span class="eyebrow">FishNet migration focus</span>
+      </div>
+      <h1>Пошаговый план проведения практики после лекции 5</h1>
+      <p class="hero-lead">
+        Эта страница нужна как опора во время занятия: что именно объяснять, в каком порядке переводить проект с NGO на FishNet,
+        где студенты обычно ломают проект и как подвести группу к следующей лекции про Prediction/Reconciliation, не решая её прямо сейчас.
+      </p>
+      <div class="hero-grid">
+        <div>
+          <div class="hero-metrics">
+            <article class="metric"><strong>Главный результат</strong><span>Рабочий базовый мультиплеер на FishNet: движение, HP, ник и стрельба.</span></article>
+            <article class="metric"><strong>Не делаем здесь</strong><span>Полноценный CSP, `Replicate`, `Reconcile`, `MoveData`, `ReconcileData`.</span></article>
+            <article class="metric"><strong>Отдельный акцент</strong><span>`NetworkObserver` и `DistanceCondition` как первый шаг к relevancy/AOI.</span></article>
+            <article class="metric"><strong>Финальный мост</strong><span>Показать проблему лага при 200 мс и зафиксировать, почему нужна лекция 6.</span></article>
+          </div>
+          <div class="tag-row">
+            <span class="tag">NGO -> FishNet</span><span class="tag">Observers</span><span class="tag">DistanceCondition</span><span class="tag">Host/Client demo</span><span class="tag">Offline-ready</span>
+          </div>
+        </div>
+        <aside class="hero-note">
+          <p><strong>Как использовать страницу:</strong> держать открытой рядом с Unity и двигаться сверху вниз. Каждый этап уже разбит на четыре преподавательских вопроса: что сказать, что сделать, что показать студентам и по какой точке понять, что группа не потерялась.</p>
+          <p><strong>Подход:</strong> меняем только сетевой API-слой и настройки сцены. Игровая логика по смыслу сохраняется. Это ключевая мысль занятия.</p>
+          <p><button class="print-button" type="button" onclick="window.print()">Открыть print preview</button></p>
+        </aside>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav class="toc-card" aria-label="Оглавление">
+        <div class="toc-title">Оглавление занятия</div>
+        <ul class="toc-list">
+          <li><a href="#intro">Вводный блок</a></li>
+          <li><a href="#start-checklist">Чек-лист перед стартом</a></li>
+          <li><a href="#step-1">Этап 1. Переход на FishNet</a></li>
+          <li><a href="#step-2">Этап 2. Перенос API</a></li>
+          <li><a href="#step-3">Этап 3. Возврат геймплея</a></li>
+          <li><a href="#step-4">Этап 4. Observers</a></li>
+          <li><a href="#step-5">Этап 5. Проверка и демонстрация</a></li>
+          <li><a href="#reference">Справка NGO -> FishNet</a></li>
+          <li><a href="#mistakes">Типичные ошибки</a></li>
+          <li><a href="#demo-check">Что проверить на показе</a></li>
+          <li><a href="#bridge">Переход к лекции 6</a></li>
+        </ul>
+        <div class="toc-footer">Используй эту страницу как маршрут проведения пары, а не как готовую раздатку студентам. Здесь важен порядок действий и контрольные точки.</div>
+      </nav>
+
+      <main class="content-column">
+        <section class="section-card" id="intro">
+          <div class="section-kicker">Вводный блок</div>
+          <h2>Что это за практика и чем она должна закончиться</h2>
+          <p class="lead-paragraph">Практика после лекции 5 должна закрепить ровно то, что было разобрано на лекции: архитектурный переход с NGO на FishNet, новые имена и точки входа API, появление `Observers`, а также первое практическое понимание того, что лаг никуда не делся и его будем решать уже на следующем занятии.</p>
+          <div class="info-grid">
+            <article class="info-box">
+              <h3>Цель практики</h3>
+              <ul>
+                <li>перенести проект с NGO на FishNet без смены игровой логики;</li>
+                <li>восстановить движение, синхронизацию HP, ника и стрельбы;</li>
+                <li>показать, как `Observers` меняют видимость и доставку данных;</li>
+                <li>подвести студентов к теме prediction, но не реализовывать её здесь полностью.</li>
+              </ul>
+            </article>
+            <article class="info-box">
+              <h3>Что должно получиться к концу</h3>
+              <ul>
+                <li>из проекта удалён NGO-стек;</li>
+                <li>в сцене настроен `NetworkManager` FishNet с `Tugboat`;</li>
+                <li>два окна `Host/Client` подключаются и видят базовый геймплей;</li>
+                <li>на сетевых объектах добавлен `NetworkObserver` с `DistanceCondition`;</li>
+                <li>при задержке 200 мс видно, что без prediction управление ощущается ватным.</li>
+              </ul>
+            </article>
+          </div>
+          <div class="alert alert-info"><strong>Важно:</strong> это не дублирование всей текущей `Практики 3`. Здесь практика сужена до миграции, базового FishNet API и первого знакомства с Observers. Prediction оставляем как анонс и демонстрацию проблемы.</div>
+        </section>
+
+        <section class="section-card" id="start-checklist">
+          <div class="section-kicker">Перед стартом</div>
+          <h2>Что студенты должны уже знать и что проверить до начала</h2>
+          <p class="lead-paragraph">До запуска миграции группа уже должна понимать основные различия NGO и FishNet из лекции 5. Если это не проговорить в начале, студенты начнут механически менять названия и потеряются в жизненном цикле и правах владения.</p>
+          <div class="checklist">
+            <div class="check-row"><span class="checkmark">✓</span><div><strong>Знание 1</strong>Нужно помнить разницу между `NetworkVariable<T>` и `[SyncVar]`, а также между `[ClientRpc]` и `[ObserversRpc]`.</div></div>
+            <div class="check-row"><span class="checkmark">✓</span><div><strong>Знание 2</strong>Студенты должны понимать, что `OnNetworkSpawn()` в NGO больше не является единственной точкой старта: в FishNet появляются `OnStartClient()` и `OnStartServer()`.</div></div>
+            <div class="check-row"><span class="checkmark">✓</span><div><strong>Знание 3</strong>Нужно напомнить, что FishNet не меняет саму игровую механику. Он меняет сеть, ownership-проверки, spawn/despawn и каналы доставки.</div></div>
+            <div class="check-row"><span class="checkmark">✓</span><div><strong>Стартовая точка проекта</strong>У студентов должен быть рабочий NGO-проект после предыдущих практик: меню подключения, игрок, движение, HP/ник и стрельба.</div></div>
+            <div class="check-row"><span class="checkmark">✓</span><div><strong>Материалы на руках</strong>До начала занятия попроси сохранить резервную копию проекта, выписать используемые сцены и префабы, и зафиксировать, какие скрипты сейчас завязаны на `Unity.Netcode`.</div></div>
+          </div>
+          <details>
+            <summary>Короткая вводная речь на 2–3 минуты</summary>
+            <div class="details-body"><p>Сегодня мы не придумываем новую игру и не переписываем геймдизайн. Мы меняем сетевой стек. В хорошем проекте миграция должна затронуть API и конфигурацию сцены, но не сломать смысл механик. Если после переноса у вас двигается игрок, синхронизируется HP, ник и стрельба, значит переход сделан правильно. Если вы заодно начали переписывать пол-игры, значит вы потеряли рамку задачи.</p></div>
+          </details>
+        </section>
+
+        <section class="section-card" id="step-1">
+          <div class="section-kicker">Этап 1</div>
+          <h2>Переход на FishNet: удаление NGO и базовая настройка сцены</h2>
+          <article class="step-card">
+            <div class="step-head"><div class="step-index">Шаг 1</div><h3>Подготовить проект к миграции</h3><p class="step-subtitle">Сначала стабилизировать исходную точку, потом только менять сетевой стек.</p></div>
+            <div class="step-panels">
+              <section class="step-panel explain"><h3>Что объяснить вслух</h3><ul><li>Нельзя мигрировать проект, если он уже нестабилен на NGO.</li><li>Сначала фиксируем рабочее состояние и только потом начинаем замену пакетов.</li><li>Резервная копия нужна не “на всякий случай”, а потому что студенты часто ломают сцену и prefab links.</li></ul></section>
+              <section class="step-panel do"><h3>Что сделать в Unity</h3><ul><li>Сделать копию проекта или новую ветку.</li><li>Проверить список сцен в Build Settings.</li><li>Записать, какие prefab objects спавнятся по сети: игрок, снаряд, менеджеры, UI-объекты.</li></ul></section>
+              <section class="step-panel see"><h3>Что должны увидеть студенты</h3><ul><li>До миграции проект ещё работает на NGO в двух окнах.</li><li>Есть понимание, какие объекты обязаны пережить перенос без изменения логики.</li></ul></section>
+              <section class="step-panel check"><h3>Контрольная точка</h3><p>Студент может показать рабочую NGO-версию и назвать 3–5 скриптов, которые завязаны на networking API.</p></section>
+            </div>
+          </article>
+          <article class="step-card">
+            <div class="step-head"><div class="step-index">Шаг 2</div><h3>Удалить NGO и подключить FishNet</h3><p class="step-subtitle">Не держать проект в смешанном состоянии, где одновременно живут два сетевых стека.</p></div>
+            <div class="step-panels">
+              <section class="step-panel explain"><h3>Что объяснить вслух</h3><ul><li>Самая вредная стадия миграции — полуперенос, когда часть кода уже на FishNet, а сцена ещё на NGO.</li><li>Ошибки компиляции после удаления NGO полезны: они быстро показывают, что именно нужно заменить.</li></ul></section>
+              <section class="step-panel do"><h3>Что сделать в Unity</h3><ul><li>Через Package Manager удалить `Netcode for GameObjects` и `Unity Transport`.</li><li>Импортировать FishNet.</li><li>Добавить на сцену `NetworkManager` FishNet.</li><li>Добавить транспорт `Tugboat` и связать его с менеджером.</li><li>Заново зарегистрировать сетевые префабы в `Default Prefab Objects`.</li></ul></section>
+              <section class="step-panel see"><h3>Что должны увидеть студенты</h3><ul><li>NGO-компоненты исчезают со сцены.</li><li>В инспекторе появляется новая сеточная конфигурация FishNet.</li><li>Компиляция пока может быть красной — это ожидаемо.</li></ul></section>
+              <section class="step-panel check"><h3>Контрольная точка</h3><p>В проекте больше нет пакетов NGO, а на сцене стоит FishNet `NetworkManager` с настроенным `Tugboat`.</p></section>
+            </div>
+          </article>
+        </section>
+        <section class="section-card" id="step-2">
+          <div class="section-kicker">Этап 2</div>
+          <h2>Перенос API: пройтись по коду и заменить все точки привязки к NGO</h2>
+          <article class="step-card">
+            <div class="step-head"><div class="step-index">Шаг 3</div><h3>Перевести базовые классы, атрибуты и lifecycle</h3><p class="step-subtitle">Это не “поиск-замена”, а осознанный перенос жизненного цикла и прав на объект.</p></div>
+            <div class="step-panels">
+              <section class="step-panel explain"><h3>Что объяснить вслух</h3><ul><li>В FishNet одинаковые названия не гарантируют одинаковый контекст использования.</li><li>Самая опасная часть миграции — lifecycle и ownership, а не замена `using`.</li><li>Если логика висела в `OnNetworkSpawn()`, нужно решить, должна она жить на клиенте, сервере или в обоих местах.</li></ul></section>
+              <section class="step-panel do"><h3>Что сделать в Unity</h3><ul><li>Заменить `using Unity.Netcode;` на `FishNet.Object` и при необходимости `FishNet.Object.Synchronizing`.</li><li>Заменить `NetworkVariable<T>` на `[SyncVar]`.</li><li>Заменить `[ClientRpc]` на `[ObserversRpc]`.</li><li>Заменить `IsOwner` на `base.IsOwner`, `IsServer` на `base.IsServerInitialized`.</li><li>Перекинуть логику из `OnNetworkSpawn()` в `OnStartClient()` и/или `OnStartServer()`.</li><li>Заменить `Spawn/Despawn` на вызовы через `ServerManager`.</li></ul></section>
+              <section class="step-panel see"><h3>Что должны увидеть студенты</h3><ul><li>Список compile errors постепенно сокращается.</li><li>Код начинает выглядеть проще в части SyncVar hooks и наблюдателей.</li></ul></section>
+              <section class="step-panel check"><h3>Контрольная точка</h3><p>Проект снова компилируется, а в сетевых скриптах больше не осталось ссылок на `Unity.Netcode`.</p></section>
+            </div>
+          </article>
+          <details>
+            <summary>Мини-справка: что проговорить про lifecycle</summary>
+            <div class="details-body"><p>В NGO у студентов часто была привычка: “всё сетевое закидываем в `OnNetworkSpawn()`”. В FishNet лучше сразу задавать вопрос: это клиентская инициализация, серверная или общая? Если это камера владельца, ей место в `OnStartClient()`. Если это серверная подписка на подключение или спавн объектов, ей место в `OnStartServer()`.</p></div>
+          </details>
+        </section>
+
+        <section class="section-card" id="step-3">
+          <div class="section-kicker">Этап 3</div>
+          <h2>Вернуть рабочий геймплей: движение, HP, ник и стрельбу</h2>
+          <article class="step-card">
+            <div class="step-head"><div class="step-index">Шаг 4</div><h3>Сначала восстановить player loop, затем UI и стрельбу</h3><p class="step-subtitle">Если пытаться чинить всё сразу, группа теряет причинно-следственную связь.</p></div>
+            <div class="step-panels">
+              <section class="step-panel explain"><h3>Что объяснить вслух</h3><ul><li>После миграции сначала возвращаем “скелет” игры: подключение и движение владельца.</li><li>Только потом поднимаем синхронизацию состояния и действия через RPC/spawn.</li><li>Если движение ещё не восстановлено, отладка HP и снарядов будет шумной и бесполезной.</li></ul></section>
+              <section class="step-panel do"><h3>Что сделать в Unity</h3><ul><li>Починить ввод только для владельца через `base.IsOwner`.</li><li>Проверить, что удалённый клиент видит движение второго игрока.</li><li>Перевести HP и ник на `[SyncVar]` с `OnChange`-хуками для UI.</li><li>Перевести стрельбу на серверный spawn снаряда через `ServerManager.Spawn()`.</li><li>Проверить запуск в двух окнах: `Host` и `Client`.</li></ul></section>
+              <section class="step-panel see"><h3>Что должны увидеть студенты</h3><ul><li>Оба окна подключаются без NGO.</li><li>Локальный игрок управляет только своим персонажем.</li><li>HP и ник обновляются у обоих клиентов.</li><li>Снаряд создаётся сервером и виден всем.</li></ul></section>
+              <section class="step-panel check"><h3>Контрольная точка</h3><p>Студент может показать базовый игровой цикл в двух окнах без ошибок и без ссылок на NGO в коде.</p></section>
+            </div>
+          </article>
+          <div class="alert alert-warn"><strong>Практический акцент для преподавателя:</strong> не давай группе уходить в тему prediction, если базовый Host/Client ещё не поднят на FishNet. Это другая задача и другой уровень сложности.</div>
+        </section>
+
+        <section class="section-card" id="step-4">
+          <div class="section-kicker">Этап 4</div>
+          <h2>Observers: показать первую реальную причину, зачем вообще переходить на FishNet</h2>
+          <article class="step-card">
+            <div class="step-head"><div class="step-index">Шаг 5</div><h3>Добавить `NetworkObserver` и `DistanceCondition`</h3><p class="step-subtitle">Этот шаг не про компиляцию, а про сетевую relevancy и контроль трафика.</p></div>
+            <div class="step-panels">
+              <section class="step-panel explain"><h3>Что объяснить вслух</h3><ul><li>В NGO все часто синхронизируется всем, а в FishNet можно сразу ограничить видимость объекта.</li><li>`ObserversRpc` и `DistanceCondition` связаны: событие доходит только до тех, кто вообще видит объект.</li><li>Глобальные объекты вроде `GameManager` нельзя случайно скрывать дистанцией, иначе потеряешь обязательную синхронизацию.</li></ul></section>
+              <section class="step-panel do"><h3>Что сделать в Unity</h3><ul><li>На игрока и сетевые снаряды добавить `NetworkObserver`.</li><li>Подключить `DistanceCondition` и подобрать тестовую дистанцию.</li><li>На глобальные менеджеры `DistanceCondition` не добавлять.</li><li>При желании показать через позиционирование игроков, кто попадает в область синхронизации, а кто нет.</li></ul></section>
+              <section class="step-panel see"><h3>Что должны увидеть студенты</h3><ul><li>Сетевые объекты больше не обязаны быть видимыми всем клиентам всегда.</li><li>Появляется предметный разговор про AOI, relevancy и экономию трафика.</li></ul></section>
+              <section class="step-panel check"><h3>Контрольная точка</h3><p>Студент может словами объяснить, зачем `DistanceCondition` добавляют на игрока и снаряды, но не на глобальные системные объекты.</p></section>
+            </div>
+          </article>
+          <details>
+            <summary>Что коротко сказать про выбор расстояния</summary>
+            <div class="details-body"><p>Не нужно превращать это в исследование баланса. Здесь важна идея: радиус видимости — это инструмент управления relevancy. Для практики достаточно взять условное расстояние и показать, что система вообще работает. Подбор “идеального” радиуса под жанр — это уже отдельный инженерный и геймдизайнерский разговор.</p></div>
+          </details>
+        </section>
+
+        <section class="section-card" id="step-5">
+          <div class="section-kicker">Этап 5</div>
+          <h2>Проверка и демонстрация: собрать всё в одну короткую верификацию</h2>
+          <article class="step-card">
+            <div class="step-head"><div class="step-index">Шаг 6</div><h3>Прогнать итоговую демонстрацию и показать проблему лага</h3><p class="step-subtitle">Здесь задача не “починить лаг”, а сделать проблему физически ощутимой для группы.</p></div>
+            <div class="step-panels">
+              <section class="step-panel explain"><h3>Что объяснить вслух</h3><ul><li>Даже после корректной миграции сеть остаётся серверно-авторитетной и задержка никуда не исчезает.</li><li>FishNet сам по себе даёт лучший инструментарий, но не отменяет физику RTT.</li><li>Следующее занятие будет не про миграцию, а про то, как скрывать эту задержку через prediction и reconciliation.</li></ul></section>
+              <section class="step-panel do"><h3>Что сделать в Unity</h3><ul><li>Запустить `Host` и `Client` в двух окнах.</li><li>Проверить движение, HP, ник и стрельбу.</li><li>Включить симуляцию задержки в FishNet и поставить примерно `200 ms`.</li><li>Попросить студентов сравнить ощущение управления до и после включения задержки.</li></ul></section>
+              <section class="step-panel see"><h3>Что должны увидеть студенты</h3><ul><li>Базовый мультиплеер работает на FishNet.</li><li>При задержке отклик на движение становится неприятным и “ватным”.</li><li>Это создаёт естественный запрос на prediction.</li></ul></section>
+              <section class="step-panel check"><h3>Контрольная точка</h3><p>Студент может сформулировать проблему: “миграция выполнена, но управление при 200 мс всё ещё ощущается плохо, значит нужно prediction”.</p></section>
+            </div>
+          </article>
+        </section>
+        <section class="section-card" id="reference">
+          <div class="section-kicker">Справка</div>
+          <h2>Компактная шпаргалка NGO -> FishNet</h2>
+          <p class="lead-paragraph">Таблицу лучше держать рядом во время миграции. Она не решает задачу за студентов, но помогает быстро отлавливать типовые точки замены.</p>
+          <table class="reference-table">
+            <thead>
+              <tr><th>NGO</th><th>FishNet</th><th>Что важно проговорить</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><code>using Unity.Netcode;</code></td><td><code>using FishNet.Object;</code><br><code>using FishNet.Object.Synchronizing;</code></td><td>Меняются пространства имён и часть жизненного цикла.</td></tr>
+              <tr><td><code>NetworkVariable&lt;T&gt;</code></td><td><code>[SyncVar]</code></td><td>Хуки объявляются через атрибут и не требуют ручной подписки как в типичном NGO-коде.</td></tr>
+              <tr><td><code>[ClientRpc]</code></td><td><code>[ObserversRpc]</code></td><td>Теперь событие завязано на наблюдателей объекта, а не просто на “всех клиентов”.</td></tr>
+              <tr><td><code>IsOwner</code></td><td><code>base.IsOwner</code></td><td>Студенты регулярно забывают префикс `base.` и получают странные ошибки поведения.</td></tr>
+              <tr><td><code>OnNetworkSpawn()</code></td><td><code>OnStartClient()</code> / <code>OnStartServer()</code></td><td>Нужно разделять клиентскую и серверную инициализацию.</td></tr>
+              <tr><td><code>netObj.Spawn()</code></td><td><code>ServerManager.Spawn(obj)</code></td><td>Спавн остаётся серверным, но API меняется.</td></tr>
+              <tr><td><code>netObj.Despawn()</code></td><td><code>ServerManager.Despawn(obj)</code></td><td>Не смешивать старые вызовы с новым менеджером.</td></tr>
+            </tbody>
+          </table>
+          <details>
+            <summary>Короткий пример миграции `PlayerController` на уровне API</summary>
+            <div class="details-body">
+              <pre><code>// NGO
+using Unity.Netcode;
+
+public class PlayerController : NetworkBehaviour
+{
+    public NetworkVariable&lt;int&gt; Health = new(100);
+
+    public override void OnNetworkSpawn()
+    {
+        if (IsOwner)
+        {
+            Camera.main.transform.SetParent(transform);
+        }
+    }
+
+    private void Update()
+    {
+        if (!IsOwner) return;
+        HandleMovement();
+    }
+}
+
+// FishNet
+using FishNet.Object;
+using FishNet.Object.Synchronizing;
+
+public class PlayerController : NetworkBehaviour
+{
+    [SyncVar]
+    public int Health = 100;
+
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+
+        if (base.IsOwner)
+        {
+            Camera.main.transform.SetParent(transform);
+        }
+    }
+
+    private void Update()
+    {
+        if (!base.IsOwner) return;
+        HandleMovement();
+    }
+}</code></pre>
+            </div>
+          </details>
+        </section>
+
+        <section class="section-card" id="mistakes">
+          <div class="section-kicker">Риски</div>
+          <h2>Типичные ошибки и места, где студенты обычно застревают</h2>
+          <div class="demo-grid">
+            <article class="demo-card"><h3>1. Проект в смешанном состоянии</h3><p>Часть сцены ещё на NGO, часть кода уже на FishNet. Результат: красная консоль, конфликт компонентов и полная потеря причинно-следственной связи.</p></article>
+            <article class="demo-card"><h3>2. Lifecycle перенесён механически</h3><p>Логику из `OnNetworkSpawn()` переносят только в `OnStartClient()`, хотя часть инициализации должна жить на сервере.</p></article>
+            <article class="demo-card"><h3>3. Ownership проверяется по-старому</h3><p>Оставляют старые проверки или забывают `base.IsOwner`, из-за чего ввод начинает работать не там, где ожидалось.</p></article>
+            <article class="demo-card"><h3>4. Снаряды больше не сетевые</h3><p>Стрельбу визуально чинят, но забывают зарегистрировать prefab в FishNet или не спавнят объект через `ServerManager`.</p></article>
+            <article class="demo-card"><h3>5. `DistanceCondition` вешают на всё подряд</h3><p>Если повесить дистанционную видимость на глобальные менеджеры, можно случайно скрыть обязательную синхронизацию матча и UI-событий.</p></article>
+          </div>
+          <details>
+            <summary>Как реагировать, если группа застряла в compile errors</summary>
+            <div class="details-body"><p>Не расползайся по всем ошибкам сразу. Иди по слоям: сначала `using` и базовые классы, потом lifecycle, потом sync/RPC, потом spawn/despawn. Важно держать у студентов ощущение маршрута, а не хаоса.</p></div>
+          </details>
+          <div class="alert alert-danger"><strong>Чего не надо делать на занятии:</strong> не уводи практику в полноценную реализацию `Replicate/Reconcile`, не начинай тюнинг транспорта и не превращай этап с `Observers` в длинную лекцию по продакшн-оптимизации. Здесь нужно закрепить API и показать смысл перехода.</div>
+        </section>
+
+        <section class="section-card" id="demo-check">
+          <div class="section-kicker">Финальная проверка</div>
+          <h2>Что проверить на демонстрации в конце занятия</h2>
+          <div class="checklist">
+            <div class="check-row"><span class="checkmark">✓</span><div><strong>Проверка 1</strong>NGO удалён из проекта, и студент может показать новый `NetworkManager` FishNet с `Tugboat`.</div></div>
+            <div class="check-row"><span class="checkmark">✓</span><div><strong>Проверка 2</strong>В двух окнах работают `Host/Client`, персонажи подключаются и видят друг друга.</div></div>
+            <div class="check-row"><span class="checkmark">✓</span><div><strong>Проверка 3</strong>Работает движение владельца, синхронизируется HP и ник, снаряд спавнится через сервер.</div></div>
+            <div class="check-row"><span class="checkmark">✓</span><div><strong>Проверка 4</strong>На ключевых игровых сетевых объектах есть `NetworkObserver`, а для них настроен `DistanceCondition`.</div></div>
+            <div class="check-row"><span class="checkmark">✓</span><div><strong>Проверка 5</strong>При симуляции задержки около `200 ms` студент может объяснить, почему игра уже перенесена на FishNet, но ощущение управления всё ещё требует следующего шага — prediction.</div></div>
+          </div>
+        </section>
+
+        <section class="section-card" id="bridge">
+          <div class="section-kicker">Переход к лекции 6</div>
+          <h2>Как закрыть практику и правильно подвести к Prediction/Reconciliation</h2>
+          <p class="lead-paragraph">Финальная мысль занятия должна быть очень простой: “мы научились переносить проект на более гибкий сетевой стек, но проблему задержки это не решает автоматически”. Так у студентов появляется правильный запрос к следующей теме.</p>
+          <div class="info-grid">
+            <article class="info-box">
+              <h3>Что сказать в конце</h3>
+              <ul>
+                <li>FishNet дал нам более сильную архитектуру, Observers и удобный API.</li>
+                <li>Но RTT по-прежнему существует, и игрок это чувствует.</li>
+                <li>Следующая тема — как скрывать задержку для движения и действий, не ломая серверную авторитетность.</li>
+              </ul>
+            </article>
+            <article class="info-box">
+              <h3>Что не раскрывать подробно сейчас</h3>
+              <ul>
+                <li>`[Replicate]` и `[Reconcile]` только упомянуть;</li>
+                <li>не показывать полноценные `MoveData/ReconcileData` как центральную часть этой практики;</li>
+                <li>не уходить в rollback и lag compensation до следующего занятия.</li>
+              </ul>
+            </article>
+          </div>
+          <div class="alert alert-info"><strong>Фраза-закрытие пары:</strong> “Сегодня мы переехали на FishNet и получили более взрослую архитектуру сети. На следующем занятии сделаем так, чтобы управление было отзывчивым даже тогда, когда сеть остаётся медленной”.</div>
+        </section>
+      </main>
+    </div>
+
+    <p class="footer-note">Файл автономен, не зависит от внешних стилей и подходит для локального открытия на ПК без интернета.</p>
+  </div>
+</body>
+</html>
