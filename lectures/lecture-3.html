@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лекция 3 | Course Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../index.html" class="brand">Course Hub</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
+      <nav id="site-nav" class="site-nav">
+        <a href="../index.html">Главная</a>
+        <a href="./lecture-1.html">Лекция 1</a>
+        <a href="./lecture-2.html">Лекция 2</a>
+        <a href="./lecture-3.html" aria-current="page">Лекция 3</a>
+        <a href="./practice-1.html">Практика 1</a>
+        <a href="./practice-2.html">Практика 2</a>
+        <a href="./practice-3.html">Практика 3</a>
+        <a href="./practice-4.html">Практика 4</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section lecture-page">
+    <a class="back-link" href="../index.html">Назад на главную</a>
+    <h1>Лекция 3. Движение, Ownership и стрельба</h1>
+
+    <section class="lecture-hero lecture-hero-text">
+      <p class="eyebrow">Переход от теории к рабочему multiplayer-геймплею</p>
+      <p>Эта лекция соединяет фундамент из первых двух занятий с тем, что реально нужно в проекте: движение игрока через <code>NetworkTransform</code>, корректная работа <code>IsOwner</code>, камера только для владельца, серверный спавн объектов и полный цикл стрельбы с валидацией на сервере.</p>
+      <div class="pill-row">
+        <span class="pill">Jitter Buffer</span>
+        <span class="pill">ChangeOwnership</span>
+        <span class="pill">OnNetworkSpawn</span>
+        <span class="pill">SpawnWithOwnership</span>
+        <span class="pill">ServerRpc Validation</span>
+      </div>
+    </section>
+
+    <div class="content-stack">
+      <article class="content-card">
+        <h2>1. Повторение и карта занятия</h2>
+        <p>После лекций 1 и 2 студент уже знает ключевые термины, но ещё не всегда умеет превращать их в рабочий код. Лекция 3 закрывает именно этот разрыв между теорией и практикой.</p>
+        <div class="info-grid">
+          <section class="media-card">
+            <h3>Что уже знаем</h3>
+            <p><code>RPC</code>, <code>NetworkVariable</code>, интерполяция, authority, базовые сетевые роли.</p>
+          </section>
+          <section class="media-card">
+            <h3>Где чаще всего ломается</h3>
+            <p>Все двигают одного игрока, камера прыгает на чужого персонажа, стрельба работает только у хоста.</p>
+          </section>
+          <section class="media-card">
+            <h3>К чему идём</h3>
+            <p>К рабочей базе для Практики 2: движение, камера, выстрел, попадание и серверная логика.</p>
+          </section>
+        </div>
+        <h3>Карта занятия</h3>
+        <ul>
+          <li><strong>Блок 1:</strong> практические рецепты для <code>NetworkTransform</code> и смысл <code>Jitter Buffer</code>.</li>
+          <li><strong>Блок 2:</strong> <code>Ownership</code>, смена владельца, жизненный цикл сетевого объекта и типовые ошибки.</li>
+          <li><strong>Блок 3:</strong> камера в мультиплеере, спавн сетевых объектов и серверная валидация RPC.</li>
+          <li><strong>Блок 4:</strong> полный цикл стрельбы от нажатия кнопки до применения урона.</li>
+        </ul>
+
+        <div class="checkpoint">
+          <h3>Проверка понимания</h3>
+          <p>Если вы можете объяснить, чем <code>IsOwner</code> отличается от <code>IsServer</code>, но пока не уверены, где именно ставить эти проверки в коде, значит лекция 3 адресует ваш текущий пробел.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>2. NetworkTransform и Jitter Buffer</h2>
+        <p><code>NetworkTransform</code> нужен не просто для “сделать синхронизацию”, а для контролируемой передачи именно тех координат и углов, которые критичны для жанра.</p>
+        <div class="media-grid">
+          <section class="media-card">
+            <h3>2D-платформер</h3>
+            <p>Синхронизируйте <strong>Position X/Y</strong> и <strong>Rotation Z</strong>. Остальные оси в большинстве сцен не дают полезного сигнала.</p>
+          </section>
+          <section class="media-card">
+            <h3>3D-шутер</h3>
+            <p>Обычно достаточно <strong>Position X/Y/Z</strong> и <strong>Rotation Y</strong>. Локальный pitch часто живёт отдельно в камере.</p>
+          </section>
+          <section class="media-card">
+            <h3>Гонки и физика</h3>
+            <p>Нужны все оси позиции и вращения. Если движение строится на физике, смотрите в сторону <code>NetworkRigidbody</code>.</p>
+          </section>
+        </div>
+
+        <h3>Почему движение может быть плавным даже при нестабильной сети</h3>
+        <p><strong>Jitter Buffer</strong> намеренно показывает не самый свежий пакет, а немного более старое состояние из буфера. Это добавляет небольшую визуальную задержку, но убирает рывки при неравномерном приходе пакетов.</p>
+        <ul>
+          <li>Без буфера рендер зависит от случайных провалов сети.</li>
+          <li>С буфером клиент почти всегда имеет следующую точку для интерполяции.</li>
+          <li>Цена подхода: +50-100 мс отображаемой задержки, выигрыш: предсказуемая плавность.</li>
+        </ul>
+
+        <h3>NetworkTransform vs NetworkRigidbody</h3>
+        <ul>
+          <li><strong>CharacterController, лифт, дверь, платформа:</strong> используйте <code>NetworkTransform</code>.</li>
+          <li><strong>Мяч, физический снаряд, машина с Rigidbody:</strong> чаще подходит <code>NetworkRigidbody</code>.</li>
+          <li>Если физика и ручная запись позиции начинают спорить друг с другом, объект на клиентах дёргается.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>3. Ownership, ChangeOwnership и жизненный цикл</h2>
+        <p><code>IsOwner</code> отвечает на вопрос: “этот объект принадлежит текущему клиенту?”. Для локального ввода это базовая проверка, без которой весь контроль рассыпается.</p>
+        <pre><code class="language-csharp">private void Update()
+{
+    if (!IsOwner) return;
+
+    float h = Input.GetAxis("Horizontal");
+    float v = Input.GetAxis("Vertical");
+
+    Vector3 move = new Vector3(h, 0f, v);
+    transform.Translate(move * (5f * Time.deltaTime), Space.World);
+}</code></pre>
+
+        <h3>Когда менять владельца объекта</h3>
+        <p>Смена владельца нужна, когда интерактивный объект должен перейти под контроль конкретного клиента: машина после посадки, предмет после подбора, камера-спектатор после смерти.</p>
+        <pre><code class="language-csharp">public void AssignVehicleToDriver(NetworkObject vehicle, ulong newClientId)
+{
+    if (!IsServer) return;
+
+    vehicle.ChangeOwnership(newClientId);
+}</code></pre>
+
+        <h3>Жизненный цикл сетевого объекта</h3>
+        <ul>
+          <li><code>Instantiate()</code> создаёт объект локально, но ещё не вводит его в сеть.</li>
+          <li><code>NetworkObject.Spawn()</code> публикует объект для остальных клиентов.</li>
+          <li><code>OnNetworkSpawn()</code> вызывается, когда сетевой контекст уже готов и можно читать <code>IsOwner</code>.</li>
+          <li><code>OnNetworkDespawn()</code> нужен для отписки и очистки зависимостей перед уничтожением.</li>
+        </ul>
+
+        <details class="hint-card">
+          <summary>Топ-3 ошибки и их исправление</summary>
+          <p><strong>Ошибка 1:</strong> читать ввод без <code>if (!IsOwner) return;</code>. Результат: несколько клиентов управляют одним объектом.</p>
+          <p><strong>Ошибка 2:</strong> делать сетевую инициализацию в <code>Start()</code>. В этот момент объект ещё может не быть заспавнен в сети.</p>
+          <p><strong>Ошибка 3:</strong> подписаться на событие в <code>OnNetworkSpawn()</code> и забыть отписаться в <code>OnNetworkDespawn()</code>.</p>
+          <pre><code class="language-csharp">public override void OnNetworkSpawn()
+{
+    if (!IsOwner) return;
+
+    SetupCamera();
+    score.OnValueChanged += OnScoreChanged;
+}
+
+public override void OnNetworkDespawn()
+{
+    score.OnValueChanged -= OnScoreChanged;
+}</code></pre>
+        </details>
+      </article>
+
+      <article class="content-card">
+        <h2>4. Камера в мультиплеере</h2>
+        <p>Главное правило: камера не должна пытаться следовать за каждым игроком. Её настраивает только локальный владелец объекта, и лучше делать это после сетевого спавна.</p>
+        <ul>
+          <li><strong>FPS:</strong> камера как дочерний объект головы, активируется только у <code>IsOwner</code>.</li>
+          <li><strong>TPS:</strong> камера хранит смещение и обновляется в <code>LateUpdate()</code>.</li>
+          <li><strong>Top-down:</strong> камера может следить за зоной или центром группы, а не за локальной моделью один в один.</li>
+        </ul>
+        <pre><code class="language-csharp">using Unity.Netcode;
+using UnityEngine;
+
+public class PlayerCamera : NetworkBehaviour
+{
+    [SerializeField] private Vector3 _offset = new Vector3(0f, 2.2f, -3.6f);
+    [SerializeField] private float _lookHeight = 1.25f;
+
+    private Camera _mainCamera;
+
+    public override void OnNetworkSpawn()
+    {
+        if (!IsOwner) return;
+
+        _mainCamera = Camera.main;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+    }
+
+    private void LateUpdate()
+    {
+        if (!IsOwner || _mainCamera == null) return;
+
+        _mainCamera.transform.position = transform.position + transform.rotation * _offset;
+        _mainCamera.transform.LookAt(transform.position + Vector3.up * _lookHeight);
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        if (!IsOwner) return;
+
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+    }
+}</code></pre>
+
+        <div class="checkpoint">
+          <h3>Критический нюанс</h3>
+          <p><code>Cursor.lockState</code> и любые операции с <code>Camera.main</code> должны выполняться только внутри ветки <code>IsOwner</code>. Иначе вы заблокируете мышь и камеру сразу у всех клиентов.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>5. Серверный спавн и SpawnWithOwnership</h2>
+        <p>Обычный <code>Instantiate()</code> создаёт объект только локально. Чтобы объект увидели остальные, сервер обязан заспавнить <code>NetworkObject</code> в сети.</p>
+        <pre><code class="language-csharp">[ServerRpc]
+private void SpawnPickupServerRpc(Vector3 position)
+{
+    GameObject instance = Instantiate(pickupPrefab, position, Quaternion.identity);
+    NetworkObject networkObject = instance.GetComponent&lt;NetworkObject&gt;();
+
+    networkObject.Spawn();
+}</code></pre>
+
+        <h3>Когда нужен SpawnWithOwnership</h3>
+        <p>Если объект с момента рождения должен быть привязан к конкретному клиенту, сразу назначайте владельца.</p>
+        <pre><code class="language-csharp">[ServerRpc]
+private void SpawnProjectileServerRpc(Vector3 position, Vector3 direction, ServerRpcParams rpcParams = default)
+{
+    Quaternion rotation = Quaternion.LookRotation(direction);
+    GameObject projectile = Instantiate(projectilePrefab, position, rotation);
+
+    projectile.GetComponent&lt;NetworkObject&gt;()
+        .SpawnWithOwnership(rpcParams.Receive.SenderClientId);
+}</code></pre>
+
+        <h3>Удаление объекта</h3>
+        <ul>
+          <li><code>Destroy()</code> без <code>Despawn()</code> ломает согласованность между сервером и клиентами.</li>
+          <li>Корректная последовательность для сетевого удаления: <code>NetworkObject.Despawn(destroy: true)</code>.</li>
+          <li>И спавн, и деспавн должны инициироваться сервером.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>6. Безопасность RPC и серверная валидация</h2>
+        <p>Клиент должен отправлять намерение, а не окончательное решение. Если сервер слепо доверяет входным параметрам RPC, игра получает спидхак, телепорт, one-shot урон и дубликацию предметов.</p>
+        <div class="info-grid">
+          <section class="media-card">
+            <h3>Спидхак</h3>
+            <p>Клиент присылает скорость в несколько раз выше допустимой, сервер не проверяет и принимает движение.</p>
+          </section>
+          <section class="media-card">
+            <h3>Телепорт</h3>
+            <p>Клиент сообщает позицию за стеной или вне карты, сервер не валидирует траекторию и разрешает перенос.</p>
+          </section>
+          <section class="media-card">
+            <h3>Урон без ограничений</h3>
+            <p>Если доверять числу урона из пакета, клиент может превратить любой выстрел в мгновенное убийство.</p>
+          </section>
+        </div>
+
+        <pre><code class="language-csharp">[ServerRpc]
+private void ShootServerRpc(Vector3 direction, ServerRpcParams rpcParams = default)
+{
+    ulong clientId = rpcParams.Receive.SenderClientId;
+
+    if (!IsAlive) return;
+    if (currentAmmo <= 0) return;
+    if (Time.time &lt; lastShotTime + shootCooldown) return;
+    if (direction.magnitude &lt; 0.9f || direction.magnitude &gt; 1.1f) return;
+
+    lastShotTime = Time.time;
+    currentAmmo--;
+
+    Quaternion rotation = Quaternion.LookRotation(direction.normalized);
+    GameObject projectile = Instantiate(projectilePrefab, muzzle.position, rotation);
+    projectile.GetComponent&lt;NetworkObject&gt;().SpawnWithOwnership(clientId);
+
+    PlayShotClientRpc();
+}</code></pre>
+
+        <p>Такая форма с ранними <code>return</code> делает правила сервера явными и не раскрывает клиенту внутреннюю логику отказа больше, чем нужно.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>7. Полный цикл стрельбы</h2>
+        <p>Когда все элементы лекции соединяются, получается простая, но надёжная цепочка: владелец читает ввод, сервер создаёт сетевой объект, клиенты видят результат, сервер применяет урон и удаляет снаряд.</p>
+        <ol>
+          <li><strong>Клиент-владелец:</strong> читает нажатие и вызывает <code>ShootServerRpc()</code>.</li>
+          <li><strong>Сервер:</strong> валидирует состояние игрока, кулдаун, направление и наличие патронов.</li>
+          <li><strong>Сервер:</strong> создаёт снаряд через <code>Instantiate + SpawnWithOwnership</code>.</li>
+          <li><strong>Все клиенты:</strong> получают заспавненный объект и проигрывают эффект выстрела.</li>
+          <li><strong>Сервер:</strong> обрабатывает попадание, уменьшает HP и деспавнит снаряд.</li>
+        </ol>
+
+        <details class="hint-card" open>
+          <summary>Пример PlayerShooting.cs</summary>
+          <pre><code class="language-csharp">using Unity.Netcode;
+using UnityEngine;
+
+public class PlayerShooting : NetworkBehaviour
+{
+    [SerializeField] private GameObject projectilePrefab;
+    [SerializeField] private Transform muzzle;
+    [SerializeField] private AudioClip shootSound;
+    [SerializeField] private float shootCooldown = 0.3f;
+
+    private float lastShotTime;
+
+    private void Update()
+    {
+        if (!IsOwner) return;
+        if (!Input.GetKeyDown(KeyCode.Mouse0)) return;
+
+        ShootServerRpc(muzzle.forward);
+    }
+
+    [ServerRpc]
+    private void ShootServerRpc(Vector3 direction, ServerRpcParams rpcParams = default)
+    {
+        if (Time.time &lt; lastShotTime + shootCooldown) return;
+
+        lastShotTime = Time.time;
+
+        Quaternion rotation = Quaternion.LookRotation(direction.normalized);
+        GameObject projectile = Instantiate(projectilePrefab, muzzle.position, rotation);
+        projectile.GetComponent&lt;NetworkObject&gt;()
+            .SpawnWithOwnership(rpcParams.Receive.SenderClientId);
+
+        PlaySoundClientRpc(muzzle.position);
+    }
+
+    [ClientRpc]
+    private void PlaySoundClientRpc(Vector3 worldPosition)
+    {
+        AudioSource.PlayClipAtPoint(shootSound, worldPosition);
+    }
+}</code></pre>
+        </details>
+
+        <details class="hint-card">
+          <summary>Пример Projectile.cs</summary>
+          <pre><code class="language-csharp">using Unity.Netcode;
+using UnityEngine;
+
+public class Projectile : NetworkBehaviour
+{
+    [SerializeField] private float speed = 20f;
+    [SerializeField] private int damage = 25;
+
+    private void Update()
+    {
+        transform.position += transform.forward * (speed * Time.deltaTime);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (!IsServer) return;
+
+        if (other.TryGetComponent(out PlayerHealth health) &&
+            other.TryGetComponent(out NetworkObject targetObject))
+        {
+            if (targetObject.OwnerClientId == OwnerClientId) return;
+
+            health.TakeDamage(damage);
+        }
+
+        NetworkObject.Despawn(destroy: true);
+    }
+}</code></pre>
+        </details>
+      </article>
+
+      <article class="content-card">
+        <h2>8. Чек-лист и подготовка к Практике 2</h2>
+        <p>Перед переходом к практической работе студент должен уметь быстро прогнать короткий список самопроверки.</p>
+        <ol>
+          <li>Я понимаю, когда использовать <code>NetworkTransform</code>, а когда <code>NetworkRigidbody</code>.</li>
+          <li>Я знаю, что <code>Jitter Buffer</code> добавляет плавность ценой небольшой задержки отображения.</li>
+          <li>Я могу объяснить, зачем нужен <code>ChangeOwnership()</code> и кто имеет право его вызывать.</li>
+          <li>Я не инициализирую сетевую логику в <code>Start()</code>, если она зависит от <code>IsOwner</code>.</li>
+          <li>Камера и курсор меняются только у локального владельца объекта.</li>
+          <li>Сетевой объект появляется через <code>Spawn()</code> и удаляется через <code>Despawn(true)</code>.</li>
+          <li>Любой важный <code>ServerRpc</code> сначала валидирует входные данные.</li>
+        </ol>
+
+        <div class="checkpoint">
+          <h3>Если что-то не работает</h3>
+          <p>Проверьте три места в первую очередь: есть ли <code>IsOwner</code> перед вводом, есть ли <code>IsServer</code> в серверной логике попадания и не спрятана ли инициализация в <code>Start()</code> вместо <code>OnNetworkSpawn()</code>.</p>
+        </div>
+      </article>
+
+      <article class="content-card practice-banner">
+        <h2>Практическая связка с лекцией 3</h2>
+        <p>Следующий шаг после лекции — собрать полноценную сцену с движением через <code>NetworkTransform</code>, камерой только для владельца, серверной стрельбой и жизненным циклом снарядов.</p>
+        <p>Именно эти части детально отрабатываются в Практике 2, поэтому лекция 3 должна восприниматься как инженерная карта перед реализацией.</p>
+        <div class="demo-links">
+          <a class="btn btn-secondary" href="./practice-2.html">Открыть практику 2</a>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>Что мы узнали</h2>
+        <ul>
+          <li>Как применять <code>NetworkTransform</code> осмысленно, а не “по умолчанию”.</li>
+          <li>Почему <code>Ownership</code> управляет вводом, камерой и интерактивными объектами.</li>
+          <li>Почему инициализацию сетевого поведения нужно переносить в <code>OnNetworkSpawn()</code>.</li>
+          <li>Как устроен серверный спавн, валидация RPC и цикл стрельбы от ввода до урона.</li>
+        </ul>
+
+        <h3>Итог по лекции</h3>
+        <p>Лекция 3 переводит курс из уровня терминов в уровень рабочих паттернов. После неё студент должен не только узнавать сетевые компоненты в Unity NGO, но и собирать из них устойчивую логику движения, камеры и стрельбы.</p>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Course Hub - Лекция 3</p>
+    </div>
+  </footer>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+  <script defer src="../assets/js/site.js"></script>
+</body>
+</html>

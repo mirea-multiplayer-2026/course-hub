@@ -699,6 +699,39 @@ pre code.hljs {
   background: #0f1a2d;
 }
 
+.lecture-hero-text {
+  padding: 1.3rem;
+  background:
+    radial-gradient(circle at top right, rgba(55, 200, 167, 0.14), transparent 32%),
+    radial-gradient(circle at bottom left, rgba(130, 164, 255, 0.12), transparent 30%),
+    linear-gradient(180deg, #13203a 0%, #0f1a2d 100%);
+}
+
+.lecture-hero-text p {
+  max-width: 68ch;
+  margin: 0.65rem 0 0;
+  color: var(--muted);
+}
+
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.72rem;
+  border-radius: 999px;
+  border: 1px solid #35527c;
+  background: rgba(10, 18, 32, 0.46);
+  color: var(--text);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
 .lecture-hero img {
   display: block;
   width: 100%;
