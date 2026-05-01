@@ -72,17 +72,167 @@
 
       <article class="content-card">
         <h2>Подготовка проекта</h2>
+        <p>На этом этапе мы не пишем новый геймплей. Задача — заменить сетевую инфраструктуру NGO на FishNet так, чтобы в сцене появились правильные FishNet-компоненты и проект снова запускался.</p>
+
+        <h3>0.1. Сделайте безопасную копию</h3>
         <ol>
           <li>Сделайте резервную копию проекта (новая ветка в Git или копия папки).</li>
-          <li>Удалите пакеты <code>Netcode for GameObjects</code> и <code>Unity Transport</code> через Package Manager.</li>
-          <li>Импортируйте <a href="https://assetstore.unity.com/packages/tools/network/fish-net-networking-evolved-207815" target="_blank" rel="noopener">FishNet</a> из Asset Store или через Git URL.</li>
-          <li>Добавьте на сцену объект с компонентом <code><span class="accent">NetworkManager</span></code> от FishNet и настройте транспорт (<code>Tugboat</code>).</li>
-          <li>Зарегистрируйте префабы игрока и снаряда в <code>Default Prefab Objects</code> FishNet.</li>
+          <li>Откройте сцену, в которой раньше стоял NGO <code>NetworkManager</code>.</li>
+          <li>Убедитесь, что у вас есть рабочие префабы игрока и снаряда из прошлой практики.</li>
         </ol>
+
+        <h3>0.2. Удалите старые NGO-компоненты</h3>
+        <ol>
+          <li>Откройте <strong>Window → Package Manager</strong>.</li>
+          <li>Удалите пакет <code>Netcode for GameObjects</code>.</li>
+          <li>Удалите пакет <code>Unity Transport</code>, если он использовался только для NGO.</li>
+          <li>В сцене удалите старый объект NGO <code>NetworkManager</code> или снимите с него NGO-компоненты.</li>
+          <li>Если на префабах остались компоненты NGO <code>NetworkObject</code>, <code>NetworkTransform</code> или скрипты с <code>using Unity.Netcode;</code>, временно оставьте префабы как есть, но будьте готовы заменить эти компоненты на FishNet-аналоги в следующих шагах.</li>
+        </ol>
+
+        <h3>0.3. Установите FishNet</h3>
+        <ol>
+          <li>Откройте <strong>Window → Package Manager</strong>.</li>
+          <li>Нажмите <strong>+</strong> в левом верхнем углу.</li>
+          <li>Выберите вариант установки FishNet: через Asset Store, через скачанный <code>.unitypackage</code> или через Git URL, если преподаватель дал ссылку.</li>
+          <li>После импорта дождитесь, пока Unity закончит компиляцию.</li>
+          <li>В проекте должна появиться папка <code>Assets/FishNet</code>. Если FishNet установлен через Git URL, он может находиться в <code>Packages/FishNet: Networking Evolved</code>.</li>
+        </ol>
+
+        <h3>0.4. Добавьте FishNet NetworkManager в сцену</h3>
+        <p>Для студентов с нуля используйте готовый prefab. Это самый простой и наименее ошибочный путь.</p>
+        <ol>
+          <li>В окне <strong>Project</strong> найдите prefab <code>FishNet/Demos/Prefabs/NetworkManager.prefab</code>.</li>
+          <li>Если FishNet стоит через Git URL, ищите его в <code>Packages/FishNet: Networking Evolved/Demos/Prefabs/NetworkManager.prefab</code>.</li>
+          <li>Перетащите prefab <code>NetworkManager</code> в <strong>Hierarchy</strong> вашей игровой сцены.</li>
+          <li>Выделите добавленный объект <code>NetworkManager</code> в <strong>Hierarchy</strong>.</li>
+          <li>Проверьте в <strong>Inspector</strong>, что на объекте есть FishNet-компоненты <code>NetworkManager</code>, <code>ObserverManager</code> и <code>PlayerSpawner</code>.</li>
+          <li>Раскройте объект <code>NetworkManager</code> в <strong>Hierarchy</strong> и найдите дочерний объект <code>NetworkHudCanvas</code>. Он нужен только для тестов: через него можно запускать Server, Client или Host кнопками в Game View.</li>
+        </ol>
+        <figure class="lecture-figure screenshot-figure">
+          <a class="screenshot-link" href="../assets/img/practice-3/screenshots/networkmanager-prefab-project.png" aria-label="Открыть скриншот NetworkManager prefab в полном размере">
+            <img src="../assets/img/practice-3/screenshots/networkmanager-prefab-project.png" alt="Prefab NetworkManager от FishNet в окне Project" loading="lazy">
+          </a>
+          <figcaption>Найдите готовый FishNet prefab <code>NetworkManager</code> в Project и перетащите его в сцену.</figcaption>
+        </figure>
+        <figure class="lecture-figure screenshot-figure">
+          <a class="screenshot-link" href="../assets/img/practice-3/screenshots/networkmanager-hierarchy-hud.png" aria-label="Открыть скриншот NetworkManager в Hierarchy в полном размере">
+            <img src="../assets/img/practice-3/screenshots/networkmanager-hierarchy-hud.png" alt="Объект NetworkManager в Hierarchy с дочерним NetworkHudCanvas" loading="lazy">
+          </a>
+          <figcaption>После добавления prefab в Hierarchy должен появиться объект <code>NetworkManager</code> с дочерним <code>NetworkHudCanvas</code>.</figcaption>
+        </figure>
+        <figure class="lecture-figure screenshot-figure">
+          <a class="screenshot-link" href="../assets/img/practice-3/screenshots/networkmanager-inspector-1.png" aria-label="Открыть первый скриншот Inspector NetworkManager в полном размере">
+            <img src="../assets/img/practice-3/screenshots/networkmanager-inspector-1.png" alt="Inspector объекта NetworkManager с FishNet-компонентами" loading="lazy">
+          </a>
+          <figcaption>В Inspector проверьте основные FishNet-компоненты на объекте <code>NetworkManager</code>.</figcaption>
+        </figure>
+        <figure class="lecture-figure screenshot-figure">
+          <a class="screenshot-link" href="../assets/img/practice-3/screenshots/networkmanager-inspector-2.png" aria-label="Открыть второй скриншот Inspector NetworkManager в полном размере">
+            <img src="../assets/img/practice-3/screenshots/networkmanager-inspector-2.png" alt="Inspector объекта NetworkManager с дополнительными настройками FishNet" loading="lazy">
+          </a>
+          <figcaption>Ниже в Inspector находятся дополнительные настройки менеджеров и транспорта FishNet.</figcaption>
+        </figure>
+
+        <details class="hint-card">
+          <summary>Если готового prefab нет: ручная сборка NetworkManager</summary>
+          <ol>
+            <li>Создайте пустой объект в сцене: <strong>GameObject → Create Empty</strong>.</li>
+            <li>Назовите его <code>NetworkManager</code>.</li>
+            <li>Нажмите <strong>Add Component</strong> и добавьте компонент FishNet <code>NetworkManager</code>. Не перепутайте с NGO-компонентом.</li>
+            <li>Добавьте компонент <code>ObserverManager</code>.</li>
+            <li>В <code>ObserverManager</code> в списке <code>Default Conditions</code> добавьте условие <code>SceneCondition</code>, чтобы клиенты видели сетевые объекты активной сцены.</li>
+            <li>Добавьте компонент <code>PlayerSpawner</code>.</li>
+            <li>Добавьте транспорт <code>Tugboat</code> на этот же объект, если он не появился автоматически или если вам нужно вручную менять порт, адрес и симуляцию задержки.</li>
+          </ol>
+        </details>
+
+        <h3>0.5. Проверьте транспорт Tugboat</h3>
+        <ol>
+          <li>Выделите объект <code>NetworkManager</code>.</li>
+          <li>В <strong>Inspector</strong> найдите компонент <code>Tugboat</code> или настройки транспорта FishNet.</li>
+          <li>Оставьте порт по умолчанию, если преподаватель не дал другой. В курсе можно использовать <code>7770</code>.</li>
+          <li>Для локального теста адрес клиента должен быть <code>localhost</code> или <code>127.0.0.1</code>.</li>
+          <li>На этом этапе не включайте симуляцию лага. Она понадобится только в Этапе 4.</li>
+        </ol>
+
+        <h3>0.6. Подготовьте prefab игрока</h3>
+        <ol>
+          <li>Откройте prefab игрока в Prefab Mode.</li>
+          <li>Удалите NGO-компоненты <code>NetworkObject</code> и <code>NetworkTransform</code>, если они остались после прошлой версии проекта.</li>
+          <li>Нажмите <strong>Add Component</strong> и добавьте FishNet <code>NetworkObject</code>.</li>
+          <li>В компоненте <code>NetworkObject</code> включите <code>Is Spawnable</code>, потому что игрок создаётся во время подключения клиента.</li>
+          <li>Добавьте FishNet <code>NetworkTransform</code>, если движение пока синхронизируется обычной transform-синхронизацией без prediction.</li>
+          <li>Если на игроке уже есть ваш скрипт движения, позже он должен наследоваться от FishNet <code>NetworkBehaviour</code>, а не от NGO <code>NetworkBehaviour</code>.</li>
+          <li>Сохраните prefab игрока.</li>
+        </ol>
+        <figure class="lecture-figure screenshot-figure">
+          <a class="screenshot-link" href="../assets/img/practice-3/screenshots/player-prefab-networkobject.png" aria-label="Открыть скриншот prefab игрока в полном размере">
+            <img src="../assets/img/practice-3/screenshots/player-prefab-networkobject.png" alt="Inspector prefab игрока с FishNet NetworkObject и включённым Is Spawnable" loading="lazy">
+          </a>
+          <figcaption>На prefab игрока должен быть FishNet <code>NetworkObject</code>. Для создания игрока по сети включите <code>Is Spawnable</code>.</figcaption>
+        </figure>
+
+        <h3>0.7. Назначьте игрока в PlayerSpawner</h3>
+        <ol>
+          <li>Вернитесь в сцену и выделите объект <code>NetworkManager</code>.</li>
+          <li>В компоненте <code>PlayerSpawner</code> найдите поле <code>Player Prefab</code>.</li>
+          <li>Перетащите туда prefab игрока из окна <strong>Project</strong>.</li>
+          <li>Если у вас есть точки появления, создайте пустые объекты <code>SpawnPoint_1</code>, <code>SpawnPoint_2</code> и разместите их на карте.</li>
+          <li>Перетащите эти точки в список <code>Spawns</code> компонента <code>PlayerSpawner</code>.</li>
+          <li>Если список <code>Spawns</code> пустой, FishNet создаст игрока в позиции, которая сохранена внутри prefab игрока.</li>
+        </ol>
+        <figure class="lecture-figure screenshot-figure">
+          <a class="screenshot-link" href="../assets/img/practice-3/screenshots/playerspawner-player-prefab.png" aria-label="Открыть скриншот PlayerSpawner в полном размере">
+            <img src="../assets/img/practice-3/screenshots/playerspawner-player-prefab.png" alt="Поле Player Prefab в компоненте PlayerSpawner с назначенным prefab игрока" loading="lazy">
+          </a>
+          <figcaption>В <code>PlayerSpawner</code> обязательно назначьте prefab игрока в поле <code>Player Prefab</code>.</figcaption>
+        </figure>
+
+        <h3>0.8. Подготовьте prefab снаряда</h3>
+        <ol>
+          <li>Откройте prefab снаряда в Prefab Mode.</li>
+          <li>Удалите старый NGO <code>NetworkObject</code>, если он есть.</li>
+          <li>Добавьте FishNet <code>NetworkObject</code>.</li>
+          <li>Включите <code>Is Spawnable</code>, потому что снаряд создаётся кодом во время игры.</li>
+          <li>Добавьте FishNet <code>NetworkTransform</code>, если позиция снаряда должна синхронизироваться между клиентами.</li>
+          <li>Сохраните prefab снаряда.</li>
+        </ol>
+        <figure class="lecture-figure screenshot-figure">
+          <a class="screenshot-link" href="../assets/img/practice-3/screenshots/projectile-prefab-networkobject.png" aria-label="Открыть скриншот prefab снаряда в полном размере">
+            <img src="../assets/img/practice-3/screenshots/projectile-prefab-networkobject.png" alt="Inspector prefab снаряда с FishNet NetworkObject и Is Spawnable" loading="lazy">
+          </a>
+          <figcaption>На prefab снаряда также нужен FishNet <code>NetworkObject</code> с включённым <code>Is Spawnable</code>, иначе серверный спавн не будет корректно работать у клиентов.</figcaption>
+        </figure>
+
+        <h3>0.9. Проверьте DefaultPrefabObjects</h3>
+        <p>В старых туториалах часто пишут «добавьте префабы в список вручную». В актуальном FishNet этот список обычно заполняется автоматически.</p>
+        <ol>
+          <li>Проверьте, что у runtime-префабов игрока и снаряда есть FishNet <code>NetworkObject</code>.</li>
+          <li>Проверьте, что у этих префабов включён флаг <code>Is Spawnable</code>.</li>
+          <li>Сохраните проект и дождитесь компиляции Unity.</li>
+          <li>Если FishNet создаёт или обновляет asset <code>DefaultPrefabObjects</code>, не редактируйте его без необходимости.</li>
+          <li>Если снаряд не появляется у клиентов, первым делом проверьте именно <code>NetworkObject → Is Spawnable</code> на prefab снаряда.</li>
+        </ol>
+
+        <h3>0.10. Первый запуск без кода prediction</h3>
+        <ol>
+          <li>Нажмите <strong>Play</strong> в Unity.</li>
+          <li>В Game View должны появиться тестовые кнопки FishNet из <code>NetworkHudCanvas</code>.</li>
+          <li>Нажмите <strong>Start Host</strong> или отдельно <strong>Start Server</strong> и <strong>Start Client</strong>.</li>
+          <li>Если <code>Player Prefab</code> назначен правильно, в сцене должен появиться объект игрока.</li>
+          <li>Если Unity пишет, что player prefab пустой, вернитесь к пункту 0.7 и назначьте prefab в <code>PlayerSpawner</code>.</li>
+        </ol>
+        <figure class="lecture-figure screenshot-figure">
+          <a class="screenshot-link" href="../assets/img/practice-3/screenshots/game-view-fishnet-buttons.png" aria-label="Открыть скриншот Game View в полном размере">
+            <img src="../assets/img/practice-3/screenshots/game-view-fishnet-buttons.png" alt="Game View с тестовыми кнопками FishNet NetworkHudCanvas" loading="lazy">
+          </a>
+          <figcaption>Тестовый <code>NetworkHudCanvas</code> показывает кнопки запуска сервера, клиента и хоста прямо в Game View.</figcaption>
+        </figure>
 
         <div class="checkpoint">
           <h3>Проверь</h3>
-          <p>Проект компилируется без ошибок после удаления NGO и импорта FishNet. На сцене есть <code><span class="accent">NetworkManager</span></code> с настроенным транспортом.</p>
+          <p>Проект компилируется без ошибок после удаления NGO и импорта FishNet. В сцене есть FishNet <code><span class="accent">NetworkManager</span></code>, <code><span class="accent">ObserverManager</span></code>, <code><span class="accent">PlayerSpawner</span></code>, тестовый <code><span class="accent">NetworkHudCanvas</span></code>, настроенный <code><span class="accent">Tugboat</span></code>, а префабы игрока и снаряда имеют FishNet <code><span class="accent">NetworkObject</span></code>.</p>
         </div>
       </article>
 
@@ -345,6 +495,7 @@ public class PlayerMovementPredicted : NetworkBehaviour
   <script defer src="../assets/js/site.js"></script>
 </body>
 </html>
+
 
 
 

@@ -43,8 +43,9 @@ if (window.hljs) {
 
 
 const zoomableImages = document.querySelectorAll('.gif-card img');
+const screenshotLinks = document.querySelectorAll('.screenshot-link[href]');
 
-if (zoomableImages.length) {
+if (zoomableImages.length || screenshotLinks.length) {
   const overlay = document.createElement('div');
   overlay.className = 'image-lightbox';
   overlay.hidden = true;
@@ -56,13 +57,22 @@ if (zoomableImages.length) {
   overlayImage.setAttribute('translate', 'no');
   const closeBtn = overlay.querySelector('.lightbox-close');
 
-    const suppressNativePopups = (node) => {
+  const suppressNativePopups = (node) => {
     ['dragstart', 'selectstart', 'contextmenu'].forEach((evt) => {
       node.addEventListener(evt, (event) => event.preventDefault());
     });
   };
 
   suppressNativePopups(overlayImage);
+
+  const openLightbox = (src, altText = '') => {
+    if (!src) return;
+    overlayImage.src = src;
+    overlayImage.alt = altText;
+    overlay.hidden = false;
+    document.body.style.overflow = 'hidden';
+  };
+
   const closeLightbox = () => {
     overlay.hidden = true;
     document.body.style.overflow = '';
@@ -75,10 +85,24 @@ if (zoomableImages.length) {
     img.setAttribute('translate', 'no');
     suppressNativePopups(img);
     img.addEventListener('click', () => {
-      overlayImage.src = img.currentSrc || img.src;
-      overlayImage.alt = img.alt || '';
-      overlay.hidden = false;
-      document.body.style.overflow = 'hidden';
+      openLightbox(img.currentSrc || img.src, img.alt || '');
+    });
+  });
+
+  screenshotLinks.forEach((link) => {
+    const previewImg = link.querySelector('img');
+    if (previewImg) {
+      previewImg.classList.add('is-zoomable');
+      previewImg.setAttribute('draggable', 'false');
+      previewImg.setAttribute('translate', 'no');
+      suppressNativePopups(previewImg);
+    }
+
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      const src = link.getAttribute('href') || previewImg?.currentSrc || previewImg?.src || '';
+      const altText = previewImg?.alt || link.getAttribute('aria-label') || '';
+      openLightbox(src, altText);
     });
   });
 

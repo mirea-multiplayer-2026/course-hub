@@ -348,6 +348,31 @@ code {
   background: rgba(9, 15, 27, 0.55);
 }
 
+.screenshot-figure {
+  max-width: 760px;
+  margin: 1rem auto;
+}
+
+.screenshot-link {
+  display: block;
+  cursor: zoom-in;
+  background:
+    linear-gradient(45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 255, 255, 0.04) 25%, transparent 25%),
+    #0b1324;
+  background-size: 18px 18px;
+}
+
+.screenshot-figure img {
+  max-height: 320px;
+  object-fit: contain;
+}
+
+.screenshot-figure figcaption::after {
+  content: " Нажмите на скриншот, чтобы открыть полный размер.";
+  color: var(--primary);
+}
+
 .media-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -631,10 +656,6 @@ code.language-csharp {
   -webkit-user-drag: none;
 }
 
-.lightbox-image {
-  pointer-events: none;
-}
-
 /* IDE-like code block accents */
 pre {
   position: relative;
@@ -789,8 +810,18 @@ pre code.hljs {
     max-width: none;
   }
 
+  .screenshot-figure img {
+    width: 100%;
+    max-width: 100%;
+    max-height: 240px;
+  }
+
   .lecture-figure figcaption {
     min-width: 640px;
+  }
+
+  .screenshot-figure figcaption {
+    min-width: 0;
   }
 
   .lecture-hero img {
