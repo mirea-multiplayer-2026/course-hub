@@ -1,0 +1,314 @@
+﻿<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лекция 7 | Course Hub</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../index.html" class="brand">Course Hub</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
+      <nav id="site-nav" class="site-nav">
+        <div class="nav-row nav-row-lectures">
+          <a href="../index.html">Главная</a>
+          <a href="./lecture-1.html">Лекция 1</a>
+          <a href="./lecture-2.html">Лекция 2</a>
+          <a href="./lecture-3.html">Лекция 3</a>
+          <a href="./lecture-4.html">Лекция 4</a>
+          <a href="./lecture-5.html">Лекция 5</a>
+          <a href="./lecture-7.html" aria-current="page">Лекция 7</a>
+        </div>
+        <div class="nav-row nav-row-practices">
+          <a href="./practice-1.html">Практика 1</a>
+          <a href="./practice-2.html">Практика 2</a>
+          <a href="./practice-3.html">Практика 3</a>
+          <a href="./practice-4.html">Практика 4</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section lecture-page">
+    <a class="back-link" href="../index.html">Назад на главную</a>
+    <h1>Лекция 7. Dedicated Server в Linux (Headless)</h1>
+
+    <section class="lecture-hero lecture-hero-text">
+      <p class="eyebrow">Блок 3: инфраструктура, Linux и деплой</p>
+      <p>Лекция переводит проект из режима локальной разработки в продакшен-подход: отдельный серверный процесс на Linux, автоматический запуск через <code>Application.isBatchMode</code>, сетевые порты, базовая диагностика и архитектура игрового цикла без перезапуска сервера.</p>
+      <div class="pill-row">
+        <span class="pill">Dedicated Server</span>
+        <span class="pill">Linux</span>
+        <span class="pill">WSL 2</span>
+        <span class="pill">-batchmode</span>
+        <span class="pill">UDP 7770</span>
+        <span class="pill">Firewall</span>
+        <span class="pill">SyncVar State Machine</span>
+      </div>
+    </section>
+
+    <div class="content-stack">
+      <article class="content-card">
+        <h2>Материалы лекции</h2>
+        <p>Скачать PDF-версию лекции:</p>
+        <div class="demo-links">
+          <a class="btn btn-secondary" href="../Lectures%20file/Lecture%207.pdf" target="_blank" rel="noopener noreferrer">PDF</a>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>1. Зачем эта лекция нужна в курсе</h2>
+        <p>До этого этапа серверная логика проверялась в основном в режиме Host внутри Unity Editor. Такой режим удобен для прототипирования, но не отражает реальные условия продакшена. Лекция 7 переводит проект на инфраструктурный уровень: отдельный серверный процесс, отдельная ОС, отдельная сеть и отдельный жизненный цикл матча.</p>
+        <div class="info-grid">
+          <section class="media-card">
+            <h3>Что было раньше</h3>
+            <p>Клиент и сервер часто жили в одном процессе. Ошибки инфраструктуры оставались незаметными.</p>
+          </section>
+          <section class="media-card">
+            <h3>Что делаем сейчас</h3>
+            <p>Поднимаем Linux dedicated server в headless-режиме и подключаем клиент по реальному IP/порту.</p>
+          </section>
+          <section class="media-card">
+            <h3>Что получаем</h3>
+            <p>Осмысленную архитектуру: сервер управляет матчем, клиенты только реагируют на серверное состояние.</p>
+          </section>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>2. Почему Linux стандарт для dedicated server</h2>
+        <p>Выделенный сервер оценивают по трём главным критериям: стоимость владения, плотность размещения процессов и автоматизация эксплуатации.</p>
+        <ul>
+          <li><strong>Лицензирование:</strong> Linux обычно не требует отдельной лицензии на каждый серверный инстанс.</li>
+          <li><strong>Ресурсная плотность:</strong> меньше системных служб и ниже overhead ОС, поэтому на том же железе помещается больше матчей.</li>
+          <li><strong>Автоматизация:</strong> инструменты CI/CD, контейнеризация и мониторинг в индустрии в первую очередь ориентированы на Linux.</li>
+          <li><strong>Операционная модель:</strong> для игровых серверов привычны headless-процессы, логи в stdout и управление через terminal/SSH.</li>
+        </ul>
+        <div class="checkpoint">
+          <h3>Практический вывод</h3>
+          <p>Переход на Linux важен не как «мода», а как способ стабилизировать стоимость и масштабирование мультиплеера.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>3. Headless-режим: что реально выключается</h2>
+        <p>Headless означает «без пользовательского интерфейса». Для сервера это критично: ему не нужен рендер, камера, звук, меню и локальный input. Ему нужны сеть, физика (если участвует в симуляции), игровой менеджер и синхронизация состояния.</p>
+        <div class="info-grid">
+          <section class="media-card">
+            <h3>Обычный клиент</h3>
+            <p>Рендер-пайплайн, камера, UI, эффекты, звук, обработка ввода.</p>
+          </section>
+          <section class="media-card">
+            <h3>Headless сервер</h3>
+            <p>ServerManager, транспорт, матч-логика, таймеры, валидация RPC, игровые состояния.</p>
+          </section>
+          <section class="media-card">
+            <h3>Результат</h3>
+            <p>Меньше RAM/CPU, быстрее старт, меньше нестабильных клиентских зависимостей в серверном билде.</p>
+          </section>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>4. Автостарт через Application.isBatchMode</h2>
+        <p>Главный признак headless-процесса в Unity — <code>Application.isBatchMode</code>. На dedicated server сервер должен стартовать автоматически, без кнопок UI.</p>
+        <pre><code class="language-csharp">using FishNet;
+using FishNet.Managing;
+using UnityEngine;
+
+public class ServerAutoStart : MonoBehaviour
+{
+    [SerializeField] private ushort port = 7770;
+
+    private void Start()
+    {
+        if (Application.isBatchMode)
+        {
+            Debug.Log($"[Server] Starting on port {port}");
+            InstanceFinder.ServerManager.StartConnection(port);
+        }
+    }
+}</code></pre>
+        <p>Ключевые флаги запуска Linux-билда:</p>
+        <pre><code class="language-bash">./GameServer.x86_64 -batchmode -nographics</code></pre>
+        <ul>
+          <li><code>-batchmode</code> отключает интерактивный UI-режим.</li>
+          <li><code>-nographics</code> не поднимает графический стек на машине без GPU.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>5. Dedicated Server Build Target в Unity</h2>
+        <p>В Unity 2021+ dedicated build target позволяет физически вырезать часть клиентских подсистем из серверного билда. Это лучше, чем просто запускать обычный клиент «с флагами».</p>
+        <ol>
+          <li>В Unity Hub установить модуль <code>Linux Dedicated Server Build Support</code>.</li>
+          <li>В <code>Build Settings</code> выбрать <code>Dedicated Server</code> и платформу Linux.</li>
+          <li>Добавить нужные сцены в билд.</li>
+          <li>Собрать серверный билд (<code>.x86_64</code>).</li>
+        </ol>
+        <div class="checkpoint">
+          <h3>Критический нюанс</h3>
+          <p>Серверная загрузочная сцена должна содержать объект с автозапуском сервера. Без этого процесс стартует, но соединение не откроется.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>6. WSL 2: запуск Linux-сервера на Windows-машине</h2>
+        <p>WSL 2 для курса удобен тем, что даёт Linux-среду без отдельного физического сервера. При этом сеть у WSL отдельная от Windows-host, поэтому IP нужно брать из WSL.</p>
+        <pre><code class="language-bash">cd /mnt/e/Builds/GameServer
+ls -la
+chmod +x ./GameServer.x86_64
+./GameServer.x86_64 -batchmode -nographics</code></pre>
+        <p>Если сервер стартовал корректно, в логах должны быть сообщения о запуске transport и готовности к подключениям.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>7. IP и порт: где студенты ошибаются чаще всего</h2>
+        <p>IP-адрес — это «дом», порт — «квартира» приложения в этом доме. Для FishNet/Tugboat в курсе используется UDP-порт <code>7770</code>.</p>
+        <p>Для WSL нужен IP именно из Linux, а не из <code>ipconfig</code> на Windows-host:</p>
+        <pre><code class="language-bash">hostname -I
+ss -ulnp | grep 7770</code></pre>
+        <div class="checkpoint">
+          <h3>Частая ошибка</h3>
+          <p>Подключение на IP вида <code>192.168.x.x</code> из Windows вместо IP вида <code>172.x.x.x</code> из WSL. Клиент не может достучаться до серверного процесса.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>8. UDP против TCP в контексте realtime игр</h2>
+        <p>Для геймплея важнее актуальность данных, чем стопроцентная доставка каждого старого пакета. Поэтому realtime-часть обычно идёт через UDP, а важные события дополнительно защищаются протоколом уровня игры.</p>
+        <ul>
+          <li><strong>TCP:</strong> гарантирует доставку и порядок, но может накапливать задержку из-за ретрансляций.</li>
+          <li><strong>UDP:</strong> не гарантирует доставку, но стабильно выигрывает по latency для динамики матча.</li>
+          <li><strong>Практика:</strong> позиционные апдейты терпят потерю отдельных пакетов, события старта/финиша матча должны быть гарантированы логикой сервера.</li>
+        </ul>
+      </article>
+
+      <article class="content-card">
+        <h2>9. Firewall и минимальная сетeвая диагностика</h2>
+        <p>Разрешение UDP-порта в Windows Firewall (PowerShell от администратора):</p>
+        <pre><code class="language-bash">netsh advfirewall firewall add rule name="GameServer" dir=in action=allow protocol=UDP localport=7770</code></pre>
+        <p>Минимальный чек Linux-стороны:</p>
+        <pre><code class="language-bash"># Проверить слушается ли UDP-порт
+ss -ulnp | grep 7770
+
+# Проверить что процесс жив
+ps aux | grep GameServer</code></pre>
+        <p>Если процесс есть, но порт не слушается, проблема обычно в коде автозапуска или в неправильной сцене билда.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>10. Условная компиляция UNITY_SERVER</h2>
+        <p>UI-код должен быть исключён из серверного билда через <code>UNITY_SERVER</code>:</p>
+        <pre><code class="language-csharp">private void Start()
+{
+#if !UNITY_SERVER
+    startButton.onClick.AddListener(StartServer);
+    mainCanvas.SetActive(true);
+#endif
+
+#if UNITY_SERVER
+    Debug.Log("[Server] Menu skipped in server build.");
+#endif
+}</code></pre>
+        <p>Такая развилка держит один репозиторий для клиента и сервера без дублирования сцен и без отдельной кодовой ветки под dedicated build.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>11. Deploy-последовательность: от билда до первого подключения</h2>
+        <ol>
+          <li>Собрать dedicated Linux build.</li>
+          <li>Перенести папку билда в путь, доступный WSL.</li>
+          <li>Выдать исполняемому файлу права через <code>chmod +x</code>.</li>
+          <li>Запустить сервер с <code>-batchmode -nographics</code>.</li>
+          <li>Проверить IP через <code>hostname -I</code>.</li>
+          <li>Открыть порт 7770 UDP во firewall.</li>
+          <li>Подключить клиент по WSL IP и порту 7770.</li>
+        </ol>
+      </article>
+
+      <article class="content-card">
+        <h2>12. Игровой цикл как машина состояний</h2>
+        <p>Сервер управляет состоянием матча, клиенты только реагируют на изменения:</p>
+        <pre><code class="language-csharp">public enum MatchState
+{
+    WaitingForPlayers,
+    InProgress,
+    ShowingResults
+}
+
+public class GameManager : NetworkBehaviour
+{
+    [SyncVar(OnChange = nameof(OnMatchStateChanged))]
+    private MatchState gameState = MatchState.WaitingForPlayers;
+
+    private void OnMatchStateChanged(MatchState prev, MatchState next, bool asServer)
+    {
+        if (next == MatchState.InProgress)
+            ShowMatchUI();
+        else if (next == MatchState.ShowingResults)
+            ShowResultsUI();
+        else if (next == MatchState.WaitingForPlayers)
+            ShowLobbyUI();
+    }
+}</code></pre>
+        <p>Эта модель защищает от рассинхрона: сервер единственный источник истины, а клиент никогда не «предсказывает» смену глобального состояния матча.</p>
+        <div class="checkpoint">
+          <h3>Архитектурное правило</h3>
+          <p><strong>Клиент не решает, когда стартует матч.</strong> Решает только сервер; клиенты отображают серверное состояние.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>13. Три типовые ошибки в практике</h2>
+        <ul>
+          <li><strong>Сервер не стартует автоматически:</strong> отсутствует или не вызывается код с <code>Application.isBatchMode</code>.</li>
+          <li><strong>Неверный IP у клиента:</strong> взят IP Windows вместо WSL.</li>
+          <li><strong>Порт закрыт firewall:</strong> UDP 7770 не пропущен, клиент ловит timeout.</li>
+        </ul>
+        <details class="hint-card">
+          <summary>Антипаттерн: перезапуск сервера после каждого раунда</summary>
+          <p>Перезапуск процесса ломает сессию и даёт холодный старт. Правильный путь: сервер работает непрерывно, а раунд сбрасывает только игровые переменные и возвращает состояние в лобби.</p>
+        </details>
+      </article>
+
+      <article class="content-card">
+        <h2>14. Чек-лист диагностики соединения</h2>
+        <ol>
+          <li>Есть ли в WSL лог старта и готовности соединения?</li>
+          <li>IP взят из <code>hostname -I</code>, а не из <code>ipconfig</code>?</li>
+          <li>Порт <code>7770/UDP</code> действительно слушается?</li>
+          <li>Есть правило firewall для входящего UDP на 7770?</li>
+          <li>В клиенте введены тот же IP и порт, что на сервере?</li>
+          <li>В коде есть автозапуск через <code>Application.isBatchMode</code>?</li>
+        </ol>
+      </article>
+
+      <article class="content-card practice-banner">
+        <h2>Связка с практикой 4</h2>
+        <p>Лекция 7 полностью готовит к практике: Linux dedicated-билд, запуск в WSL, подключение клиента, диагностика сети и цикл <code>Lobby → Match → Results → Lobby</code> без перезапуска серверного процесса.</p>
+        <div class="demo-links">
+          <a class="btn btn-secondary" href="./practice-4.html">Открыть практику 4</a>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Course Hub - Лекция 7</p>
+    </div>
+  </footer>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+  <script defer src="../assets/js/site.js"></script>
+</body>
+</html>
