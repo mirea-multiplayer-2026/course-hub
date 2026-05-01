@@ -148,6 +148,22 @@ h3 {
   margin: 0 0 1rem;
 }
 
+.page-lead {
+  max-width: 72ch;
+}
+
+.last-updated {
+  display: inline-flex;
+  margin: 0 0 1rem;
+  padding: 0.42rem 0.7rem;
+  border: 1px solid #35527c;
+  border-radius: 999px;
+  background: rgba(10, 18, 32, 0.46);
+  color: var(--muted);
+  font-weight: 700;
+  font-size: 0.94rem;
+}
+
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -199,6 +215,32 @@ h3 {
   gap: 1rem;
 }
 
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.card h3 {
+  margin-bottom: 0.45rem;
+}
+
+.card p {
+  color: var(--muted);
+}
+
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+  margin-top: auto;
+}
+
+.card > .link-arrow {
+  margin-top: auto;
+}
+
 .link-arrow {
   color: #82e4d0;
   font-weight: 700;
@@ -207,6 +249,106 @@ h3 {
 
 .link-arrow:hover {
   text-decoration: underline;
+}
+
+.file-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2rem;
+  padding: 0.34rem 0.6rem;
+  border: 1px solid #35527c;
+  border-radius: 8px;
+  background: rgba(10, 18, 32, 0.42);
+  color: var(--text);
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.file-link:hover,
+.file-link:focus-visible {
+  border-color: #82e4d0;
+  color: #82e4d0;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.75rem;
+  padding: 0.24rem 0.58rem;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.status-ready {
+  background: rgba(55, 200, 167, 0.14);
+  border: 1px solid rgba(55, 200, 167, 0.5);
+  color: #95f0dc;
+}
+
+.status-progress {
+  background: rgba(255, 212, 121, 0.14);
+  border: 1px solid rgba(255, 212, 121, 0.48);
+  color: #ffd479;
+}
+
+.status-soon {
+  background: rgba(130, 164, 255, 0.13);
+  border: 1px solid rgba(130, 164, 255, 0.45);
+  color: #b7c9ff;
+}
+
+.roadmap {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.roadmap-item {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(23, 36, 58, 0.92) 0%, rgba(29, 45, 70, 0.92) 100%);
+  box-shadow: var(--shadow);
+}
+
+.roadmap-item h3 {
+  margin: 0.8rem 0 0.45rem;
+}
+
+.roadmap-item p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.roadmap-item.is-done {
+  border-top: 3px solid #37c8a7;
+}
+
+.roadmap-item.is-progress {
+  border-top: 3px solid #ffd479;
+}
+
+.roadmap-item.is-soon {
+  border-top: 3px solid #82a4ff;
+}
+
+.support-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 1rem;
+}
+
+.compact-list {
+  margin: 0.75rem 0 0;
+  padding-left: 1.25rem;
+}
+
+.compact-list li {
+  margin-bottom: 0.5rem;
 }
 
 .site-footer {
@@ -519,16 +661,21 @@ code {
 
 @media (max-width: 1000px) {
   .info-grid,
-  .media-grid {
+  .media-grid,
+  .roadmap,
+  .support-grid {
     grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 700px) {
   .info-grid,
-  .media-grid {
+  .media-grid,
+  .roadmap,
+  .support-grid {
     grid-template-columns: 1fr;
   }
+
 }
 
 

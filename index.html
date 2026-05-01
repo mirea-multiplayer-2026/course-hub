@@ -38,7 +38,10 @@
   <main>
     <section class="hero">
       <div class="container">
+        <p class="eyebrow">Курс продолжается, материалы пополняются постепенно</p>
         <h1>Учебные материалы по курсу<br>Мультиплеер в Unity</h1>
+        <p class="page-lead">Здесь собраны лекции, практики, PDF-материалы и рабочие подсказки по NGO, FishNet и dedicated server. Если какой-то раздел ещё не готов, это отмечено в статусе.</p>
+        <p class="last-updated">Последнее обновление: 1 мая 2026</p>
         <div class="hero-actions">
           <a class="btn btn-hero-link" href="./lectures/lecture-1.html">Лекция 1</a>
           <a class="btn btn-hero-link" href="./lectures/lecture-2.html">Лекция 2</a>
@@ -55,60 +58,137 @@
     </section>
 
     <section class="container section">
+      <h2>Дорожная карта курса</h2>
+      <div class="roadmap">
+        <article class="roadmap-item is-done">
+          <span class="status-badge status-ready">Готово</span>
+          <h3>Блок 1. Основы NGO</h3>
+          <p>Лекции 1-4 и практики 1-2: подключение игроков, состояние, RPC, движение, ownership, пул объектов и лобби.</p>
+        </article>
+        <article class="roadmap-item is-progress">
+          <span class="status-badge status-progress">Дополняется</span>
+          <h3>Блок 2. Переход на FishNet</h3>
+          <p>Лекция 5 и практика 3 доступны. Блок дополняется, потому что лекция 6 ещё не добавлена.</p>
+        </article>
+        <article class="roadmap-item is-progress">
+          <span class="status-badge status-progress">Дополняется</span>
+          <h3>Блок 3. Серверная сборка и запуск</h3>
+          <p>Лекция 7 готова, практика 4 доступна. Блок дополняется, потому что лекция 8 ещё не добавлена.</p>
+        </article>
+        <article class="roadmap-item is-soon">
+          <span class="status-badge status-soon">Скоро</span>
+          <h3>Лекции 6 и 8</h3>
+          <p>Разделы будут добавлены после подготовки материалов. Номера оставлены в карте курса, чтобы структура была прозрачной.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="container section">
       <h2>Текущий объём</h2>
       <div class="cards">
         <article class="card">
+          <span class="status-badge status-ready">Готово</span>
           <h3>Лекция 1</h3>
           <p>Базовые понятия, терминология, первичные шаги и разбор ошибок.</p>
-          <a class="link-arrow" href="./lectures/lecture-1.html">Открыть страницу</a>
+          <div class="card-actions">
+            <a class="link-arrow" href="./lectures/lecture-1.html">Открыть страницу</a>
+            <a class="file-link" href="./Lectures%20file/Lecture%201.pdf">PDF</a>
+          </div>
         </article>
         <article class="card">
+          <span class="status-badge status-ready">Готово</span>
           <h3>Лекция 2</h3>
           <p>Синхронизация состояния, сериализация и оптимизация трафика.</p>
-          <a class="link-arrow" href="./lectures/lecture-2.html">Открыть страницу</a>
+          <div class="card-actions">
+            <a class="link-arrow" href="./lectures/lecture-2.html">Открыть страницу</a>
+            <a class="file-link" href="./Lectures%20file/Lecture%202.pdf">PDF</a>
+          </div>
         </article>
         <article class="card">
+          <span class="status-badge status-ready">Готово</span>
           <h3>Лекция 3</h3>
           <p>Движение через NetworkTransform, ownership, мультиплеерная камера и серверная стрельба.</p>
-          <a class="link-arrow" href="./lectures/lecture-3.html">Открыть страницу</a>
+          <div class="card-actions">
+            <a class="link-arrow" href="./lectures/lecture-3.html">Открыть страницу</a>
+            <a class="file-link" href="./Lectures%20file/Lecture%203.pdf">PDF</a>
+          </div>
         </article>
         <article class="card">
+          <span class="status-badge status-ready">Готово</span>
           <h3>Лекция 4</h3>
-          <p>Секция подготовлена как плейсхолдер. Контент для четвёртой лекции будет добавлен позже.</p>
-          <a class="link-arrow" href="./lectures/lecture-4.html">Открыть страницу</a>
+          <p>Продвинутый NGO: targeted RPC, unreliable RPC, object pooling, сетевой инвентарь, лобби и загрузка сцен.</p>
+          <div class="card-actions">
+            <a class="link-arrow" href="./lectures/lecture-4.html">Открыть страницу</a>
+            <a class="file-link" href="./Lectures%20file/Lecture%204.pdf">PDF</a>
+          </div>
         </article>
         <article class="card">
+          <span class="status-badge status-ready">Готово</span>
           <h3>Лекция 5</h3>
           <p>FishNet: архитектура, SyncVar, Observers, AOI и миграция проекта с NGO на новый networking-стек.</p>
-          <a class="link-arrow" href="./lectures/lecture-5.html">Открыть страницу</a>
+          <div class="card-actions">
+            <a class="link-arrow" href="./lectures/lecture-5.html">Открыть страницу</a>
+            <a class="file-link" href="./Lectures%20file/Lecture%205.pdf">PDF</a>
+          </div>
         </article>
         <article class="card">
+          <span class="status-badge status-ready">Готово</span>
           <h3>Лекция 7</h3>
           <p>Dedicated Server на Linux: headless-запуск, WSL, порты, firewall и серверный игровой цикл без перезапуска.</p>
-          <a class="link-arrow" href="./lectures/lecture-7.html">Открыть страницу</a>
+          <div class="card-actions">
+            <a class="link-arrow" href="./lectures/lecture-7.html">Открыть страницу</a>
+            <a class="file-link" href="./Lectures%20file/Lecture%207.pdf">PDF</a>
+          </div>
         </article>
         <article class="card">
+          <span class="status-badge status-ready">Готово</span>
           <h3>Практика 1</h3>
           <p>Подключение двух игроков, синхронизация ника и HP, нанесение урона через сервер.</p>
           <a class="link-arrow" href="./lectures/practice-1.html">Открыть страницу</a>
         </article>
         <article class="card">
+          <span class="status-badge status-ready">Готово</span>
           <h3>Практика 2</h3>
           <p>Движение персонажа через NetworkTransform, камера владельца, стрельба снарядами через RPC.</p>
           <a class="link-arrow" href="./lectures/practice-2.html">Открыть страницу</a>
         </article>
         <article class="card">
+          <span class="status-badge status-ready">Готово</span>
           <h3>Практика 3</h3>
           <p>Миграция проекта с NGO на FishNet, клиентское предсказание движения, тестирование с лагом.</p>
           <a class="link-arrow" href="./lectures/practice-3.html">Открыть страницу</a>
         </article>
         <article class="card">
+          <span class="status-badge status-progress">Дополняется</span>
           <h3>Практика 4</h3>
           <p>Dedicated Server под Linux, лобби с ожиданием игроков, игровой цикл и экран результатов.</p>
           <a class="link-arrow" href="./lectures/practice-4.html">Открыть страницу</a>
         </article>
       </div>
     </section>
+
+    <section class="container section support-grid">
+      <article class="content-card student-note">
+        <h2>Если вы отстали</h2>
+        <ol class="compact-list">
+          <li>Сначала восстановите Практику 1: Host/Client, prefab игрока и синхронизация HP.</li>
+          <li>После этого переходите к Практике 2: движение, камера владельца, серверная стрельба и респавн.</li>
+          <li>Перед FishNet проверьте, что понимаете разницу между состоянием, событием и владением объектом.</li>
+          <li>Если не запускается dedicated server, проверьте порт, firewall, IP-адрес WSL и batch/headless-режим.</li>
+        </ol>
+      </article>
+
+      <article class="content-card">
+        <h2>Частые ошибки</h2>
+        <ul class="compact-list">
+          <li>Prefab игрока или снаряда не зарегистрирован как сетевой prefab.</li>
+          <li>Клиент пытается менять состояние, которое должен менять только сервер.</li>
+          <li>Камера активна у всех игроков, а не только у владельца объекта.</li>
+          <li>RPC используется для постоянного состояния вместо NetworkVariable или SyncVar.</li>
+        </ul>
+      </article>
+    </section>
+
   </main>
 
   <footer class="site-footer">
