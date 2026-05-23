@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Лекция 6 | Course Hub</title>
+  <link rel="icon" type="image/svg+xml" href="../assets/img/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/atom-one-dark.min.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="../index.html" class="brand">Course Hub</a>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Меню</button>
+      <nav id="site-nav" class="site-nav">
+        <div class="nav-row nav-row-lectures">
+          <a href="../index.html">Главная</a>
+          <a href="./lecture-1.html">Лекция 1</a>
+          <a href="./lecture-2.html">Лекция 2</a>
+          <a href="./lecture-3.html">Лекция 3</a>
+          <a href="./lecture-4.html">Лекция 4</a>
+          <a href="./lecture-5.html">Лекция 5</a>
+          <a href="./lecture-6.html" aria-current="page">Лекция 6</a>
+          <a href="./lecture-7.html">Лекция 7</a>
+        </div>
+        <div class="nav-row nav-row-practices">
+          <a href="./practice-1.html">Практика 1</a>
+          <a href="./practice-2.html">Практика 2</a>
+          <a href="./practice-3.html">Практика 3</a>
+          <a href="./practice-4.html">Практика 4</a>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container section lecture-page">
+    <a class="back-link" href="../index.html">Назад на главную</a>
+    <h1>Лекция 6. Борьба с задержками</h1>
+
+    <section class="lecture-hero lecture-hero-text">
+      <p class="eyebrow">Prediction, Rollback и Lag Compensation</p>
+      <p>Лекция закрывает главный разрыв после миграции на FishNet: почему ввод может ощущаться мгновенным при 200 мс ping, как клиент откатывает собственную симуляцию после серверной коррекции и почему сервер иногда честно засчитывает попадание по цели, которая на экране жертвы уже ушла за угол.</p>
+      <div class="pill-row">
+        <span class="pill">Client-Side Prediction</span>
+        <span class="pill">Input Buffer</span>
+        <span class="pill">Server Reconciliation</span>
+        <span class="pill">Rollback</span>
+        <span class="pill">Lag Compensation</span>
+        <span class="pill">FishNet Replicate</span>
+        <span class="pill">Hit Registration</span>
+      </div>
+    </section>
+
+    <div class="content-stack">
+      <article class="content-card">
+        <h2>Материалы лекции</h2>
+        <p>Скачать материалы лекции и демонстрационный Unity package:</p>
+        <div class="demo-links">
+          <a class="btn btn-secondary" href="../Lectures%20file/Lecture%206.pdf" target="_blank" rel="noopener noreferrer">PDF</a>
+          <a class="btn btn-secondary" href="../Demo/Lecture%206.unitypackage" download>Demo .unitypackage</a>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>1. Зачем эта лекция нужна</h2>
+        <p>В лекции 5 мы перешли на FishNet и увидели, что у фреймворка есть готовая база под prediction. Но само наличие атрибута <code>[Replicate]</code> не объясняет, почему персонаж двигается сразу, почему иногда происходит коррекция и почему серверу нужна история состояний.</p>
+        <div class="info-grid">
+          <section class="media-card">
+            <h3>Что было раньше</h3>
+            <p>Мы синхронизировали состояние, RPC и observer-видимость. Управление всё ещё могло ощущаться задержанным при высоком ping.</p>
+          </section>
+          <section class="media-card">
+            <h3>Что разбираем сейчас</h3>
+            <p>Client-side prediction, input buffer, sequence number, rollback, reconciliation и lag compensation.</p>
+          </section>
+          <section class="media-card">
+            <h3>К чему идём</h3>
+            <p>К пониманию, как строится отзывчивый, но server-authoritative realtime-геймплей.</p>
+          </section>
+        </div>
+        <div class="checkpoint">
+          <h3>Версии, принятые в примерах</h3>
+          <p>Unity 6 LTS, .NET Standard 2.1, FishNet v4.x. Код ниже учебный: он показывает сетевой паттерн, а не готовую production-архитектуру с DI, конфигами и полноценным input-layer.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>2. Четыре сетевые проблемы и чем их лечат</h2>
+        <p>Лекция 1 дала диагноз: latency, jitter, packet loss и bandwidth. Лекция 6 показывает инструменты, которые применяются к первым двум проблемам в realtime-играх.</p>
+        <div class="media-grid">
+          <section class="media-card">
+            <h3>Latency</h3>
+            <p>Чистая задержка пути. Для собственного ввода лечится client-side prediction, для стрельбы по другим игрокам - lag compensation.</p>
+          </section>
+          <section class="media-card">
+            <h3>Jitter</h3>
+            <p>Нестабильный приход пакетов. Лечится interpolation buffer: клиент показывает немного прошлое, зато плавное состояние.</p>
+          </section>
+          <section class="media-card">
+            <h3>Packet Loss</h3>
+            <p>Потеря UDP-пакетов. Для input часто применяют redundancy: в каждом пакете дублируют несколько последних вводов.</p>
+          </section>
+        </div>
+        <p><strong>Bandwidth</strong> остаётся важным, но в этой лекции он не главный. Оптимизация payload, квантизация и частота отправки уже разбирались в лекции 2.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>3. RTT breakdown: где теряется время</h2>
+        <p>Ping в 80 мс не означает, что игрок видит подтверждённый сервером результат через 80 мс. Реальная задержка ощущения складывается из нескольких участков.</p>
+        <ol>
+          <li><strong>Client → Server:</strong> ввод летит на сервер примерно half-RTT, например 40 мс.</li>
+          <li><strong>Server tick:</strong> сервер принимает ввод, считает симуляцию и коллизии.</li>
+          <li><strong>Server → Client:</strong> snapshot возвращается ещё примерно 40 мс.</li>
+          <li><strong>Interpolation delay:</strong> клиент держит буфер 100-200 мс, чтобы сгладить jitter.</li>
+        </ol>
+        <p>Итог: при ping 80 мс игрок легко получает около 180 мс задержки между нажатием и подтверждённым отображением состояния. Поэтому клиентские игры не ждут сервер для собственного движения.</p>
+        <div class="checkpoint">
+          <h3>Ключевая мысль</h3>
+          <p>У каждого участника сети своё «сейчас». Клиент видит серверное прошлое, сервер получает уже устаревший ввод клиента, а остальные игроки видят ещё более старую интерполированную картинку.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>4. Client-Side Prediction одной фразой</h2>
+        <p><strong>Не ждать сервер. Симулировать у себя. Сервер потом подтвердит.</strong></p>
+        <p>Клиент-владелец на каждом тике читает input, сразу применяет его локально и отправляет на сервер. Сервер позже применяет тот же input у себя и присылает авторитетное состояние.</p>
+        <pre><code class="language-csharp">using UnityEngine;
+
+namespace CourseHub.Lecture6
+{
+    public sealed class LocalPredictionExample : MonoBehaviour
+    {
+        [SerializeField] private float _speed = 6f;
+
+        private uint _sequence;
+
+        private void FixedUpdate()
+        {
+            Vector2 input = ReadMoveInput();
+            uint sequence = _sequence++;
+
+            ApplyMove(input, Time.fixedDeltaTime);
+            SendInputToServer(sequence, input);
+        }
+
+        private static Vector2 ReadMoveInput()
+        {
+            // Учебный пример: в проекте курса ввод лучше читать через New Input System.
+            return new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        }
+
+        private void ApplyMove(Vector2 input, float deltaTime)
+        {
+            Vector3 direction = new Vector3(input.x, 0f, input.y).normalized;
+            transform.position += direction * (_speed * deltaTime);
+        }
+
+        private void SendInputToServer(uint sequence, Vector2 input)
+        {
+            // Учебная заглушка сетевой отправки: в FishNet это делает Replicate pipeline.
+            Debug.Log($"Input {sequence}: {input}");
+        }
+    }
+}</code></pre>
+        <p>Сам по себе prediction не отменяет server authority. Клиент не принимает финальное решение, он только временно показывает наиболее вероятный результат собственного ввода.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>5. Input Buffer и sequence number</h2>
+        <p>Чтобы потом исправить ошибку предсказания, клиент обязан помнить, какие вводы он уже применил локально. Для этого используется input buffer: последовательность команд с номерами тиков или sequence number.</p>
+        <pre><code class="language-csharp">using System.Collections.Generic;
+using UnityEngine;
+
+namespace CourseHub.Lecture6
+{
+    public readonly struct MoveCommand
+    {
+        public MoveCommand(uint sequence, Vector2 input, float deltaTime)
+        {
+            Sequence = sequence;
+            Input = input;
+            DeltaTime = deltaTime;
+        }
+
+        public uint Sequence { get; }
+        public Vector2 Input { get; }
+        public float DeltaTime { get; }
+    }
+
+    public sealed class InputBuffer
+    {
+        private readonly Queue&lt;MoveCommand&gt; _commands = new();
+
+        public void Add(MoveCommand command)
+        {
+            _commands.Enqueue(command);
+        }
+
+        public void DropConfirmed(uint serverSequence)
+        {
+            while (_commands.Count > 0 &amp;&amp; _commands.Peek().Sequence <= serverSequence)
+            {
+                _commands.Dequeue();
+            }
+        }
+
+        public MoveCommand[] GetPendingCommands()
+        {
+            return _commands.ToArray();
+        }
+    }
+}</code></pre>
+        <p>Sequence number решает две задачи: сервер понимает порядок вводов, а клиент понимает, какие локальные команды уже подтверждены и какие нужно переиграть после rollback.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>6. FishNet Replicate: что скрывает атрибут</h2>
+        <p>В FishNet prediction-пайплайн упакован в методы <code>[Replicate]</code> и <code>[Reconcile]</code>. Это не магия: под капотом всё равно есть input, tick, буфер, серверная симуляция и коррекция.</p>
+        <pre><code class="language-csharp">using FishNet.Object;
+using FishNet.Object.Prediction;
+using FishNet.Transporting;
+using UnityEngine;
+
+namespace CourseHub.Lecture6
+{
+    public struct MoveData : IReplicateData
+    {
+        public MoveData(float horizontal, float vertical)
+        {
+            Horizontal = horizontal;
+            Vertical = vertical;
+            Tick = 0;
+        }
+
+        public float Horizontal;
+        public float Vertical;
+        private uint Tick;
+
+        public uint GetTick()
+        {
+            return Tick;
+        }
+
+        public void SetTick(uint value)
+        {
+            Tick = value;
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    public struct ReconcileData : IReconcileData
+    {
+        public ReconcileData(Vector3 position, Vector3 velocity)
+        {
+            Position = position;
+            Velocity = velocity;
+            Tick = 0;
+        }
+
+        public Vector3 Position;
+        public Vector3 Velocity;
+        private uint Tick;
+
+        public uint GetTick()
+        {
+            return Tick;
+        }
+
+        public void SetTick(uint value)
+        {
+            Tick = value;
+        }
+
+        public void Dispose()
+        {
+        }
+    }
+
+    public sealed class PredictedMover : NetworkBehaviour
+    {
+        [SerializeField] private CharacterController _controller;
+        [SerializeField] private float _speed = 6f;
+
+        private Vector3 _velocity;
+
+        private void Update()
+        {
+            if (!base.IsOwner) return;
+
+            MoveData data = new MoveData(
+                Input.GetAxisRaw("Horizontal"),
+                Input.GetAxisRaw("Vertical"));
+
+            Move(data);
+        }
+
+        [Replicate]
+        private void Move(MoveData data, ReplicateState state = ReplicateState.Invalid, Channel channel = Channel.Unreliable)
+        {
+            Vector3 direction = new Vector3(data.Horizontal, 0f, data.Vertical).normalized;
+            _velocity = direction * _speed;
+            _controller.Move(_velocity * (float)base.TimeManager.TickDelta);
+        }
+
+        public override void CreateReconcile()
+        {
+            ReconcileData data = new ReconcileData(transform.position, _velocity);
+            ReconcileState(data);
+        }
+
+        [Reconcile]
+        private void ReconcileState(ReconcileData data, Channel channel = Channel.Unreliable)
+        {
+            transform.position = data.Position;
+            _velocity = data.Velocity;
+        }
+    }
+}</code></pre>
+        <div class="checkpoint">
+          <h3>Что важно понимать</h3>
+          <p><code>[Replicate]</code> не делает клиента главным. Он позволяет клиенту заранее проиграть тот же input, который сервер потом применит авторитетно.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>7. Server Reconciliation и rollback</h2>
+        <p>Prediction всегда может ошибиться: серверная коллизия, другой игрок, рассинхрон физики, потерянный input. Reconciliation исправляет это через три шага:</p>
+        <ol>
+          <li>Клиент получает авторитетное состояние сервера на sequence/tick N.</li>
+          <li>Клиент откатывает локальное состояние к серверной позиции.</li>
+          <li>Клиент заново проигрывает все неподтверждённые вводы после N.</li>
+        </ol>
+        <pre><code class="language-csharp">using UnityEngine;
+
+namespace CourseHub.Lecture6
+{
+    public sealed class ReconciliationExample
+    {
+        private const float ErrorThreshold = 0.15f;
+
+        private readonly InputBuffer _inputBuffer = new();
+        private Vector3 _predictedPosition;
+
+        public void ApplyServerState(uint confirmedSequence, Vector3 serverPosition)
+        {
+            float error = Vector3.Distance(_predictedPosition, serverPosition);
+
+            if (error < ErrorThreshold)
+            {
+                _inputBuffer.DropConfirmed(confirmedSequence);
+                return;
+            }
+
+            _predictedPosition = serverPosition;
+            _inputBuffer.DropConfirmed(confirmedSequence);
+
+            foreach (MoveCommand command in _inputBuffer.GetPendingCommands())
+            {
+                Replay(command);
+            }
+        }
+
+        private void Replay(MoveCommand command)
+        {
+            Vector3 direction = new Vector3(command.Input.x, 0f, command.Input.y).normalized;
+            _predictedPosition += direction * (6f * command.DeltaTime);
+        }
+    }
+}</code></pre>
+        <p><strong>Error threshold</strong> нужен обязательно. Без него микроскопические float-расхождения будут вызывать постоянные коррекции и визуальную дрожь.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>8. Lag Compensation: честная стрельба в прошлом</h2>
+        <p>Prediction лечит собственное движение. Lag compensation лечит другую проблему: стрелок нажал fire по цели на своём экране, но сервер к моменту получения пакета уже видит цель в другой позиции.</p>
+        <p>Решение: сервер хранит историю позиций целей, на выстреле откатывает проверку на время выстрела и делает raycast по историческим hitbox.</p>
+        <ol>
+          <li>Сервер хранит историю позиций за последние 0.5-1.0 секунды.</li>
+          <li>Клиент отправляет команду выстрела с tick/time.</li>
+          <li>Сервер ограничивает rewind через cap, например 200 мс.</li>
+          <li>Сервер проверяет попадание в историческом состоянии мира.</li>
+          <li>Если попадание подтверждено, урон применяется в текущем серверном состоянии.</li>
+        </ol>
+        <pre><code class="language-csharp">using System.Collections.Generic;
+using UnityEngine;
+
+namespace CourseHub.Lecture6
+{
+    public readonly struct PositionSample
+    {
+        public PositionSample(double time, Vector3 position)
+        {
+            Time = time;
+            Position = position;
+        }
+
+        public double Time { get; }
+        public Vector3 Position { get; }
+    }
+
+    public sealed class LagCompensationHistory
+    {
+        private const double MaxHistorySeconds = 1.0;
+        private const double MaxRewindSeconds = 0.2;
+
+        private readonly Queue&lt;PositionSample&gt; _samples = new();
+
+        public void Record(double serverTime, Vector3 position)
+        {
+            _samples.Enqueue(new PositionSample(serverTime, position));
+
+            while (_samples.Count > 0 &amp;&amp; serverTime - _samples.Peek().Time > MaxHistorySeconds)
+            {
+                _samples.Dequeue();
+            }
+        }
+
+        public Vector3 GetRewoundPosition(double serverTime, double requestedRewindSeconds)
+        {
+            double rewind = Mathf.Min((float)requestedRewindSeconds, (float)MaxRewindSeconds);
+            double targetTime = serverTime - rewind;
+            PositionSample best = default;
+
+            foreach (PositionSample sample in _samples)
+            {
+                if (sample.Time <= targetTime)
+                {
+                    best = sample;
+                }
+            }
+
+            return best.Position;
+        }
+    }
+}</code></pre>
+        <div class="checkpoint">
+          <h3>Почему нужен cap</h3>
+          <p>Без ограничения rewind игрок может искусственно завышать задержку и заставлять сервер проверять попадания в слишком старом мире. Обычно cap держат в районе 200 мс, а точное значение подбирают под жанр.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>9. Три участника lag compensation</h2>
+        <div class="info-grid">
+          <section class="media-card">
+            <h3>Стрелок</h3>
+            <p>Видит цель в прошлом серверного времени, но считает свой выстрел визуально честным.</p>
+          </section>
+          <section class="media-card">
+            <h3>Сервер</h3>
+            <p>Хранит историю и проверяет попадание не в текущей позиции цели, а в позиции на момент выстрела стрелка.</p>
+          </section>
+          <section class="media-card">
+            <h3>Жертва</h3>
+            <p>Может получить урон уже после ухода за укрытие, потому что на экране стрелка она ещё была видимой.</p>
+          </section>
+        </div>
+        <p>Это компромисс, а не баг. Если полностью защищать жертву, стрелок будет видеть «попал в голову», но сервер откажет. Если полностью защищать стрелка, жертва чаще получает урон «за стеной». Хорошая netcode-настройка выбирает приемлемый баланс.</p>
+      </article>
+
+      <article class="content-card">
+        <h2>10. Demo LagGhosts</h2>
+        <p>Демонстрация в Unity package показывает одну цель и три способа смотреть на её движение при искусственной задержке 0-500 мс.</p>
+        <div class="media-grid">
+          <section class="media-card">
+            <h3>Красный ghost</h3>
+            <p>Серверная истина. При росте задержки на клиенте заметны рывки snapshot-обновлений.</p>
+          </section>
+          <section class="media-card">
+            <h3>Жёлтый ghost</h3>
+            <p>Наивный клиент с interpolation buffer. Движение плавнее, но объект заметно отстаёт.</p>
+          </section>
+          <section class="media-card">
+            <h3>Зелёный ghost</h3>
+            <p>Предсказывающий клиент. Совпадает с ожидаемой симуляцией, пока локальная модель детерминирована.</p>
+          </section>
+        </div>
+        <ol>
+          <li>Импортируйте <code>Lecture 6.unitypackage</code> в отдельный учебный проект или ветку.</li>
+          <li>Откройте сцену <code>LagGhosts</code>.</li>
+          <li>Запустите сцену и меняйте latency slider.</li>
+          <li>Сравните, как каждый ghost реагирует на рост задержки.</li>
+        </ol>
+      </article>
+
+      <article class="content-card">
+        <h2>11. Топ-7 ошибок</h2>
+        <ol>
+          <li><strong>Предсказывать чужой ввод:</strong> для удалённых игроков нужна интерполяция, а не фантазия клиента.</li>
+          <li><strong>Забыть error threshold:</strong> микроскопические расхождения превращаются в постоянную дрожь.</li>
+          <li><strong>Использовать mesh collider как hitbox:</strong> lag compensation должен быстро проверять простые формы.</li>
+          <li><strong>Lag compensation без cap:</strong> слишком глубокий rewind открывает чит-вектор.</li>
+          <li><strong>Синхронизировать позицию через NetworkVariable/SyncVar:</strong> для частого движения нужны NetworkTransform, prediction или специализированный поток snapshot.</li>
+          <li><strong>Tickrate 20 Гц для skill-based shooter:</strong> низкая частота сервера не даст ощущение Valorant/CS-like стрельбы.</li>
+          <li><strong>Игнорировать packet loss:</strong> один потерянный input может вызвать рассинхрон и reconcile-коррекцию.</li>
+        </ol>
+      </article>
+
+      <article class="content-card">
+        <h2>12. Три практических приёма</h2>
+        <div class="info-grid">
+          <section class="media-card">
+            <h3>Hit marker с server confirm</h3>
+            <p>Клиент показывает первичный hit marker мгновенно, а сервер позже подтверждает урон, звук и числа damage.</p>
+          </section>
+          <section class="media-card">
+            <h3>Разный tickrate</h3>
+            <p>Физику можно считать чаще, чем отправлять snapshot по сети: например, simulation 60 Гц, network send 30 Гц.</p>
+          </section>
+          <section class="media-card">
+            <h3>Input redundancy</h3>
+            <p>В каждом input-пакете можно дублировать несколько последних команд, чтобы потеря одного UDP-пакета не ломала тик.</p>
+          </section>
+        </div>
+      </article>
+
+      <article class="content-card practice-banner">
+        <h2>Домашнее задание</h2>
+        <p>Расширьте демонстрацию <code>LagGhosts</code>: добавьте четвёртый объект <code>LagCompensatedShooter</code>, который стреляет в moving target и показывает разницу между мгновенным локальным hit marker и серверным подтверждением попадания через rewind.</p>
+        <ol>
+          <li>Стрелок должен показывать локальный hit marker сразу после выстрела.</li>
+          <li>Сервер должен подтверждать попадание с задержкой, используя историю позиции цели.</li>
+          <li>Нужно показать эффект «убит за углом» при увеличенной задержке.</li>
+          <li>Сдача: короткое видео, где виден latency slider и различие локального/серверного решения.</li>
+        </ol>
+      </article>
+
+      <article class="content-card">
+        <h2>Что мы узнали</h2>
+        <ul>
+          <li><strong>Prediction</strong> работает на клиенте и лечит собственный input.</li>
+          <li><strong>Reconciliation</strong> откатывает клиента к серверной правде и переигрывает неподтверждённые вводы.</li>
+          <li><strong>Lag compensation</strong> работает на сервере и проверяет попадания в историческом состоянии мира.</li>
+          <li>У каждого инструмента есть цена: CPU, память, риск коррекций, спорные попадания и необходимость cap/threshold.</li>
+        </ul>
+        <div class="checkpoint">
+          <h3>Связка с лекцией 7</h3>
+          <p>Dedicated server из лекции 7 хранит не только текущую симуляцию. Для качественного netcode ему также нужны input buffers, история позиций, rewind-логика и авторитетная проверка действий клиентов.</p>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>Course Hub - Лекция 6</p>
+    </div>
+  </footer>
+
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/languages/csharp.min.js"></script>
+  <script defer src="../assets/js/site.js"></script>
+</body>
+</html>
