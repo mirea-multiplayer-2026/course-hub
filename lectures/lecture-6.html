@@ -106,11 +106,42 @@
           </section>
         </div>
         <p><strong>Bandwidth</strong> остаётся важным, но в этой лекции он не главный. Оптимизация payload, квантизация и частота отправки уже разбирались в лекции 2.</p>
+        <div class="checkpoint">
+          <h3>Для студентов as-is</h3>
+          <p>Сегодня мы не «ускоряем интернет». Мы строим иллюзию мгновенного отклика: клиент временно показывает ожидаемый результат, а сервер позже подтверждает или исправляет его.</p>
+        </div>
       </article>
 
       <article class="content-card">
-        <h2>3. RTT breakdown: где теряется время</h2>
+        <h2>3. Эту проблему решили ещё в 1996-м</h2>
+        <p>Client-side prediction, rollback и lag compensation не являются новой модой FishNet. Эти идеи появились в ранних сетевых шутерах и стали стандартом задолго до Unity.</p>
+        <div class="info-grid">
+          <section class="media-card">
+            <h3>QuakeWorld, 1996</h3>
+            <p>John Carmack добавил client-side prediction, потому что играть в Quake через dial-up с ping 300 мс без локальной симуляции было невозможно.</p>
+          </section>
+          <section class="media-card">
+            <h3>Half-Life / Counter-Strike</h3>
+            <p>Valve формализовала latency compensation: сервер проверяет выстрел не по текущему миру, а по миру, который видел стрелок.</p>
+          </section>
+          <section class="media-card">
+            <h3>Современные игры</h3>
+            <p>CS, Valorant, Apex и другие competitive-игры используют те же принципы. Меняются tickrate, буферы и качество реализации, но не базовая идея.</p>
+          </section>
+        </div>
+        <div class="checkpoint">
+          <h3>Методическая заметка для преподавателя</h3>
+          <p>Этот блок нужен, чтобы студенты не воспринимали prediction как «галочку FishNet». FishNet даёт удобный API, но сам паттерн старше большинства современных движков.</p>
+        </div>
+      </article>
+
+      <article class="content-card">
+        <h2>4. RTT breakdown: где теряется время</h2>
         <p>Ping в 80 мс не означает, что игрок видит подтверждённый сервером результат через 80 мс. Реальная задержка ощущения складывается из нескольких участков.</p>
+        <div class="media-card">
+          <h3>Client input → Server receive → Server send → Client render</h3>
+          <p><code>RTT = Δ1 + Δ2 + Δ3</code>, где <code>Δ1</code> - путь input до сервера, <code>Δ2</code> - обработка на серверном тике, <code>Δ3</code> - путь snapshot обратно к клиенту. После этого клиент часто добавляет ещё interpolation delay для сглаживания jitter.</p>
+        </div>
         <ol>
           <li><strong>Client → Server:</strong> ввод летит на сервер примерно half-RTT, например 40 мс.</li>
           <li><strong>Server tick:</strong> сервер принимает ввод, считает симуляцию и коллизии.</li>
@@ -125,10 +156,26 @@
       </article>
 
       <article class="content-card">
-        <h2>4. Client-Side Prediction одной фразой</h2>
+        <h2>5. Client-Side Prediction одной фразой</h2>
         <p><strong>Не ждать сервер. Симулировать у себя. Сервер потом подтвердит.</strong></p>
         <p>Клиент-владелец на каждом тике читает input, сразу применяет его локально и отправляет на сервер. Сервер позже применяет тот же input у себя и присылает авторитетное состояние.</p>
-        <pre><code class="language-csharp">using UnityEngine;
+        <div class="info-grid">
+          <section class="media-card">
+            <h3>Что видит игрок</h3>
+            <p>Нажал <code>W</code> - персонаж пошёл сразу. Ощущение такое, будто ping равен нулю.</p>
+          </section>
+          <section class="media-card">
+            <h3>Что делает клиент</h3>
+            <p>Локально применяет input и сохраняет команду в буфер, чтобы потом можно было переиграть её после correction.</p>
+          </section>
+          <section class="media-card">
+            <h3>Что делает сервер</h3>
+            <p>Получает input позже, проверяет его и считает авторитетную позицию. Клиентская версия остаётся временной гипотезой.</p>
+          </section>
+        </div>
+        <details class="hint-card">
+          <summary>Учебный код: локальное предсказание без FishNet</summary>
+          <pre><code class="language-csharp">using UnityEngine;
 
 namespace CourseHub.Lecture6
 {
@@ -166,13 +213,30 @@ namespace CourseHub.Lecture6
         }
     }
 }</code></pre>
+        </details>
         <p>Сам по себе prediction не отменяет server authority. Клиент не принимает финальное решение, он только временно показывает наиболее вероятный результат собственного ввода.</p>
       </article>
 
       <article class="content-card">
-        <h2>5. Input Buffer и sequence number</h2>
+        <h2>6. Input Buffer и sequence number</h2>
         <p>Чтобы потом исправить ошибку предсказания, клиент обязан помнить, какие вводы он уже применил локально. Для этого используется input buffer: последовательность команд с номерами тиков или sequence number.</p>
-        <pre><code class="language-csharp">using System.Collections.Generic;
+        <div class="media-grid">
+          <section class="media-card">
+            <h3>Input buffer</h3>
+            <p>Локальная история команд: «на тике 142 нажал W», «на тике 143 W+D», «на тике 144 отпустил D».</p>
+          </section>
+          <section class="media-card">
+            <h3>Sequence number</h3>
+            <p>Номер команды, по которому сервер и клиент понимают, что уже подтверждено, а что ещё ждёт ответа.</p>
+          </section>
+          <section class="media-card">
+            <h3>Replay</h3>
+            <p>После rollback клиент заново применяет неподтверждённые команды поверх серверной истины.</p>
+          </section>
+        </div>
+        <details class="hint-card">
+          <summary>Учебный код: минимальный input buffer</summary>
+          <pre><code class="language-csharp">using System.Collections.Generic;
 using UnityEngine;
 
 namespace CourseHub.Lecture6
@@ -214,13 +278,30 @@ namespace CourseHub.Lecture6
         }
     }
 }</code></pre>
+        </details>
         <p>Sequence number решает две задачи: сервер понимает порядок вводов, а клиент понимает, какие локальные команды уже подтверждены и какие нужно переиграть после rollback.</p>
       </article>
 
       <article class="content-card">
-        <h2>6. FishNet Replicate: что скрывает атрибут</h2>
+        <h2>7. FishNet Replicate: что скрывает атрибут</h2>
         <p>В FishNet prediction-пайплайн упакован в методы <code>[Replicate]</code> и <code>[Reconcile]</code>. Это не магия: под капотом всё равно есть input, tick, буфер, серверная симуляция и коррекция.</p>
-        <pre><code class="language-csharp">using FishNet.Object;
+        <div class="info-grid">
+          <section class="media-card">
+            <h3><code>[Replicate]</code></h3>
+            <p>Описывает действие, которое может быть проиграно и на клиенте, и на сервере одинаковым способом.</p>
+          </section>
+          <section class="media-card">
+            <h3><code>[Reconcile]</code></h3>
+            <p>Передаёт клиенту авторитетное состояние сервера, чтобы клиент мог исправить локальную симуляцию.</p>
+          </section>
+          <section class="media-card">
+            <h3>Цена удобства</h3>
+            <p>API короче, но ответственность остаётся: input должен быть валидируемым, движение - детерминированным, correction - не слишком частой.</p>
+          </section>
+        </div>
+        <details class="hint-card">
+          <summary>Учебный код: FishNet Replicate/Reconcile</summary>
+          <pre><code class="language-csharp">using FishNet.Object;
 using FishNet.Object.Prediction;
 using FishNet.Transporting;
 using UnityEngine;
@@ -323,6 +404,7 @@ namespace CourseHub.Lecture6
         }
     }
 }</code></pre>
+        </details>
         <div class="checkpoint">
           <h3>Что важно понимать</h3>
           <p><code>[Replicate]</code> не делает клиента главным. Он позволяет клиенту заранее проиграть тот же input, который сервер потом применит авторитетно.</p>
@@ -330,14 +412,20 @@ namespace CourseHub.Lecture6
       </article>
 
       <article class="content-card">
-        <h2>7. Server Reconciliation и rollback</h2>
+        <h2>8. Server Reconciliation и rollback</h2>
         <p>Prediction всегда может ошибиться: серверная коллизия, другой игрок, рассинхрон физики, потерянный input. Reconciliation исправляет это через три шага:</p>
         <ol>
           <li>Клиент получает авторитетное состояние сервера на sequence/tick N.</li>
           <li>Клиент откатывает локальное состояние к серверной позиции.</li>
           <li>Клиент заново проигрывает все неподтверждённые вводы после N.</li>
         </ol>
-        <pre><code class="language-csharp">using UnityEngine;
+        <div class="checkpoint">
+          <h3>Не «телепорт», а коррекция гипотезы</h3>
+          <p>Клиентское состояние до подтверждения - это не истина, а прогноз. Если сервер прислал другое состояние, клиент не «проиграл», а получил более точные данные и пересчитал локальную ветку будущего.</p>
+        </div>
+        <details class="hint-card">
+          <summary>Учебный код: rollback + replay</summary>
+          <pre><code class="language-csharp">using UnityEngine;
 
 namespace CourseHub.Lecture6
 {
@@ -374,13 +462,18 @@ namespace CourseHub.Lecture6
         }
     }
 }</code></pre>
+        </details>
         <p><strong>Error threshold</strong> нужен обязательно. Без него микроскопические float-расхождения будут вызывать постоянные коррекции и визуальную дрожь.</p>
       </article>
 
       <article class="content-card">
-        <h2>8. Lag Compensation: честная стрельба в прошлом</h2>
+        <h2>9. Lag Compensation: честная стрельба в прошлом</h2>
         <p>Prediction лечит собственное движение. Lag compensation лечит другую проблему: стрелок нажал fire по цели на своём экране, но сервер к моменту получения пакета уже видит цель в другой позиции.</p>
         <p>Решение: сервер хранит историю позиций целей, на выстреле откатывает проверку на время выстрела и делает raycast по историческим hitbox.</p>
+        <div class="media-card">
+          <h3>Почему «убили за углом» не всегда баг</h3>
+          <p>На экране жертвы она уже за укрытием. На экране стрелка в момент выстрела она ещё была видима. Сервер выбирает не текущее «сейчас» жертвы, а момент, когда стрелок реально нажал fire с учётом его задержки.</p>
+        </div>
         <ol>
           <li>Сервер хранит историю позиций за последние 0.5-1.0 секунды.</li>
           <li>Клиент отправляет команду выстрела с tick/time.</li>
@@ -388,7 +481,9 @@ namespace CourseHub.Lecture6
           <li>Сервер проверяет попадание в историческом состоянии мира.</li>
           <li>Если попадание подтверждено, урон применяется в текущем серверном состоянии.</li>
         </ol>
-        <pre><code class="language-csharp">using System.Collections.Generic;
+        <details class="hint-card">
+          <summary>Учебный код: история позиций для rewind</summary>
+          <pre><code class="language-csharp">using System.Collections.Generic;
 using UnityEngine;
 
 namespace CourseHub.Lecture6
@@ -440,6 +535,7 @@ namespace CourseHub.Lecture6
         }
     }
 }</code></pre>
+        </details>
         <div class="checkpoint">
           <h3>Почему нужен cap</h3>
           <p>Без ограничения rewind игрок может искусственно завышать задержку и заставлять сервер проверять попадания в слишком старом мире. Обычно cap держат в районе 200 мс, а точное значение подбирают под жанр.</p>
@@ -447,7 +543,7 @@ namespace CourseHub.Lecture6
       </article>
 
       <article class="content-card">
-        <h2>9. Три участника lag compensation</h2>
+        <h2>10. Три участника lag compensation</h2>
         <div class="info-grid">
           <section class="media-card">
             <h3>Стрелок</h3>
@@ -466,7 +562,7 @@ namespace CourseHub.Lecture6
       </article>
 
       <article class="content-card">
-        <h2>10. Demo LagGhosts</h2>
+        <h2>11. Demo LagGhosts</h2>
         <p>Демонстрация в Unity package показывает одну цель и три способа смотреть на её движение при искусственной задержке 0-500 мс.</p>
         <div class="media-grid">
           <section class="media-card">
@@ -491,7 +587,7 @@ namespace CourseHub.Lecture6
       </article>
 
       <article class="content-card">
-        <h2>11. Топ-7 ошибок</h2>
+        <h2>12. Топ-7 ошибок</h2>
         <ol>
           <li><strong>Предсказывать чужой ввод:</strong> для удалённых игроков нужна интерполяция, а не фантазия клиента.</li>
           <li><strong>Забыть error threshold:</strong> микроскопические расхождения превращаются в постоянную дрожь.</li>
@@ -504,7 +600,7 @@ namespace CourseHub.Lecture6
       </article>
 
       <article class="content-card">
-        <h2>12. Три практических приёма</h2>
+        <h2>13. Три практических приёма</h2>
         <div class="info-grid">
           <section class="media-card">
             <h3>Hit marker с server confirm</h3>
